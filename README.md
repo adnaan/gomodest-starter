@@ -2,7 +2,7 @@
 
 > The main idea is to use server rendered html with spots of client-side dynamism using SvelteJS & StimulusJS
  
-The webapp is primar plain old javascript, html, css but with spots of SvelteJS used for interactivity without page reloads. StimulusJS is used for sprinkling
+The webapp is mostly plain old javascript, html, css but with spots of SvelteJS used for interactivity without page reloads. StimulusJS is used for sprinkling
 interactivity in server rendered html & mounting Svelte components into divs.
 
 A few things which were used:
