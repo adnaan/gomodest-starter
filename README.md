@@ -1,4 +1,4 @@
-**GOMODEST** is a demo app inspired from modest approaches to building webapps as enlisted in https://modestjs.works/. It can be used as a template to spin off simple Go webapps.
+**GOMODEST** is a Multi Page App(MPA) using Go's `html/template`, `SvelteJS` and `StimulusJS`. It is inspired from modest approaches to building webapps as enlisted in https://modestjs.works/. It can be used as a template to spin off simple Go webapps.
 
 ## Motivation
 
