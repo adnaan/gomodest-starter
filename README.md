@@ -158,5 +158,9 @@ Other possibly interesting aspects could be the layout of [web/html](https://git
 
 ![Account](screenshots/gomodest_1.png?raw=true "Account")
 
- 
+ ## Attributions
+
+1. https://areknawo.com/making-a-todo-app-in-svelte/
+2. https://modestjs.works/
+3. https://github.com/foolin/goview
  
