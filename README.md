@@ -1,19 +1,26 @@
-Gomodest is a demo app inspired from modest approaches to building webapps as enlisted in https://modestjs.works/.
+Gomodest is a demo app inspired from modest approaches to building webapps as enlisted in https://modestjs.works/. It can be used as a template to spin off simple Go webapps.
 
-It can be used as a template to spin off simple Go webapps. The webapp is mostly plain old javascript, html, css but with spots of SvelteJS used for interactivity without page reloads.
+> The main idea is to mostly use server rendered html with spots of client-side dynamism using SvelteJS & StimulusJS
+ 
 
-Used:
+The webapp is mostly plain old javascript, html, css but with spots of SvelteJS used for interactivity without page reloads. StimulusJS is used for sprinkling
+interactivity in server rendered html & mounting Svelte components into divs.
 
-1. Go, html/template
+A few things which were used:
+
+1. Go, html/template, goview
 2. SvelteJS
 3. StimulusJS
 4. Bulma CSS
+
+Many more things in `go.mod` & `web/package.json`
+
+To run, clone this repo and: 
 
 ```bash
 $ cd web && yarn install && yarn watch
 $ go run main.go
 ```
-
 
 This snippet is the most interesting part of this demo: 
 
