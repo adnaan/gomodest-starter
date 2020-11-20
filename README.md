@@ -78,3 +78,18 @@ Other possibly interesting aspects could be the layout of [web/html](https://git
  3. [pkg/pages.go](https://github.com/adnaan/gomodest/blob/main/pkg/pages.go)
  
  That is all.
+ 
+ ---------------
+ 
+ Pages
+ 
+![Home](screenshots/gomodest_4.png?raw=true "Home")
+
+![Sign in](screenshots/gomodest_3.png?raw=true "Sign in")
+
+![App](screenshots/gomodest_2.png?raw=true "App")
+
+![Account](screenshots/gomodest_1.png?raw=true "Account")
+
+ 
+ 
