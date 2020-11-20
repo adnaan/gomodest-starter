@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"encoding/gob"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -25,6 +26,7 @@ const (
 func NewRouter() http.Handler {
 
 	store = sessions.NewFilesystemStore("", []byte("something-very-secret"))
+	gob.Register(map[string]interface{}{})
 
 	// logger
 	logger := httplog.NewLogger("gomodest",
