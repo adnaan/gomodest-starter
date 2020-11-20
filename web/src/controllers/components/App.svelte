@@ -44,7 +44,7 @@
 
 </script>
 
-
+<!-- below code from https://areknawo.com/making-a-todo-app-in-svelte/ -->
 <main class="container is-fluid">
     <div class="columns is-centered is-vcentered is-mobile">
         <div class="column is-narrow" style="width: 70%">

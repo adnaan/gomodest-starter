@@ -1,4 +1,4 @@
-Gomodest is an demo app inspired from modest approaches to building webapps as enlisted in https://modestjs.works/.
+Gomodest is a demo app inspired from modest approaches to building webapps as enlisted in https://modestjs.works/.
 
 It can be used as a template to spin off simple Go webapps. The webapp is mostly plain old javascript, html, css but with spots of SvelteJS used for interactivity without page reloads.
 
@@ -14,3 +14,60 @@ $ cd web && yarn install && yarn watch
 $ go run main.go
 ```
 
+
+This snippet is the most interesting part of this demo: 
+
+```html
+{{define "content"}}
+    <div class="columns is-mobile is-centered">
+        <div class="column is-half-desktop">
+            <div
+                    data-target="svelte.component"
+                    data-component-name="app"
+                    data-component-props="{{.Data}}">
+            </div>
+        </div>
+    </div>
+    </div>
+{{end}}
+```
+
+[source](https://github.com/adnaan/gomodest/blob/main/web/html/app.html)
+
+In the above snippet, we use StimulusJS to mount a Svelte component by using the following code:
+
+```js
+import { Controller } from "stimulus";
+     import components from "./components";
+     
+     export default class extends Controller {
+         static targets = ["component"]
+         connect() {
+             if (this.componentTargets.length > 0){
+                 this.componentTargets.forEach(el => {
+                     const componentName = el.dataset.componentName;
+                     const componentProps = el.dataset.componentProps ? JSON.parse(el.dataset.componentProps): {};
+                     if (!(componentName in components)){
+                         console.log(`svelte component: ${componentName}, not found!`)
+                         return;
+                     }
+                     const app = new components[componentName]({
+                         target: el,
+                         props: componentProps
+                     });
+                 })
+             }
+         }
+     }
+```
+[source](https://github.com/adnaan/gomodest/blob/main/web/src/controllers/svelte_controller.js)
+
+This strategy allows us to mix server rendered HTML pages with client side dynamism.
+
+Other possibly interests aspects are the layout of [web/html](https://github.com/adnaan/gomodest/tree/main/web/html) and the usage of the super nice [goview](https://github.com/foolin/goview) library to render html in these files: 
+
+ 1. [pkg/router.go](https://github.com/adnaan/gomodest/blob/main/pkg/router.go)
+ 2. [pkg/view.go](https://github.com/adnaan/gomodest/blob/main/pkg/view.go)
+ 3. [pkg/pages.go](https://github.com/adnaan/gomodest/blob/main/pkg/pages.go)
+ 
+ That is all.
