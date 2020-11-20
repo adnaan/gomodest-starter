@@ -1,7 +1,6 @@
-import home from "./Home.svelte"
 import app from "./App.svelte"
 
+// export other components here.
 export default {
-    home: home,
     app: app,
 }
