@@ -1,8 +1,10 @@
+# Intro
+
 **gomodest** is a demo app inspired from modest approaches to building webapps as enlisted in https://modestjs.works/. It can be used as a template to spin off simple Go webapps.
 
 > The main idea is to use server rendered html with spots of client-side dynamism using SvelteJS & StimulusJS
  
-The webapp is mostly plain old javascript, html, css but with spots of SvelteJS used for interactivity without page reloads. StimulusJS is used for sprinkling
+The webapp is mostly plain old javascript, html, css but with sprinkles & spots of SvelteJS used for interactivity without page reloads. StimulusJS is used for sprinkling
 interactivity in server rendered html & mounting Svelte components into divs.
 
 A few things which were used:
@@ -20,6 +22,66 @@ To run, clone this repo and:
 $ cd web && yarn install && yarn watch
 $ go run main.go
 ```
+
+The ideas in this demo app follow the JS gradient as noted [here](https://modestjs.works/book/part-2/the-js-gradient/). I have taken the liberty to organise them into the following big blocks: **server-rendered html**, **sprinkles** and **spots**.
+
+## Server Rendered HTML
+
+Use `html/template` and `goview` to render html pages. It's quite powerful when do you don't need client-side interactions.
+
+example: 
+
+```go
+func accountPage(w http.ResponseWriter, r *http.Request) (goview.M, error) {
+
+	session, err := store.Get(r, "auth-session")
+	if err != nil {
+		return nil, fmt.Errorf("%v, %w", err, InternalErr)
+	}
+
+	profileData, ok := session.Values["profile"]
+	if !ok {
+		return nil, fmt.Errorf("%v, %w", err, InternalErr)
+	}
+
+	profile, ok := profileData.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("%v, %w", err, InternalErr)
+	}
+
+	return goview.M{
+		"name": profile["name"],
+	}, nil
+
+}
+```
+
+## Sprinkles
+
+Use `stimulusjs` to level up server-rendered html to handle simple interactions like: navigations, form validations etc.
+
+example:
+
+```html
+    <button class="button is-primary is-outlined is-fullwidth"
+            data-action="click->navigate#goto"
+            data-goto="/  "
+            type="button">
+        Home
+    </button>
+```
+
+```js
+    goto(e){
+        if (e.currentTarget.dataset.goto){
+            window.location = e.currentTarget.dataset.goto;
+        }
+    }
+```
+
+## Spots
+
+Use `sveltejs` to take over `spots` of a server-rendered html page to provide more complex interactivity without page reloads.
 
 This snippet is the most interesting part of this demo: 
 
@@ -43,7 +105,7 @@ This snippet is the most interesting part of this demo:
 In the above snippet, we use StimulusJS to mount a Svelte component by using the following code:
 
 ```js
-import { Controller } from "stimulus";
+     import { Controller } from "stimulus";
      import components from "./components";
      
      export default class extends Controller {
