@@ -64,7 +64,7 @@ import { Controller } from "stimulus";
 
 This strategy allows us to mix server rendered HTML pages with client side dynamism.
 
-Other possibly interests aspects are the layout of [web/html](https://github.com/adnaan/gomodest/tree/main/web/html) and the usage of the super nice [goview](https://github.com/foolin/goview) library to render html in these files: 
+Other possibly interesting aspects could be the layout of [web/html](https://github.com/adnaan/gomodest/tree/main/web/html) and the usage of the super nice [goview](https://github.com/foolin/goview) library to render html in these files: 
 
  1. [pkg/router.go](https://github.com/adnaan/gomodest/blob/main/pkg/router.go)
  2. [pkg/view.go](https://github.com/adnaan/gomodest/blob/main/pkg/view.go)
