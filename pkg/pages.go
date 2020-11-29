@@ -280,6 +280,8 @@ func forgotPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request)
 		return pageData, err
 	}
 
+	pageData["recovery_sent"] = true
+
 	return pageData, nil
 }
 

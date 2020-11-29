@@ -1,6 +1,9 @@
 {{define "content"}}
     <div class="columns is-mobile is-centered">
         <div class="column is-one-third-desktop">
+            {{ if .recovery_sent }}
+                <box class="box has-background-warning"> A password recovery link has been sent to your inbox. </box>
+           {{else}}
 
             <form data-controller="signin"
                   data-action="submit->signin#submitForm"
@@ -26,6 +29,7 @@
                     </div>
                 </div>
             </form>
+            {{end}}
         </div>
     </div>
     </div>
