@@ -37,8 +37,11 @@
                             Sign out
                         </a>
                     {{else }}
-                        <a class="button is-dark" href="/login">
+                        <a class="button {{if hasPrefix "/login" .route}} is-link {{else}} is-light {{end}}" href="/login">
                             Sign in
+                        </a>
+                        <a class="button {{if hasPrefix "/signup" .route}} is-link {{else}} is-light {{end}}" href="/signup">
+                            Sign up
                         </a>
                     {{end}}
                 </div>

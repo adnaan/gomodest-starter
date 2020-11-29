@@ -1,6 +1,14 @@
 {{define "content"}}
     <div class="columns is-mobile is-centered">
         <div class="column is-half-desktop">
+            {{ if .change_email }}
+                <box class="box has-background-warning"> A verification link has been sent to your inbox for confirming your new email address. Please verify to complete the request. </box>
+            {{end}}
+
+            {{ if .email_changed }}
+                <box class="box has-background-success"> Your email was updated! </box>
+            {{end}}
+
             <div class="card px-5 py-5">
                 <h4 class="title is-4">Profile</h4>
                 <hr/>
@@ -21,7 +29,7 @@
                                     name="name"
                                     type="text"
                                     placeholder="e.g Alex Smith"
-                                    value="{{.name}}">
+                                    value="{{.metadata.name}}">
                         </div>
                     </div>
 
@@ -37,7 +45,7 @@
                                    aria-label="Email"
                                    pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
                                    placeholder="e.g. alexsmith@gmail.com"
-                                   value="{{.email}}" disabled>
+                                   value="{{.email}}">
                         </div>
                     </div>
                 {{end}}

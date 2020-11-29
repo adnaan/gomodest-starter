@@ -1,71 +1,97 @@
 package pkg
 
 import (
-	"encoding/gob"
+	"context"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 
-	"github.com/go-chi/httplog"
+	"github.com/foolin/goview"
 
-	"github.com/gorilla/sessions"
+	"github.com/adnaan/users"
+
+	"github.com/go-chi/httplog"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-)
-
-var (
-	store *sessions.FilesystemStore
 )
 
 const (
 	appCtxDataKey = "app_ctx_data"
 )
 
+type AppContext struct {
+	users      *users.API
+	viewEngine *goview.ViewEngine
+}
+
 // NewRouter ...
 func NewRouter() http.Handler {
-
-	store = sessions.NewFilesystemStore("", []byte("something-very-secret"))
-	gob.Register(map[string]interface{}{})
+	ctx := context.Background()
+	driver := "postgres"
+	dataSource := "host=0.0.0.0 port=5432 user=gomodest dbname=gomodest sslmode=disable"
+	usersAPI, err := users.NewDefaultAPI(ctx, driver, dataSource, "mycookiesecret")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// logger
 	logger := httplog.NewLogger("gomodest",
 		httplog.Options{
 			JSON:     true,
-			LogLevel: "INFO",
+			LogLevel: "ERROR",
 		})
-
-	r := chi.NewRouter()
-	r.Use(middleware.Compress(5))
-	r.Use(middleware.Heartbeat("/health"))
-	r.Use(middleware.Recoverer)
-	r.Use(setDefaultPageData)
-	r.Use(httplog.RequestLogger(logger))
 
 	indexLayout, err := viewEngine("index")
 	if err != nil {
 		panic(err)
 	}
 
-	r.NotFound(renderPage(indexLayout, "404", nil))
-	r.Get("/", renderPage(indexLayout, "home", nil))
-	r.Get("/account", renderPage(indexLayout, "account", accountPage))
-	r.Post("/account", renderPage(indexLayout, "account", accountPageSubmit))
-	r.Post("/login", renderPage(indexLayout, "login", loginPageSubmit))
-	r.Get("/login", renderPage(indexLayout, "login", nil))
-	r.Get("/logout", logoutHandler)
+	appCtx := AppContext{
+		users:      usersAPI,
+		viewEngine: indexLayout,
+	}
 
-	r.Route("/app", func(r chi.Router) {
-		r.Use(isAuthenticated)
-		r.Get("/", renderPage(indexLayout, "app", appPage))
+	// middlewares
+	r := chi.NewRouter()
+	r.Use(middleware.Compress(5))
+	r.Use(middleware.Heartbeat("/health"))
+	r.Use(middleware.Recoverer)
+	r.Use(setDefaultPageData(appCtx))
+	r.Use(httplog.RequestLogger(logger))
+
+	// routes
+	// public
+	r.NotFound(renderPage(appCtx, "404", nil))
+	r.Get("/", renderPage(appCtx, "home", nil))
+	r.Get("/login", renderPage(appCtx, "login", loginPage))
+	r.Get("/signup", renderPage(appCtx, "signup", nil))
+
+	r.Post("/signup", usersAPI.Signup)
+	r.Get("/confirm/{token}", usersAPI.ConfirmEmail)
+	r.Get("/change/{token}", usersAPI.ConfirmEmailChange)
+	r.Post("/login", usersAPI.Login)
+	r.Get("/logout", usersAPI.Logout)
+
+	// authenticated
+	r.Route("/account", func(r chi.Router) {
+		r.Use(usersAPI.IsAuthenticated)
+		r.Get("/", renderPage(appCtx, "account", accountPage))
+		r.Post("/", renderPage(appCtx, "account", accountPageSubmit))
 	})
 
-	r.Route("/todos", func(r chi.Router) {
-		r.Use(isAuthenticatedAPI)
+	r.Route("/app", func(r chi.Router) {
+		r.Use(usersAPI.IsAuthenticated)
+		r.Get("/", renderPage(appCtx, "app", appPage))
+	})
+
+	r.Route("/api", func(r chi.Router) {
+		r.Use(usersAPI.IsAuthenticated)
 		r.Use(middleware.AllowContentType("application/json"))
-		r.Get("/", listTodos)
-		r.Post("/", addTodo)
-		r.Delete("/", deleteTodo)
+		r.Get("/todos", listTodos)
+		r.Post("/todos", addTodo)
+		r.Delete("/todos", deleteTodo)
 	})
 
 	workDir, _ := os.Getwd()
@@ -73,5 +99,4 @@ func NewRouter() http.Handler {
 	fileServer(r, "/static", filesDir)
 
 	return r
-
 }

@@ -5,7 +5,7 @@
 
     let todos = [];
     let input = "";
-    const todosAPI = 'http://localhost:4000/todos'
+    const todosAPI = 'http://localhost:4000/api/todos'
     onMount(async () => {
         const res = await fetch(todosAPI);
         todos = await res.json();
@@ -55,9 +55,9 @@
                 </div>
                 <div class="control">
                     <button class="button is-primary">
-            <span class="icon is-small">
-              <i class="fas fa-plus"></i>
-            </span>
+                        <span class="icon is-small">
+                          <i class="fas fa-plus"></i>
+                        </span>
                     </button>
                 </div>
             </form>

@@ -17,7 +17,6 @@ export default class extends Controller {
         return true;
     }
 
-
     submitForm(e){
         if (this.validateEmail() && this.validatePassword()){
             return;

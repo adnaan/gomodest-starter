@@ -1,56 +1,82 @@
 package pkg
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/google/uuid"
 
 	"github.com/mholt/binding"
 
 	"github.com/foolin/goview"
 )
 
-type LoginForm struct {
-	Email    string
-	Password string
-}
+func setDefaultPageData(appCtx AppContext) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			pageData := map[string]interface{}{
+				"route": r.URL.Path,
+			}
 
-// Fieldmap for the LoginForm. extend it for more fields
-func (lf *LoginForm) FieldMap(req *http.Request) binding.FieldMap {
-	return binding.FieldMap{
-		&lf.Email:    "email",
-		&lf.Password: "password",
+			_, email, metadata, err := appCtx.users.LoggedInUser(r)
+			if err == nil {
+				pageData["email"] = email
+				pageData["metadata"] = metadata
+				pageData["is_logged_in"] = true
+				fmt.Println("setDefaultPageData", pageData)
+			}
+
+			ctx := r.Context()
+			ctx = context.WithValue(ctx, appCtxDataKey, pageData)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
 	}
 }
 
-func loginPageSubmit(w http.ResponseWriter, r *http.Request) (goview.M, error) {
-	loginForm := new(LoginForm)
-	if errs := binding.Bind(r, loginForm); errs != nil {
-		return nil, fmt.Errorf("%v, %w", errs, BadRequest)
+func loginPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+	confirmed := r.URL.Query().Get("confirmed")
+	if confirmed == "true" {
+		return goview.M{
+			"confirmed": true,
+		}, nil
 	}
 
-	session, err := store.Get(r, "auth-session")
-	if err != nil {
-		return nil, fmt.Errorf("%v, %w", err, InternalErr)
-	}
-	session.Values["token"] = uuid.New().String()
-	profile := make(map[string]interface{})
-	profile["email"] = loginForm.Email
-	profile["name"] = ""
-
-	session.Values["profile"] = profile
-	err = session.Save(r, w)
-	if err != nil {
-		return nil, fmt.Errorf("%v, %w", err, InternalErr)
+	notConfirmed := r.URL.Query().Get("not_confirmed")
+	if notConfirmed == "true" {
+		return goview.M{
+			"not_confirmed": true,
+		}, nil
 	}
 
-	http.Redirect(w, r, "/app", http.StatusSeeOther)
+	confirmationSent := r.URL.Query().Get("confirmation_sent")
+	if confirmationSent == "true" {
+		return goview.M{
+			"confirmation_sent": true,
+		}, nil
+	}
+
+	emailChanged := r.URL.Query().Get("email_changed")
+	if emailChanged == "true" {
+		return goview.M{
+			"email_changed": true,
+		}, nil
+	}
+
 	return goview.M{}, nil
 }
 
-func appPage(w http.ResponseWriter, r *http.Request) (goview.M, error) {
+func accountPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+	emailChanged := r.URL.Query().Get("email_changed")
+	if emailChanged == "true" {
+		return goview.M{
+			"email_changed": true,
+		}, nil
+	}
+
+	return goview.M{}, nil
+}
+
+func appPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	dummy := struct {
 		Title string `json:"title"`
 	}{
@@ -70,29 +96,6 @@ func appPage(w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	}, nil
 }
 
-func accountPage(w http.ResponseWriter, r *http.Request) (goview.M, error) {
-
-	session, err := store.Get(r, "auth-session")
-	if err != nil {
-		return nil, fmt.Errorf("%v, %w", err, InternalErr)
-	}
-
-	profileData, ok := session.Values["profile"]
-	if !ok {
-		return nil, fmt.Errorf("%v, %w", err, InternalErr)
-	}
-
-	profile, ok := profileData.(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("%v, %w", err, InternalErr)
-	}
-
-	return goview.M{
-		"name": profile["name"],
-	}, nil
-
-}
-
 type AccountForm struct {
 	Name  string
 	Email string
@@ -106,35 +109,52 @@ func (af *AccountForm) FieldMap(req *http.Request) binding.FieldMap {
 	}
 }
 
-func accountPageSubmit(w http.ResponseWriter, r *http.Request) (goview.M, error) {
+func accountPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	accountForm := new(AccountForm)
 	if errs := binding.Bind(r, accountForm); errs != nil {
 		return nil, fmt.Errorf("%v, %w", errs, BadRequest)
 	}
 
-	session, err := store.Get(r, "auth-session")
+	pageData := goview.M{}
+
+	id, email, metaData, err := appCtx.users.LoggedInUser(r)
 	if err != nil {
 		return nil, fmt.Errorf("%v, %w", err, InternalErr)
 	}
 
-	profileData, ok := session.Values["profile"]
-	if !ok {
-		return nil, fmt.Errorf("%v, %w", err, InternalErr)
+	if accountForm.Email != "" && accountForm.Email != email {
+		err = appCtx.users.ChangeEmail(id, accountForm.Email)
+		if err != nil {
+			return nil, fmt.Errorf("%v, %w", err, InternalErr)
+		}
+		pageData["change_email"] = "requested"
 	}
 
-	profile, ok := profileData.(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("%v, %w", err, InternalErr)
+	var name string
+	var ok bool
+	if metaData["name"] == nil {
+		name = ""
+	} else {
+		name, ok = metaData["name"].(string)
+		if !ok {
+			return nil, fmt.Errorf("%v, %w", fmt.Errorf("invalid name"), InternalErr)
+		}
 	}
 
-	profile["name"] = accountForm.Name
-	session.Values["profile"] = profile
-	err = session.Save(r, w)
-	if err != nil {
-		return nil, fmt.Errorf("%v, %w", err, InternalErr)
+	if name != accountForm.Name {
+		err = appCtx.users.UpdateMetaData(id, map[string]interface{}{
+			"name": accountForm.Name,
+		})
+
+		if err != nil {
+			return nil, fmt.Errorf("%v, %w", err, InternalErr)
+		}
 	}
 
-	return goview.M{
-		"name": accountForm.Name,
-	}, nil
+	pageData["email"] = email
+
+	metaData["name"] = accountForm.Name
+	pageData["metadata"] = metaData
+	fmt.Println("accountPageSubmit", pageData)
+	return pageData, nil
 }

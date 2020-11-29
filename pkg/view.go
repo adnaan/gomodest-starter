@@ -37,20 +37,20 @@ func viewEngine(baseTemplate string) (*goview.ViewEngine, error) {
 	}), nil
 }
 
-type PageHandlerFunc func(w http.ResponseWriter, r *http.Request) (goview.M, error)
+type PageHandlerFunc func(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error)
 
-func simplePage(w http.ResponseWriter, r *http.Request) (goview.M, error) {
+func simplePage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	return goview.M{}, nil
 }
 
-func renderPage(viewEngine *goview.ViewEngine, page string, pageHandlerFunc PageHandlerFunc) http.HandlerFunc {
+func renderPage(appCtx AppContext, page string, pageHandlerFunc PageHandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// merge app context data set by isAuthenticated Middleware with the passed page data
 		pageData := make(map[string]interface{})
 		if pageHandlerFunc == nil {
 			pageHandlerFunc = simplePage
 		}
-		data, err := pageHandlerFunc(w, r)
+		pageHandlerData, err := pageHandlerFunc(appCtx, w, r)
 		if err != nil {
 			fmt.Println(err)
 			var httpErr HTTPErr
@@ -66,20 +66,21 @@ func renderPage(viewEngine *goview.ViewEngine, page string, pageHandlerFunc Page
 		// default page data set by setPageData middleware
 		appCtxData, ok := r.Context().Value(appCtxDataKey).(map[string]interface{})
 		if ok {
-			if data == nil {
-				data = appCtxData
-			} else {
-				for k, v := range appCtxData {
-					data[k] = v
+			if pageHandlerData != nil {
+				// page handler data overrides default page data
+				for k, v := range pageHandlerData {
+					appCtxData[k] = v
 				}
 			}
+		} else {
+			appCtxData = pageHandlerData
 		}
 
-		for k, v := range data {
+		for k, v := range appCtxData {
 			pageData[k] = v
 		}
 
-		err = viewEngine.Render(w, http.StatusOK, page, pageData)
+		err = appCtx.viewEngine.Render(w, http.StatusOK, page, pageData)
 		if err != nil {
 			fmt.Println(err)
 			fmt.Fprintf(w, "umm...awkward.")

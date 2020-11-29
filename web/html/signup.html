@@ -5,25 +5,24 @@
                 <p> {{.error}} </p>
             {{end}}
 
-            {{ if .confirmed }}
-                <box class="box has-background-success"> Thank you for confirming your email. Sign in to get started ! </box>
-            {{end}}
-
-            {{ if .not_confirmed }}
-                <box class="box has-background-warning"> Email not confirmed yet ! An email was sent to your inbox for confirmation. Please confirm to login.</box>
-            {{end}}
-
-            {{ if .confirmation_sent }}
-                <box class="box has-background-warning"> An email has been sent to your inbox for confirmation. Please confirm to login. </box>
-            {{end}}
-
             <form data-controller="signin"
                   data-action="submit->signin#submitForm"
                   method="POST">
                 <div class="field">
+                    <label class="label">Name</label>
+                    <input data-target="signin.name"
+                           data-action="blur->signin#validateName"
+                           name="name"
+                           class="input"
+                           type="text"
+                           placeholder="First Last"
+                           aria-label="Name">
+
+                </div>
+                <div class="field">
                     <label class="label">Email</label>
                     <input data-target="signin.email"
-                           data-action="blur->login#validateEmail"
+                           data-action="blur->signin#validateEmail"
                            name="email"
                            pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
                            class="input"
@@ -36,7 +35,7 @@
                 <div class="field">
                     <label class="label">Password</label>
                     <input data-target="signin.password"
-                           data-action="blur->login#validatePassword"
+                           data-action="blur->signin#validatePassword"
                            name="password"
                            class="input"
                            type="password"
@@ -47,15 +46,15 @@
                     <div class="control is-expanded">
                         <button class="button is-primary is-fullwidth"
                                 type="submit">
-                            Sign in
+                            Sign up
                         </button>
                     </div>
                     <div class="control is-expanded">
                         <button class="button is-primary is-outlined is-fullwidth"
                                 data-action="click->navigate#goto"
-                                data-goto="/signup"
+                                data-goto="/login"
                                 type="button">
-                            Sign up
+                            Sign in
                         </button>
                     </div>
                 </div>
