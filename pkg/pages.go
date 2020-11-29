@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-chi/chi"
+
 	"github.com/mholt/binding"
 
 	"github.com/foolin/goview"
@@ -156,5 +158,51 @@ func accountPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request
 	metaData["name"] = accountForm.Name
 	pageData["metadata"] = metaData
 	fmt.Println("accountPageSubmit", pageData)
+	return pageData, nil
+}
+
+func forgotPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+	accountForm := new(AccountForm)
+	if errs := binding.Bind(r, accountForm); errs != nil {
+		return nil, fmt.Errorf("%v, %w", errs, BadRequest)
+	}
+
+	pageData := goview.M{}
+
+	err := appCtx.users.Recovery(accountForm.Email)
+	if err != nil {
+		return pageData, err
+	}
+
+	return pageData, nil
+}
+
+type ResetForm struct {
+	Password string
+}
+
+// Fieldmap for the ResetForm. extend it for more fields
+func (rf *ResetForm) FieldMap(_ *http.Request) binding.FieldMap {
+	return binding.FieldMap{
+		&rf.Password: "password",
+	}
+}
+
+func resetPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+	token := chi.URLParam(r, "token")
+	resetForm := new(ResetForm)
+	if errs := binding.Bind(r, resetForm); errs != nil {
+		return nil, fmt.Errorf("%v, %w", errs, BadRequest)
+	}
+
+	pageData := goview.M{}
+
+	err := appCtx.users.ConfirmRecovery(token, resetForm.Password)
+	if err != nil {
+		return pageData, err
+	}
+
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
+
 	return pageData, nil
 }

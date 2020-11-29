@@ -67,6 +67,10 @@ func NewRouter() http.Handler {
 	r.Get("/", renderPage(appCtx, "home", nil))
 	r.Get("/login", renderPage(appCtx, "login", loginPage))
 	r.Get("/signup", renderPage(appCtx, "signup", nil))
+	r.Get("/forgot", renderPage(appCtx, "forgot", nil))
+	r.Post("/forgot", renderPage(appCtx, "forgot", forgotPageSubmit))
+	r.Get("/reset/{token}", renderPage(appCtx, "reset", nil))
+	r.Post("/reset/{token}", renderPage(appCtx, "reset", resetPageSubmit))
 
 	r.Post("/signup", usersAPI.Signup)
 	r.Get("/confirm/{token}", usersAPI.ConfirmEmail)

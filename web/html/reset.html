@@ -1,0 +1,45 @@
+{{define "content"}}
+    <div class="columns is-mobile is-centered">
+        <div class="column is-one-third-desktop">
+
+            <h1>Reset Password</h1>
+
+            <form data-controller="signin"
+                  data-action="submit->signin#submitForm"
+                  method="POST">
+                <div class="field">
+                    <label class="label">Password</label>
+                    <input data-target="signin.password"
+                           data-action="blur->login#validatePassword"
+                           id="password"
+                           name="password"
+                           class="input"
+                           type="password"
+                           aria-label="Password" required>
+
+                </div>
+                <div class="field">
+                    <label class="label">Confirm Password</label>
+                    <input data-target="signin.confirm_password"
+                           data-action="blur->login#validatePassword"
+                           id="confirm_password"
+                           name="confirm_password"
+                           class="input"
+                           type="password"
+                           aria-label="Confirm Password" required>
+
+                </div>
+                <div class="field is-grouped">
+                    <div class="control is-expanded">
+                        <button class="button is-primary is-fullwidth"
+                                type="submit">
+                            Reset Password
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    </div>
+
+{{end}}
