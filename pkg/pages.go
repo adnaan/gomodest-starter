@@ -35,6 +35,91 @@ func setDefaultPageData(appCtx AppContext) func(next http.Handler) http.Handler 
 	}
 }
 
+func signupPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+	var email, password string
+	metadata := make(map[string]interface{})
+	r.ParseForm()
+	for k, v := range r.Form {
+
+		if k == "email" && len(v) == 0 {
+			return goview.M{}, fmt.Errorf("email is required")
+		}
+
+		if k == "password" && len(v) == 0 {
+			return goview.M{}, fmt.Errorf("password is required")
+		}
+
+		if len(v) == 0 {
+			continue
+		}
+
+		if k == "email" && len(v) > 0 {
+			email = v[0]
+			continue
+		}
+
+		if k == "password" && len(v) > 0 {
+			password = v[0]
+			continue
+		}
+
+		if len(v) == 1 {
+			metadata[k] = v[0]
+			continue
+		}
+		if len(v) > 1 {
+			metadata[k] = v
+		}
+	}
+
+	err := appCtx.users.Signup(email, password, metadata)
+	if err != nil {
+		return goview.M{}, nil
+	}
+
+	http.Redirect(w, r, "/login?confirmation_sent=true", http.StatusSeeOther)
+
+	return goview.M{}, nil
+}
+
+type LoginForm struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func (l *LoginForm) Bind(_ *http.Request) error {
+	return nil
+}
+
+// Fieldmap for the LoginData
+func (l *LoginForm) FieldMap(_ *http.Request) binding.FieldMap {
+	return binding.FieldMap{
+		&l.Email: binding.Field{
+			Form:     "email",
+			Required: true,
+		},
+		&l.Password: binding.Field{
+			Form:     "password",
+			Required: true,
+		},
+	}
+}
+
+func loginPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+	loginForm := new(LoginForm)
+	if errs := binding.Bind(r, loginForm); errs != nil {
+		return nil, fmt.Errorf("%v, %w", errs, BadRequest)
+	}
+
+	err := appCtx.users.Login(w, r, loginForm.Email, loginForm.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	http.Redirect(w, r, "/app", http.StatusSeeOther)
+	return goview.M{}, nil
+}
+
 func loginPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	confirmed := r.URL.Query().Get("confirmed")
 	if confirmed == "true" {
@@ -75,6 +160,27 @@ func accountPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (gov
 		}, nil
 	}
 
+	return goview.M{}, nil
+}
+
+func confirmEmailChangePage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+	token := chi.URLParam(r, "token")
+	err := appCtx.users.ConfirmEmailChange(token)
+	if err != nil {
+		return nil, err
+	}
+	http.Redirect(w, r, "/account?email_changed=true", http.StatusSeeOther)
+
+	return goview.M{}, nil
+}
+
+func confirmEmailPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+	token := chi.URLParam(r, "token")
+	err := appCtx.users.ConfirmEmail(token)
+	if err != nil {
+		return nil, err
+	}
+	http.Redirect(w, r, "/login?confirmed=true", http.StatusSeeOther)
 	return goview.M{}, nil
 }
 

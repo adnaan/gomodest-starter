@@ -65,17 +65,21 @@ func NewRouter() http.Handler {
 	// public
 	r.NotFound(renderPage(appCtx, "404", nil))
 	r.Get("/", renderPage(appCtx, "home", nil))
-	r.Get("/login", renderPage(appCtx, "login", loginPage))
+
 	r.Get("/signup", renderPage(appCtx, "signup", nil))
+	r.Post("/signup", renderPage(appCtx, "signup", signupPageSubmit))
+
+	r.Get("/confirm/{token}", renderPage(appCtx, "confirmed", confirmEmailPage))
+
+	r.Get("/login", renderPage(appCtx, "login", loginPage))
+	r.Post("/login", renderPage(appCtx, "login", loginPageSubmit))
+
 	r.Get("/forgot", renderPage(appCtx, "forgot", nil))
 	r.Post("/forgot", renderPage(appCtx, "forgot", forgotPageSubmit))
 	r.Get("/reset/{token}", renderPage(appCtx, "reset", nil))
 	r.Post("/reset/{token}", renderPage(appCtx, "reset", resetPageSubmit))
+	r.Get("/change/{token}", renderPage(appCtx, "changed", confirmEmailChangePage))
 
-	r.Post("/signup", usersAPI.Signup)
-	r.Get("/confirm/{token}", usersAPI.ConfirmEmail)
-	r.Get("/change/{token}", usersAPI.ConfirmEmailChange)
-	r.Post("/login", usersAPI.Login)
 	r.Get("/logout", usersAPI.Logout)
 
 	// authenticated
