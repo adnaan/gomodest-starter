@@ -43,50 +43,51 @@ func simplePage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (govi
 	return goview.M{}, nil
 }
 
-func renderPage(appCtx AppContext, page string, pageHandlerFunc PageHandlerFunc) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// merge app context data set by isAuthenticated Middleware with the passed page data
-		pageData := make(map[string]interface{})
-		if pageHandlerFunc == nil {
-			pageHandlerFunc = simplePage
-		}
-		pageHandlerData, err := pageHandlerFunc(appCtx, w, r)
-		if err != nil {
-			fmt.Println(err)
-			var httpErr HTTPErr
-			if errors.As(err, &httpErr) {
-				pageData["pageError"] = httpErr.Error()
-				pageData["pageErrorStatus"] = httpErr.Status()
-			} else {
-				pageData["pageError"] = "Internal Error"
-				pageData["pageErrorStatus"] = 500
-			}
-		}
-
-		// default page data set by setPageData middleware
-		appCtxData, ok := r.Context().Value(appCtxDataKey).(map[string]interface{})
-		if ok {
-			if pageHandlerData != nil {
-				// page handler data overrides default page data
-				for k, v := range pageHandlerData {
-					appCtxData[k] = v
+func newRenderer(appCtx AppContext) func(page string, pageHandlerFuncs ...PageHandlerFunc) http.HandlerFunc {
+	return func(page string, pageHandlerFuncs ...PageHandlerFunc) http.HandlerFunc {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// merge app context data set by isAuthenticated Middleware with the passed page data
+			pageData := make(map[string]interface{})
+			// default page data set by setPageData middleware
+			appCtxData, ok := r.Context().Value(appCtxDataKey).(map[string]interface{})
+			if ok {
+				for k, v := range appCtxData {
+					pageData[k] = v
 				}
 			}
-		} else {
-			appCtxData = pageHandlerData
-		}
+			// set default page renderer
+			if len(pageHandlerFuncs) == 0 {
+				pageHandlerFuncs = append(pageHandlerFuncs, simplePage)
+			}
 
-		for k, v := range appCtxData {
-			pageData[k] = v
-		}
+			for _, pageHandlerFunc := range pageHandlerFuncs {
+				appCtx.pageData = pageData
+				pageHandlerData, err := pageHandlerFunc(appCtx, w, r)
+				if err != nil {
+					fmt.Println(err)
+					var httpErr HTTPErr
+					if errors.As(err, &httpErr) {
+						pageData["pageError"] = httpErr.Error()
+						pageData["pageErrorStatus"] = httpErr.Status()
+					} else {
+						pageData["pageError"] = "Internal Error"
+						pageData["pageErrorStatus"] = 500
+					}
+				}
+				// set returned page data from the handler to the main pageData map
+				for k, v := range pageHandlerData {
+					pageData[k] = v
+				}
+			}
 
-		err = appCtx.viewEngine.Render(w, http.StatusOK, page, pageData)
-		if err != nil {
-			fmt.Println(err)
-			fmt.Fprintf(w, "umm...awkward.")
-			return
-		}
-	})
+			err := appCtx.viewEngine.Render(w, http.StatusOK, page, pageData)
+			if err != nil {
+				fmt.Println(err)
+				fmt.Fprintf(w, "umm...awkward.")
+				return
+			}
+		})
+	}
 }
 
 // fileServer conveniently sets up a http.FileServer handler to serve

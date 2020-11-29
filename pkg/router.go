@@ -24,6 +24,7 @@ const (
 type AppContext struct {
 	users      *users.API
 	viewEngine *goview.ViewEngine
+	pageData   goview.M
 }
 
 // NewRouter ...
@@ -53,6 +54,8 @@ func NewRouter() http.Handler {
 		viewEngine: indexLayout,
 	}
 
+	rr := newRenderer(appCtx)
+
 	// middlewares
 	r := chi.NewRouter()
 	r.Use(middleware.Compress(5))
@@ -63,35 +66,35 @@ func NewRouter() http.Handler {
 
 	// routes
 	// public
-	r.NotFound(renderPage(appCtx, "404", nil))
-	r.Get("/", renderPage(appCtx, "home", nil))
+	r.NotFound(rr("404"))
+	r.Get("/", rr("home"))
 
-	r.Get("/signup", renderPage(appCtx, "signup", nil))
-	r.Post("/signup", renderPage(appCtx, "signup", signupPageSubmit))
+	r.Get("/signup", rr("signup"))
+	r.Post("/signup", rr("signup", signupPageSubmit))
 
-	r.Get("/confirm/{token}", renderPage(appCtx, "confirmed", confirmEmailPage))
+	r.Get("/confirm/{token}", rr("confirmed", confirmEmailPage))
 
-	r.Get("/login", renderPage(appCtx, "login", loginPage))
-	r.Post("/login", renderPage(appCtx, "login", loginPageSubmit))
+	r.Get("/login", rr("login", loginPage))
+	r.Post("/login", rr("login", loginPageSubmit))
 
-	r.Get("/forgot", renderPage(appCtx, "forgot", nil))
-	r.Post("/forgot", renderPage(appCtx, "forgot", forgotPageSubmit))
-	r.Get("/reset/{token}", renderPage(appCtx, "reset", nil))
-	r.Post("/reset/{token}", renderPage(appCtx, "reset", resetPageSubmit))
-	r.Get("/change/{token}", renderPage(appCtx, "changed", confirmEmailChangePage))
+	r.Get("/forgot", rr("forgot"))
+	r.Post("/forgot", rr("forgot", forgotPageSubmit))
+	r.Get("/reset/{token}", rr("reset"))
+	r.Post("/reset/{token}", rr("reset", resetPageSubmit))
+	r.Get("/change/{token}", rr("changed", confirmEmailChangePage))
 
 	r.Get("/logout", usersAPI.Logout)
 
 	// authenticated
 	r.Route("/account", func(r chi.Router) {
 		r.Use(usersAPI.IsAuthenticated)
-		r.Get("/", renderPage(appCtx, "account", accountPage))
-		r.Post("/", renderPage(appCtx, "account", accountPageSubmit))
+		r.Get("/", rr("account", accountPage))
+		r.Post("/", rr("account", accountPageSubmit))
 	})
 
 	r.Route("/app", func(r chi.Router) {
 		r.Use(usersAPI.IsAuthenticated)
-		r.Get("/", renderPage(appCtx, "app", appPage))
+		r.Get("/", rr("app", appPage))
 	})
 
 	r.Route("/api", func(r chi.Router) {

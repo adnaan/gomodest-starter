@@ -11,7 +11,6 @@
         todos = await res.json();
     });
 
-
      const addTodo = async() =>{
          if (!input){
              return
