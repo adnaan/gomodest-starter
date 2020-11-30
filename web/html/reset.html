@@ -2,15 +2,16 @@
     <div class="columns is-mobile is-centered">
         <div class="column is-one-third-desktop">
 
-            <h1>Reset Password</h1>
+            <h1 class="box has-background-info-light has-text-weight-semibold">Change to a new pasword</h1>
+            <br>
 
-            <form data-controller="signin"
-                  data-action="submit->signin#submitForm"
+            <form
+                  data-action="submit->account#submitResetForm"
                   method="POST">
                 <div class="field">
                     <label class="label">Password</label>
-                    <input data-target="signin.password"
-                           data-action="blur->login#validatePassword"
+                    <input data-target="account.password"
+                           data-action="blur->account#validatePassword"
                            id="password"
                            name="password"
                            class="input"
@@ -20,8 +21,8 @@
                 </div>
                 <div class="field">
                     <label class="label">Confirm Password</label>
-                    <input data-target="signin.confirm_password"
-                           data-action="blur->login#validatePassword"
+                    <input data-target="account.confirmPassword"
+                           data-action="blur->account#validatePassword"
                            id="confirm_password"
                            name="confirm_password"
                            class="input"

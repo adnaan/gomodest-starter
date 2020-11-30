@@ -17,13 +17,13 @@
                 <box class="box has-background-warning"> An email has been sent to your inbox for confirmation. Please confirm to login. </box>
             {{end}}
 
-            <form data-controller="signin"
-                  data-action="submit->signin#submitForm"
+            <form
+                  data-action="submit->account#submitLoginForm"
                   method="POST">
                 <div class="field">
                     <label class="label">Email</label>
-                    <input data-target="signin.email"
-                           data-action="blur->login#validateEmail"
+                    <input data-target="account.email"
+                           data-action="blur->account#validateEmail"
                            name="email"
                            pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
                            class="input"
@@ -35,8 +35,8 @@
 
                 <div class="field">
                     <label class="label">Password</label>
-                    <input data-target="signin.password"
-                           data-action="blur->login#validatePassword"
+                    <input data-target="account.password"
+                           data-action="blur->account.#validatePassword"
                            name="password"
                            class="input"
                            type="password"

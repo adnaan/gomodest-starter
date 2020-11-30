@@ -5,13 +5,13 @@
                 <box class="box has-background-warning"> A password recovery link has been sent to your inbox. </box>
            {{else}}
 
-            <form data-controller="signin"
-                  data-action="submit->signin#submitForm"
+            <form
+                  data-action="submit->account#submitForgetForm"
                   method="POST">
                 <div class="field">
                     <label class="label">Email</label>
-                    <input data-target="signin.email"
-                           data-action="blur->login#validateEmail"
+                    <input data-target="account.email"
+                           data-action="blur->account#validateEmail"
                            name="email"
                            pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
                            class="input"

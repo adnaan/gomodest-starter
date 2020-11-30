@@ -5,7 +5,7 @@
     <title>gomodest</title>
     {{include "partials/header"}}
   </head>
-  <body data-controller="navigate svelte">
+  <body data-controller="navigate svelte account">
   {{include "partials/top_navbar"}}
     <section class="section">
       <div class="container h-full px-5 py-5">
@@ -18,6 +18,13 @@
             </div>
           </div>
         {{end}}
+        <div class="columns is-mobile is-centered is-vcentered">
+          <div class="column is-one-quarter-desktop has-text-centered is-narrow">
+            <div class="is-hidden notification is-danger is-light has-text-weight-semibold" data-target="account.formError">
+              <p>Form validation failed</p>
+            </div>
+          </div>
+        </div>
         {{template "content" .}}
       </div>
     </section>

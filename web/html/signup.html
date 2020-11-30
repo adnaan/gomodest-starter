@@ -1,17 +1,13 @@
 {{define "content"}}
     <div class="columns is-mobile is-centered">
         <div class="column is-one-third-desktop">
-            {{ if .error }}
-                <p> {{.error}} </p>
-            {{end}}
-
-            <form data-controller="signin"
-                  data-action="submit->signin#submitForm"
+            <form
+                  data-action="submit->account#submitSignupForm"
                   method="POST">
                 <div class="field">
                     <label class="label">Name</label>
-                    <input data-target="signin.name"
-                           data-action="blur->signin#validateName"
+                    <input data-target="account.name"
+                           data-action="blur->account#validateName"
                            name="name"
                            class="input"
                            type="text"
@@ -21,25 +17,25 @@
                 </div>
                 <div class="field">
                     <label class="label">Email</label>
-                    <input data-target="signin.email"
-                           data-action="blur->signin#validateEmail"
+                    <input data-target="account.email"
+                           data-action="blur->account#validateEmail"
                            name="email"
                            pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
                            class="input"
                            type="email"
                            placeholder="your@email.com"
-                           aria-label="Email">
+                           aria-label="Email" required>
 
                 </div>
 
                 <div class="field">
                     <label class="label">Password</label>
-                    <input data-target="signin.password"
-                           data-action="blur->signin#validatePassword"
+                    <input data-target="account.password"
+                           data-action="blur->account#validatePassword"
                            name="password"
                            class="input"
                            type="password"
-                           aria-label="Password">
+                           aria-label="Password" required>
 
                 </div>
                 <div class="field is-grouped">
