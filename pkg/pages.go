@@ -38,7 +38,7 @@ func setDefaultPageData(appCtx AppContext) func(next http.Handler) http.Handler 
 func signupPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	var email, password string
 	metadata := make(map[string]interface{})
-	r.ParseForm()
+	_ = r.ParseForm()
 	for k, v := range r.Form {
 
 		if k == "email" && len(v) == 0 {
@@ -108,7 +108,7 @@ func (l *LoginForm) FieldMap(_ *http.Request) binding.FieldMap {
 func loginPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	loginForm := new(LoginForm)
 	if errs := binding.Bind(r, loginForm); errs != nil {
-		return nil, fmt.Errorf("%v, %w", errs, BadRequest)
+		return nil, fmt.Errorf("%v, %w", errs, fmt.Errorf("missing email or password"))
 	}
 
 	err := appCtx.users.Login(w, r, loginForm.Email, loginForm.Password)
@@ -120,7 +120,7 @@ func loginPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) 
 	return goview.M{}, nil
 }
 
-func loginPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+func loginPage(_ AppContext, _ http.ResponseWriter, r *http.Request) (goview.M, error) {
 	confirmed := r.URL.Query().Get("confirmed")
 	if confirmed == "true" {
 		return goview.M{
@@ -152,7 +152,7 @@ func loginPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (govie
 	return goview.M{}, nil
 }
 
-func accountPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+func accountPage(_ AppContext, _ http.ResponseWriter, r *http.Request) (goview.M, error) {
 	emailChanged := r.URL.Query().Get("email_changed")
 	if emailChanged == "true" {
 		return goview.M{
@@ -184,7 +184,7 @@ func confirmEmailPage(appCtx AppContext, w http.ResponseWriter, r *http.Request)
 	return goview.M{}, nil
 }
 
-func appPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+func appPage(_ AppContext, _ http.ResponseWriter, _ *http.Request) (goview.M, error) {
 	dummy := struct {
 		Title string `json:"title"`
 	}{
@@ -193,10 +193,7 @@ func appPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.
 
 	d, err := json.Marshal(&dummy)
 	if err != nil {
-		return nil, fmt.Errorf("%v: %w", err, HTTPErr{
-			UserMessage: "Couldn't find data",
-			Code:        404,
-		})
+		return nil, fmt.Errorf("%v: %w", err, fmt.Errorf("encoding failed"))
 	}
 
 	return goview.M{
@@ -210,30 +207,30 @@ type AccountForm struct {
 }
 
 // Fieldmap for the accountform. extend it for more fields
-func (af *AccountForm) FieldMap(req *http.Request) binding.FieldMap {
+func (af *AccountForm) FieldMap(_ *http.Request) binding.FieldMap {
 	return binding.FieldMap{
 		&af.Name:  "name",
 		&af.Email: "email",
 	}
 }
 
-func accountPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+func accountPageSubmit(appCtx AppContext, _ http.ResponseWriter, r *http.Request) (goview.M, error) {
 	accountForm := new(AccountForm)
 	if errs := binding.Bind(r, accountForm); errs != nil {
-		return nil, fmt.Errorf("%v, %w", errs, BadRequest)
+		return nil, fmt.Errorf("%v, %w", errs, fmt.Errorf("missing name or email"))
 	}
 
 	pageData := goview.M{}
 
 	id, email, metaData, err := appCtx.users.LoggedInUser(r)
 	if err != nil {
-		return nil, fmt.Errorf("%v, %w", err, InternalErr)
+		return nil, err
 	}
 
 	if accountForm.Email != "" && accountForm.Email != email {
 		err = appCtx.users.ChangeEmail(id, accountForm.Email)
 		if err != nil {
-			return nil, fmt.Errorf("%v, %w", err, InternalErr)
+			return nil, err
 		}
 		pageData["change_email"] = "requested"
 	}
@@ -245,7 +242,7 @@ func accountPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request
 	} else {
 		name, ok = metaData["name"].(string)
 		if !ok {
-			return nil, fmt.Errorf("%v, %w", fmt.Errorf("invalid name"), InternalErr)
+			return nil, err
 		}
 	}
 
@@ -255,7 +252,7 @@ func accountPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request
 		})
 
 		if err != nil {
-			return nil, fmt.Errorf("%v, %w", err, InternalErr)
+			return nil, err
 		}
 	}
 
@@ -263,14 +260,13 @@ func accountPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request
 
 	metaData["name"] = accountForm.Name
 	pageData["metadata"] = metaData
-	fmt.Println("accountPageSubmit", pageData)
 	return pageData, nil
 }
 
-func forgotPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+func forgotPageSubmit(appCtx AppContext, _ http.ResponseWriter, r *http.Request) (goview.M, error) {
 	accountForm := new(AccountForm)
 	if errs := binding.Bind(r, accountForm); errs != nil {
-		return nil, fmt.Errorf("%v, %w", errs, BadRequest)
+		return nil, fmt.Errorf("%v, %w", errs, "email or password missing")
 	}
 
 	pageData := goview.M{}
@@ -300,7 +296,7 @@ func resetPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) 
 	token := chi.URLParam(r, "token")
 	resetForm := new(ResetForm)
 	if errs := binding.Bind(r, resetForm); errs != nil {
-		return nil, fmt.Errorf("%v, %w", errs, BadRequest)
+		return nil, fmt.Errorf("%v, %w", errs, fmt.Errorf("missing password"))
 	}
 
 	pageData := goview.M{}

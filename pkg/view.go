@@ -65,13 +65,11 @@ func newRenderer(appCtx AppContext) func(page string, pageHandlerFuncs ...PageHa
 				pageHandlerData, err := pageHandlerFunc(appCtx, w, r)
 				if err != nil {
 					fmt.Println(err)
-					var httpErr HTTPErr
-					if errors.As(err, &httpErr) {
-						pageData["pageError"] = httpErr.Error()
-						pageData["pageErrorStatus"] = httpErr.Status()
+					userError := errors.Unwrap(err)
+					if userError != nil {
+						pageData["userError"] = userError.Error()
 					} else {
-						pageData["pageError"] = "Internal Error"
-						pageData["pageErrorStatus"] = 500
+						pageData["userError"] = "Internal Error"
 					}
 				}
 				// set returned page data from the handler to the main pageData map

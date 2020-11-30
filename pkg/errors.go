@@ -6,37 +6,6 @@ import (
 	"github.com/go-chi/render"
 )
 
-type Error interface {
-	error
-	Status() int
-}
-
-// HTTPErr represents an http error
-type HTTPErr struct {
-	UserMessage string
-	Code        int
-}
-
-// Error satisfies the error interface
-func (h HTTPErr) Error() string {
-	return h.UserMessage
-}
-
-// Status return the http status code
-func (h HTTPErr) Status() int {
-	return h.Code
-}
-
-var InternalErr = HTTPErr{
-	UserMessage: "Internal Error",
-	Code:        500,
-}
-
-var BadRequest = HTTPErr{
-	UserMessage: "Invalid Request",
-	Code:        400,
-}
-
 // copied from https://github.com/go-chi/chi/blob/master/_examples/rest/main.go#L389
 //--
 // Error response payloads & renderers
