@@ -4,3 +4,4 @@ web/dist
 .idea
 *.db
 tmp
+.DS_Store

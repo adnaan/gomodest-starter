@@ -14,7 +14,7 @@ import (
 	"github.com/go-chi/chi"
 )
 
-func First(str string) string {
+func first(str string) string {
 	if len(str) == 0 {
 		return ""
 	}
@@ -77,7 +77,7 @@ func newRenderer(appCtx AppContext) func(page string, pageHandlerFuncs ...PageHa
 					fmt.Println(err)
 					userError := errors.Unwrap(err)
 					if userError != nil {
-						pageData["userError"] = First(strings.ToLower(userError.Error()))
+						pageData["userError"] = first(strings.ToLower(userError.Error()))
 					} else {
 						pageData["userError"] = "Internal Error"
 					}

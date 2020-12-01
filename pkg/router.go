@@ -30,8 +30,10 @@ type AppContext struct {
 // NewRouter ...
 func NewRouter() http.Handler {
 	ctx := context.Background()
-	driver := "postgres"
-	dataSource := "host=0.0.0.0 port=5432 user=gomodest dbname=gomodest sslmode=disable"
+	//driver := "postgres"
+	//dataSource := "host=0.0.0.0 port=5432 user=gomodest dbname=gomodest sslmode=disable"
+	driver := "sqlite3"
+	dataSource := "file:users.db?mode=memory&cache=shared&_fk=1"
 	usersAPI, err := users.NewDefaultAPI(ctx, driver, dataSource, "mycookiesecret")
 	if err != nil {
 		log.Fatal(err)
