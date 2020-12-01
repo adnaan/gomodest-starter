@@ -5,6 +5,7 @@ export default class extends Controller {
 
     validateEmail() {
         if (!this.emailTarget.validity.valid || this.emailTarget.value === ''){
+            this.showFormError("Invalid Email")
             return false;
         }
         return true;
@@ -13,13 +14,15 @@ export default class extends Controller {
 
     validateName() {
         if (this.nameTarget.value === ''){
+            this.showFormError("Name cannot be empty")
             return false;
         }
         return true;
     }
 
     validatePassword() {
-        if (this.passwordTarget.value === ''){
+        if (this.passwordTarget.value === '' || this.passwordTarget.value.length < 8){
+            this.showFormError("Minimum 8 character password is required")
             return false;
         }
         return true;
@@ -52,6 +55,13 @@ export default class extends Controller {
         }
 
         this.showFormError("Password's don't match")
+        e.preventDefault();
+    }
+
+    submitAccountForm(e){
+        if (this.validateEmail() && this.validateName()){
+            return;
+        }
         e.preventDefault();
     }
 

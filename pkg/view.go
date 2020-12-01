@@ -6,12 +6,22 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"unicode"
 
 	"github.com/Masterminds/sprig"
 	"github.com/foolin/goview"
 
 	"github.com/go-chi/chi"
 )
+
+func First(str string) string {
+	if len(str) == 0 {
+		return ""
+	}
+	tmp := []rune(str)
+	tmp[0] = unicode.ToUpper(tmp[0])
+	return string(tmp)
+}
 
 func viewEngine(baseTemplate string) (*goview.ViewEngine, error) {
 
@@ -67,7 +77,7 @@ func newRenderer(appCtx AppContext) func(page string, pageHandlerFuncs ...PageHa
 					fmt.Println(err)
 					userError := errors.Unwrap(err)
 					if userError != nil {
-						pageData["userError"] = userError.Error()
+						pageData["userError"] = First(strings.ToLower(userError.Error()))
 					} else {
 						pageData["userError"] = "Internal Error"
 					}

@@ -11,16 +11,16 @@
       <div class="container h-full px-5 py-5">
         {{if .userError}}
           <div class="columns is-mobile is-centered is-vcentered">
-            <div class="column is-one-quarter-desktop has-text-centered is-narrow">
-              <div class="notification is-danger is-light has-text-weight-semibold">
+            <div class="column is-one-third-desktop has-text-centered is-narrow">
+              <div class="notification is-danger is-light">
                 <p>{{.userError}}!</p>
               </div>
             </div>
           </div>
         {{end}}
         <div class="columns is-mobile is-centered is-vcentered">
-          <div class="column is-one-quarter-desktop has-text-centered is-narrow">
-            <div class="is-hidden notification is-danger is-light has-text-weight-semibold" data-target="account.formError">
+          <div class="column is-one-third-desktop has-text-centered is-narrow">
+            <div class="is-hidden notification is-danger is-light" data-target="account.formError">
               <p>Form validation failed</p>
             </div>
           </div>

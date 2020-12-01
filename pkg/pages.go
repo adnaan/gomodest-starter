@@ -25,7 +25,6 @@ func setDefaultPageData(appCtx AppContext) func(next http.Handler) http.Handler 
 				pageData["email"] = email
 				pageData["metadata"] = metadata
 				pageData["is_logged_in"] = true
-				fmt.Println("setDefaultPageData", pageData)
 			}
 
 			ctx := r.Context()
@@ -74,7 +73,7 @@ func signupPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request)
 
 	err := appCtx.users.Signup(email, password, metadata)
 	if err != nil {
-		return goview.M{}, nil
+		return goview.M{}, err
 	}
 
 	http.Redirect(w, r, "/login?confirmation_sent=true", http.StatusSeeOther)

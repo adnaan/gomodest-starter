@@ -12,8 +12,8 @@
             <div class="card px-5 py-5">
                 <h4 class="title is-4">Profile</h4>
                 <hr/>
-                <form data-controller="account"
-                      data-action="submit->account#submitForm"
+                <form
+                      data-action="submit->account#submitAccountForm"
                       method="POST">
                     {{if .Error}}
                         <div class="field has-background-danger has-text-white px-6 py-5">
@@ -24,6 +24,8 @@
                         <label class="label">Name</label>
                         <div class="control">
                             <input
+                                    data-target="account.name"
+                                    data-action="blur->account#validateName"
                                     maxlength="30"
                                     class="input"
                                     name="name"
