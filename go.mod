@@ -2,7 +2,7 @@ module gomodest
 
 go 1.15
 
-replace github.com/adnaan/users => ../users
+//replace github.com/adnaan/users => ../users
 
 require (
 	github.com/Masterminds/goutils v1.1.0 // indirect
