@@ -115,7 +115,13 @@ func loginPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) 
 		return nil, err
 	}
 
-	http.Redirect(w, r, "/app", http.StatusSeeOther)
+	redirectTo := "/app"
+	from := r.URL.Query().Get("from")
+	if from != "" {
+		redirectTo = from
+	}
+
+	http.Redirect(w, r, redirectTo, http.StatusSeeOther)
 	return goview.M{}, nil
 }
 
