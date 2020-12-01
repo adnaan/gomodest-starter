@@ -5,3 +5,4 @@ web/dist
 *.db
 tmp
 .DS_Store
+bin
