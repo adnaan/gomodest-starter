@@ -3,9 +3,6 @@ package pkg
 import (
 	"context"
 	"log"
-	"net/http"
-	"os"
-	"path/filepath"
 
 	"github.com/foolin/goview"
 
@@ -25,28 +22,35 @@ type AppContext struct {
 	users      *users.API
 	viewEngine *goview.ViewEngine
 	pageData   goview.M
+	cfg        Config
 }
 
-// NewRouter ...
-func NewRouter() http.Handler {
-	ctx := context.Background()
+func router(ctx context.Context, cfg Config) chi.Router {
 	//driver := "postgres"
 	//dataSource := "host=0.0.0.0 port=5432 user=gomodest dbname=gomodest sslmode=disable"
-	driver := "sqlite3"
-	dataSource := "file:users.db?mode=memory&cache=shared&_fk=1"
-	usersAPI, err := users.NewDefaultAPI(ctx, driver, dataSource, "mycookiesecret")
+	defaultUsersConfig := users.Config{
+		Driver:          cfg.Driver,
+		Datasource:      cfg.DataSource,
+		SessionSecret:   cfg.SessionSecret,
+		SMTPUser:        cfg.SMTPUser,
+		SMTPPass:        cfg.SMTPPass,
+		SMTPHost:        cfg.SMTPHost,
+		SMTPPort:        cfg.Port,
+		SMTPUnencrypted: false,
+	}
+	usersAPI, err := users.NewDefaultAPI(ctx, defaultUsersConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// logger
-	logger := httplog.NewLogger("gomodest",
+	logger := httplog.NewLogger(cfg.Name,
 		httplog.Options{
-			JSON:     true,
-			LogLevel: "ERROR",
+			JSON:     cfg.LogFormatJSON,
+			LogLevel: cfg.LogLevel,
 		})
 
-	indexLayout, err := viewEngine("index")
+	indexLayout, err := viewEngine(cfg, "index")
 	if err != nil {
 		panic(err)
 	}
@@ -54,6 +58,7 @@ func NewRouter() http.Handler {
 	appCtx := AppContext{
 		users:      usersAPI,
 		viewEngine: indexLayout,
+		cfg:        cfg,
 	}
 
 	rr := newRenderer(appCtx)
@@ -61,7 +66,7 @@ func NewRouter() http.Handler {
 	// middlewares
 	r := chi.NewRouter()
 	r.Use(middleware.Compress(5))
-	r.Use(middleware.Heartbeat("/health"))
+	r.Use(middleware.Heartbeat(cfg.HealthPath))
 	r.Use(middleware.Recoverer)
 	r.Use(setDefaultPageData(appCtx))
 	r.Use(httplog.RequestLogger(logger))
@@ -106,10 +111,6 @@ func NewRouter() http.Handler {
 		r.Post("/todos", addTodo)
 		r.Delete("/todos", deleteTodo)
 	})
-
-	workDir, _ := os.Getwd()
-	filesDir := http.Dir(filepath.Join(workDir, "web", "dist"))
-	fileServer(r, "/static", filesDir)
 
 	return r
 }

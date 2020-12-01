@@ -10,14 +10,13 @@ import (
 type Config struct {
 	Name             string `json:"name" default:"gomodest"`
 	Host             string `json:"host" default:"0.0.0.0"`
-	Scheme           string `json:"scheme" default:"http"`
 	Port             int    `json:"port" default:"4000"`
 	HealthPath       string `json:"health_path" envconfig:"health_path" default:"/healthz"`
 	ReadTimeoutSecs  int    `json:"read_timeout_secs" envconfig:"read_timeout_secs" default:"5"`
 	WriteTimeoutSecs int    `json:"write_timeout_secs" envconfig:"write_timeout_secs" default:"10"`
-	LogLevel         string `json:"log_level" envconfig:"log_level" default:"info"`
+	LogLevel         string `json:"log_level" envconfig:"log_level" default:"error"`
 	LogFormatJSON    bool   `json:"log_format_json" envconfig:"log_format_json" default:"false"`
-	WebRoot          string `json:"web_root" envconfig:"web_root" default:"./web"`
+	WebRoot          string `json:"web_root" envconfig:"web_root" default:"web"`
 	SessionSecret    string `json:"session_secret" envconfig:"session_secret" default:"mysessionsecret"`
 
 	// datasource
@@ -33,13 +32,14 @@ type Config struct {
 	SMTPUnencrypted bool   `json:"smtp_unencrypted" envconfig:"smtp_unencrypted" default:"false"`
 }
 
-func loadConfig(configFile string, envPrefix string) (*Config, error) {
+func loadConfig(configFile string, envPrefix string) (Config, error) {
+	var config Config
 	if err := loadEnvironment(configFile); err != nil {
-		return nil, err
+		return config, err
 	}
-	config := new(Config)
-	if err := envconfig.Process(envPrefix, config); err != nil {
-		return nil, err
+
+	if err := envconfig.Process(envPrefix, &config); err != nil {
+		return config, err
 	}
 
 	return config, nil

@@ -23,9 +23,9 @@ func first(str string) string {
 	return string(tmp)
 }
 
-func viewEngine(baseTemplate string) (*goview.ViewEngine, error) {
+func viewEngine(cfg Config, baseTemplate string) (*goview.ViewEngine, error) {
 
-	fileInfo, err := ioutil.ReadDir("web/html/partials")
+	fileInfo, err := ioutil.ReadDir(fmt.Sprintf("%s/html/partials", cfg.WebRoot))
 	if err != nil {
 		return nil, err
 	}
@@ -38,11 +38,11 @@ func viewEngine(baseTemplate string) (*goview.ViewEngine, error) {
 	}
 
 	return goview.New(goview.Config{
-		Root:         "web/html",
+		Root:         fmt.Sprintf("%s/html", cfg.WebRoot),
 		Extension:    ".html",
 		Master:       fmt.Sprintf("layouts/%s", baseTemplate),
 		Partials:     partials,
-		DisableCache: true,
+		DisableCache: false,
 		Funcs:        sprig.FuncMap(), // http://masterminds.github.io/sprig/
 	}), nil
 }

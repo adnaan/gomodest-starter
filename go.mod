@@ -2,7 +2,7 @@ module gomodest
 
 go 1.15
 
-//replace github.com/adnaan/users => ../users
+replace github.com/adnaan/users => ../users
 
 require (
 	github.com/Masterminds/goutils v1.1.0 // indirect
@@ -15,14 +15,15 @@ require (
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-chi/httplog v0.1.6
 	github.com/go-chi/render v1.0.1
+	github.com/go-chi/valve v0.0.0-20170920024740-9e45288364f4
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/google/go-cmp v0.5.1 // indirect
 	github.com/google/uuid v1.1.2
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/joho/godotenv v1.3.0
+	github.com/jordan-wright/email v4.0.1-0.20200917010138-e1c00e156980+incompatible
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/mattn/go-sqlite3 v1.14.5
 	github.com/mholt/binding v0.3.0
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	go.etcd.io/bbolt v1.3.5 // indirect
