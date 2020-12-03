@@ -1,4 +1,4 @@
-**GOMODEST** is a toy Multi Page App(MPA) using Go's `html/template`, `SvelteJS` and `StimulusJS`. It is inspired from modest approaches to building webapps as enlisted in https://modestjs.works/. It can be used as a template to spin off simple Go webapps.
+**GOMODEST** is a Multi Page App(MPA) **starter kit** using Go's `html/template`, `SvelteJS` and `StimulusJS`. It is inspired from modest approaches to building webapps as enlisted in https://modestjs.works/. It can be used as a template to spin off simple Go webapps.
 
 ## Motivation
 
@@ -15,9 +15,10 @@ interactivity in server rendered html & mounting Svelte components into divs.
 A few things which were used:
 
 1. Go, html/template, goview
-2. SvelteJS
-3. StimulusJS
-4. Bulma CSS
+2. Authentication: [github.com/adnaan/users](https://github.com/adnaan/users)
+3. SvelteJS
+4. StimulusJS
+5. Bulma CSS
 
 Many more things in `go.mod` & `web/package.json`
 
@@ -29,7 +30,7 @@ $ cd web && yarn install && yarn watch
 $ go run main.go
 ```
 
-The ideas in this demo app follow the JS gradient as noted [here](https://modestjs.works/book/part-2/the-js-gradient/). I have taken the liberty to organise them into the following big blocks: **server-rendered html**, **sprinkles** and **spots**.
+The ideas in this starter kit follow the JS gradient as noted [here](https://modestjs.works/book/part-2/the-js-gradient/). I have taken the liberty to organise them into the following big blocks: **server-rendered html**, **sprinkles** and **spots**.
 
 ## Server Rendered HTML
 
@@ -89,7 +90,7 @@ example:
 
 Use `sveltejs` to take over `spots` of a server-rendered html page to provide more complex interactivity without page reloads.
 
-This snippet is the most interesting part of this demo: 
+This snippet is the most interesting part of this project: 
 
 ```html
 {{define "content"}}
