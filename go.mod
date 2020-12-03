@@ -2,7 +2,7 @@ module gomodest
 
 go 1.15
 
-//replace github.com/adnaan/users => ../users
+replace github.com/adnaan/users => ../users
 
 require (
 	github.com/Masterminds/goutils v1.1.0 // indirect
@@ -24,6 +24,7 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/jordan-wright/email v4.0.1-0.20200917010138-e1c00e156980+incompatible
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/matcornic/hermes/v2 v2.1.0
 	github.com/mholt/binding v0.3.0
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	go.etcd.io/bbolt v1.3.5 // indirect

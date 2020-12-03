@@ -29,14 +29,10 @@ func router(ctx context.Context, cfg Config) chi.Router {
 	//driver := "postgres"
 	//dataSource := "host=0.0.0.0 port=5432 user=gomodest dbname=gomodest sslmode=disable"
 	defaultUsersConfig := users.Config{
-		Driver:          cfg.Driver,
-		Datasource:      cfg.DataSource,
-		SessionSecret:   cfg.SessionSecret,
-		SMTPUser:        cfg.SMTPUser,
-		SMTPPass:        cfg.SMTPPass,
-		SMTPHost:        cfg.SMTPHost,
-		SMTPPort:        cfg.Port,
-		SMTPUnencrypted: false,
+		Driver:        cfg.Driver,
+		Datasource:    cfg.DataSource,
+		SessionSecret: cfg.SessionSecret,
+		SendMail:      sendEmailFunc(cfg),
 	}
 	usersAPI, err := users.NewDefaultAPI(ctx, defaultUsersConfig)
 	if err != nil {

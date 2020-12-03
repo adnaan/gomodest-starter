@@ -9,6 +9,7 @@ import (
 
 type Config struct {
 	Name             string `json:"name" default:"gomodest"`
+	Scheme           string `json:"scheme" default:"http"`
 	Host             string `json:"host" default:"0.0.0.0"`
 	Port             int    `json:"port" default:"4000"`
 	HealthPath       string `json:"health_path" envconfig:"health_path" default:"/healthz"`
@@ -24,12 +25,12 @@ type Config struct {
 	DataSource string `json:"datasource" envconfig:"datasource" default:"file:users.db?mode=memory&cache=shared&_fk=1"`
 
 	// smtp
-	SMTPHost        string `json:"smtp_host" envconfig:"smtp_host" default:"0.0.0.0"`
-	SMTPPort        int    `json:"smtp_port,omitempty" envconfig:"smtp_port" default:"1025"`
-	SMTPUser        string `json:"smtp_user" envconfig:"smtp_user" default:"myuser" `
-	SMTPPass        string `json:"smtp_pass,omitempty" envconfig:"smtp_pass" default:"mypass"`
-	SMTPAdminEmail  string `json:"smtp_admin_email" envconfig:"smtp_admin_email" default:"noreply@opsjar"`
-	SMTPUnencrypted bool   `json:"smtp_unencrypted" envconfig:"smtp_unencrypted" default:"false"`
+	SMTPHost       string `json:"smtp_host" envconfig:"smtp_host" default:"0.0.0.0"`
+	SMTPPort       int    `json:"smtp_port,omitempty" envconfig:"smtp_port" default:"1025"`
+	SMTPUser       string `json:"smtp_user" envconfig:"smtp_user" default:"myuser" `
+	SMTPPass       string `json:"smtp_pass,omitempty" envconfig:"smtp_pass" default:"mypass"`
+	SMTPAdminEmail string `json:"smtp_admin_email" envconfig:"smtp_admin_email" default:"noreply@gomodest.xyz"`
+	SMTPDebug      bool   `json:"smtp_debug" envconfig:"smtp_debug" default:"false"`
 }
 
 func loadConfig(configFile string, envPrefix string) (Config, error) {
