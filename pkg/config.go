@@ -30,7 +30,7 @@ type Config struct {
 	SMTPUser       string `json:"smtp_user" envconfig:"smtp_user" default:"myuser" `
 	SMTPPass       string `json:"smtp_pass,omitempty" envconfig:"smtp_pass" default:"mypass"`
 	SMTPAdminEmail string `json:"smtp_admin_email" envconfig:"smtp_admin_email" default:"noreply@gomodest.xyz"`
-	SMTPDebug      bool   `json:"smtp_debug" envconfig:"smtp_debug" default:"false"`
+	SMTPDebug      bool   `json:"smtp_debug" envconfig:"smtp_debug" default:"true"`
 }
 
 func loadConfig(configFile string, envPrefix string) (Config, error) {

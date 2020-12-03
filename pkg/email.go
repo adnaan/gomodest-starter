@@ -34,17 +34,21 @@ func sendEmailFunc(cfg Config) users.SendMailFunc {
 
 		var emailTmpl hermes.Email
 		var subject string
+		host := cfg.Host
+		if host == "0.0.0.0" || host == "localhost" {
+			host = fmt.Sprintf("%s:%d", host, cfg.Port)
+		}
 
 		switch mailType {
 		case users.Confirmation:
 			subject = "Welcome to Gomodest!"
-			emailTmpl = confirmation(name, fmt.Sprintf("%s://%s/confirm/%s", cfg.Scheme, cfg.Host, token))
+			emailTmpl = confirmation(name, fmt.Sprintf("%s://%s/confirm/%s", cfg.Scheme, host, token))
 		case users.Recovery:
 			subject = "Reset password on Gomodest.xyz"
-			emailTmpl = recovery(name, fmt.Sprintf("%s://%s/reset/%s", cfg.Scheme, cfg.Host, token))
+			emailTmpl = recovery(name, fmt.Sprintf("%s://%s/reset/%s", cfg.Scheme, host, token))
 		case users.ChangeEmail:
 			subject = "Change email on Gomodest.xyz"
-			emailTmpl = changeEmail(name, fmt.Sprintf("%s://%s/change/%s", cfg.Scheme, cfg.Host, token))
+			emailTmpl = changeEmail(name, fmt.Sprintf("%s://%s/change/%s", cfg.Scheme, host, token))
 		}
 
 		res, err := h.GenerateHTML(emailTmpl)
@@ -60,9 +64,7 @@ func sendEmailFunc(cfg Config) users.SendMailFunc {
 			From:    cfg.SMTPAdminEmail,
 		}
 
-		pool.Send(e, 20*time.Second)
-
-		return nil
+		return pool.Send(e, 20*time.Second)
 	}
 }
 

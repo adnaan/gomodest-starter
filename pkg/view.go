@@ -90,7 +90,7 @@ func newRenderer(appCtx AppContext) func(page string, pageHandlerFuncs ...PageHa
 
 			err := appCtx.viewEngine.Render(w, http.StatusOK, page, pageData)
 			if err != nil {
-				fmt.Println(err)
+				fmt.Println("viewEngine.Render error: ", err)
 				fmt.Fprintf(w, "umm...awkward.")
 				return
 			}
