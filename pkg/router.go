@@ -1,77 +1,112 @@
 package pkg
 
 import (
-	"encoding/gob"
-	"net/http"
-	"os"
-	"path/filepath"
+	"context"
+	"log"
+
+	"github.com/foolin/goview"
+
+	"github.com/adnaan/users"
 
 	"github.com/go-chi/httplog"
 
-	"github.com/gorilla/sessions"
-
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-)
-
-var (
-	store *sessions.FilesystemStore
 )
 
 const (
 	appCtxDataKey = "app_ctx_data"
 )
 
-// NewRouter ...
-func NewRouter() http.Handler {
+type AppContext struct {
+	users      *users.API
+	viewEngine *goview.ViewEngine
+	pageData   goview.M
+	cfg        Config
+}
 
-	store = sessions.NewFilesystemStore("", []byte("something-very-secret"))
-	gob.Register(map[string]interface{}{})
+func router(ctx context.Context, cfg Config) chi.Router {
+	//driver := "postgres"
+	//dataSource := "host=0.0.0.0 port=5432 user=gomodest dbname=gomodest sslmode=disable"
+	defaultUsersConfig := users.Config{
+		Driver:        cfg.Driver,
+		Datasource:    cfg.DataSource,
+		SessionSecret: cfg.SessionSecret,
+		SendMail:      sendEmailFunc(cfg),
+	}
+	usersAPI, err := users.NewDefaultAPI(ctx, defaultUsersConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// logger
-	logger := httplog.NewLogger("gomodest",
+	logger := httplog.NewLogger(cfg.Name,
 		httplog.Options{
-			JSON:     true,
-			LogLevel: "INFO",
+			JSON:     cfg.LogFormatJSON,
+			LogLevel: cfg.LogLevel,
 		})
 
-	r := chi.NewRouter()
-	r.Use(middleware.Compress(5))
-	r.Use(middleware.Heartbeat("/health"))
-	r.Use(middleware.Recoverer)
-	r.Use(setDefaultPageData)
-	r.Use(httplog.RequestLogger(logger))
-
-	indexLayout, err := viewEngine("index")
+	indexLayout, err := viewEngine(cfg, "index")
 	if err != nil {
 		panic(err)
 	}
 
-	r.NotFound(renderPage(indexLayout, "404", nil))
-	r.Get("/", renderPage(indexLayout, "home", nil))
-	r.Get("/account", renderPage(indexLayout, "account", accountPage))
-	r.Post("/account", renderPage(indexLayout, "account", accountPageSubmit))
-	r.Post("/login", renderPage(indexLayout, "login", loginPageSubmit))
-	r.Get("/login", renderPage(indexLayout, "login", nil))
-	r.Get("/logout", logoutHandler)
+	appCtx := AppContext{
+		users:      usersAPI,
+		viewEngine: indexLayout,
+		cfg:        cfg,
+	}
+
+	rr := newRenderer(appCtx)
+
+	// middlewares
+	r := chi.NewRouter()
+	r.Use(middleware.Compress(5))
+	r.Use(middleware.Heartbeat(cfg.HealthPath))
+	r.Use(middleware.Recoverer)
+	r.Use(setDefaultPageData(appCtx))
+	r.Use(httplog.RequestLogger(logger))
+
+	// routes
+	// public
+	r.NotFound(rr("404"))
+	r.Get("/", rr("home"))
+
+	r.Get("/signup", rr("signup"))
+	r.Post("/signup", rr("signup", signupPageSubmit))
+
+	r.Get("/confirm/{token}", rr("confirmed", confirmEmailPage))
+
+	r.Get("/login", rr("login", loginPage))
+	r.Post("/login", rr("login", loginPageSubmit))
+
+	r.Get("/forgot", rr("forgot"))
+	r.Post("/forgot", rr("forgot", forgotPageSubmit))
+	r.Get("/reset/{token}", rr("reset"))
+	r.Post("/reset/{token}", rr("reset", resetPageSubmit))
+	r.Get("/change/{token}", rr("changed", confirmEmailChangePage))
+
+	r.Get("/logout", usersAPI.Logout)
+
+	// authenticated
+	r.Route("/account", func(r chi.Router) {
+		r.Use(usersAPI.IsAuthenticated)
+		r.Get("/", rr("account", accountPage))
+		r.Post("/", rr("account", accountPageSubmit))
+	})
 
 	r.Route("/app", func(r chi.Router) {
-		r.Use(isAuthenticated)
-		r.Get("/", renderPage(indexLayout, "app", appPage))
+		r.Use(usersAPI.IsAuthenticated)
+		r.Get("/", rr("app", appPage))
 	})
 
-	r.Route("/todos", func(r chi.Router) {
-		r.Use(isAuthenticatedAPI)
+	r.Route("/api", func(r chi.Router) {
+		r.Use(usersAPI.IsAuthenticated)
 		r.Use(middleware.AllowContentType("application/json"))
-		r.Get("/", listTodos)
-		r.Post("/", addTodo)
-		r.Delete("/", deleteTodo)
+		r.Get("/todos", listTodos)
+		r.Post("/todos", addTodo)
+		r.Delete("/todos", deleteTodo)
 	})
-
-	workDir, _ := os.Getwd()
-	filesDir := http.Dir(filepath.Join(workDir, "web", "dist"))
-	fileServer(r, "/static", filesDir)
 
 	return r
-
 }

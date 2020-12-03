@@ -3,3 +3,6 @@ web/node_modules
 web/dist
 .idea
 *.db
+tmp
+.DS_Store
+bin
