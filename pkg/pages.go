@@ -84,6 +84,7 @@ func signupPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request)
 type LoginForm struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	Magic    string `json:"magic"`
 }
 
 func (l *LoginForm) Bind(_ *http.Request) error {
@@ -99,7 +100,11 @@ func (l *LoginForm) FieldMap(_ *http.Request) binding.FieldMap {
 		},
 		&l.Password: binding.Field{
 			Form:     "password",
-			Required: true,
+			Required: false,
+		},
+		&l.Magic: binding.Field{
+			Form:     "magic",
+			Required: false,
 		},
 	}
 }
@@ -107,21 +112,44 @@ func (l *LoginForm) FieldMap(_ *http.Request) binding.FieldMap {
 func loginPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	loginForm := new(LoginForm)
 	if errs := binding.Bind(r, loginForm); errs != nil {
-		return nil, fmt.Errorf("%v, %w", errs, fmt.Errorf("missing email or password"))
+		return nil, fmt.Errorf("%v, %w", errs, fmt.Errorf("missing email"))
 	}
 
-	err := appCtx.users.Login(w, r, loginForm.Email, loginForm.Password)
+	if loginForm.Magic == "magic" {
+		err := appCtx.users.OTP(loginForm.Email)
+		if err != nil {
+			return nil, err
+		}
+		http.Redirect(w, r, "/magic-link-sent", http.StatusSeeOther)
+	} else {
+		err := appCtx.users.Login(w, r, loginForm.Email, loginForm.Password)
+		if err != nil {
+			return nil, err
+		}
+
+		redirectTo := "/app"
+		from := r.URL.Query().Get("from")
+		if from != "" {
+			redirectTo = from
+		}
+
+		http.Redirect(w, r, redirectTo, http.StatusSeeOther)
+	}
+
+	return goview.M{}, nil
+}
+
+func magicLinkLoginConfirm(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+	otp := chi.URLParam(r, "otp")
+	err := appCtx.users.LoginWithOTP(w, r, otp)
 	if err != nil {
 		return nil, err
 	}
 
 	redirectTo := "/app"
-	from := r.URL.Query().Get("from")
-	if from != "" {
-		redirectTo = from
-	}
 
 	http.Redirect(w, r, redirectTo, http.StatusSeeOther)
+
 	return goview.M{}, nil
 }
 

@@ -80,6 +80,9 @@ func router(ctx context.Context, cfg Config) chi.Router {
 	r.Get("/login", rr("login", loginPage))
 	r.Post("/login", rr("login", loginPageSubmit))
 
+	r.Get("/magic-link-sent", rr("magic"))
+	r.Get("/magic-login/{otp}", rr("login", magicLinkLoginConfirm))
+
 	r.Get("/forgot", rr("forgot"))
 	r.Post("/forgot", rr("forgot", forgotPageSubmit))
 	r.Get("/reset/{token}", rr("reset"))

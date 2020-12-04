@@ -49,6 +49,9 @@ func sendEmailFunc(cfg Config) users.SendMailFunc {
 		case users.ChangeEmail:
 			subject = "Change email on Gomodest.xyz"
 			emailTmpl = changeEmail(name, fmt.Sprintf("%s://%s/change/%s", cfg.Scheme, host, token))
+		case users.OTP:
+			subject = "Magic link to log into Gomodest.xyz"
+			emailTmpl = magic(name, fmt.Sprintf("%s://%s/magic-login/%s", cfg.Scheme, host, token))
 		}
 
 		res, err := h.GenerateHTML(emailTmpl)
@@ -135,6 +138,30 @@ func recovery(name, link string) hermes.Email {
 			},
 			Outros: []string{
 				"If you did not request a password reset, no further action is required on your part.",
+			},
+			Signature: "Thanks",
+		},
+	}
+}
+
+func magic(name, link string) hermes.Email {
+	return hermes.Email{
+		Body: hermes.Body{
+			Name: name,
+			Intros: []string{
+				"You have received this email because a request for a magic login link for your Gomodest account was received.",
+			},
+			Actions: []hermes.Action{
+				{
+					Instructions: "Click the button below to login:",
+					Button: hermes.Button{
+						Text: "Login with magic link",
+						Link: link,
+					},
+				},
+			},
+			Outros: []string{
+				"If you did not request a magic login link, no further action is required on your part.",
 			},
 			Signature: "Thanks",
 		},

@@ -17,13 +17,67 @@
                 <box class="box has-background-warning"> An email has been sent to your inbox for confirmation. Please confirm to login. </box>
             {{end}}
 
+            <div class="columns is-mobile is-centered pb-5">
+                <p class="title is-3">Sign in to Gomodest</p>
+            </div>
+
+
+
+            <div id="magic-login" class="is-hidden">
+                <div class="columns is-mobile is-centered py-5">
+                    <button id="btn-magic-login" class="button is-primary"
+                            type="button"
+                            data-toggle-ids="magic-login,password-login"
+                            data-toggle-class="is-hidden"
+                            data-target="navigate.toggler"
+                            data-action="click->navigate#toggle"> Use Password instead </button>
+                </div>
+                <form
+                        data-action="submit->account#submitMagicLoginForm"
+                        method="POST">
+                    <div class="field">
+                        <label class="label">Email</label>
+                        <input data-target="account.email"
+                               name="email"
+                               pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
+                               class="input"
+                               type="email"
+                               placeholder="your@email.com"
+                               aria-label="Email">
+
+                    </div>
+
+                    <input data-target="account.magic"
+                           name="magic"
+                           class="input"
+                           value="magic"
+                           type="hidden">
+
+                    <div class="field is-grouped">
+                        <div class="control is-expanded">
+                            <button class="button is-primary is-fullwidth"
+                                    type="submit">
+                                Sign in with Magic Link
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div id="password-login">
+                <div class="columns is-mobile is-centered py-5">
+                    <button  id="btn-password-login" type="button" class="button is-primary"
+                             data-toggle-ids="magic-login,password-login"
+                             data-toggle-class="is-hidden"
+                             data-target="navigate.toggler"
+                             data-action="click->navigate#toggle"> Use Magic Link instead </button>
+                </div>
             <form
                   data-action="submit->account#submitLoginForm"
                   method="POST">
                 <div class="field">
                     <label class="label">Email</label>
                     <input data-target="account.email"
-                           data-action="blur->account#validateEmail"
                            name="email"
                            pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
                            class="input"
@@ -41,8 +95,9 @@
                            class="input"
                            type="password"
                            aria-label="Password">
-
                 </div>
+
+
                 <div class="field is-grouped">
                     <div class="control is-expanded">
                         <button class="button is-primary is-fullwidth"
@@ -66,6 +121,7 @@
                     Forgot Password ?
                 </a>
             </form>
+            </div>
         </div>
     </div>
     </div>

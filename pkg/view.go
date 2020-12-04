@@ -42,7 +42,7 @@ func viewEngine(cfg Config, baseTemplate string) (*goview.ViewEngine, error) {
 		Extension:    ".html",
 		Master:       fmt.Sprintf("layouts/%s", baseTemplate),
 		Partials:     partials,
-		DisableCache: false,
+		DisableCache: true,
 		Funcs:        sprig.FuncMap(), // http://masterminds.github.io/sprig/
 	}), nil
 }

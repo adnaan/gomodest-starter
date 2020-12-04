@@ -2,7 +2,7 @@ module gomodest
 
 go 1.15
 
-//replace github.com/adnaan/users => ../users
+// replace github.com/adnaan/users => ../users
 
 require (
 	github.com/Masterminds/goutils v1.1.0 // indirect
@@ -33,7 +33,7 @@ require (
 	golang.org/x/crypto v0.0.0-20201203163018-be400aefbc4c // indirect
 	golang.org/x/mod v0.4.0 // indirect
 	golang.org/x/sys v0.0.0-20201126233918-771906719818 // indirect
-	golang.org/x/tools v0.0.0-20201203170353-bdde1628ed1d // indirect
+	golang.org/x/tools v0.0.0-20201203230154-39497347062d // indirect
 	google.golang.org/appengine v1.6.6 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 )
