@@ -8,10 +8,9 @@ require (
 	github.com/Masterminds/goutils v1.1.0 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible
-	github.com/adnaan/users v0.0.0-20201203191602-e2b4ca60d7c6
+	github.com/adnaan/users v0.0.0-20201204013449-d3fc0dbe98e4
 	github.com/asdine/storm/v3 v3.2.1
 	github.com/facebook/ent v0.5.1 // indirect
-	github.com/fatih/structs v1.1.0 // indirect
 	github.com/foolin/goview v0.3.0
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-chi/httplog v0.1.6
