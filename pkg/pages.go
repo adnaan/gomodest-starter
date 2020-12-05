@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi"
 
@@ -17,7 +18,8 @@ func setDefaultPageData(appCtx AppContext) func(next http.Handler) http.Handler 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			pageData := map[string]interface{}{
-				"route": r.URL.Path,
+				"route":    r.URL.Path,
+				"app_name": strings.Title(strings.ToLower(appCtx.cfg.Name)),
 			}
 
 			_, email, metadata, err := appCtx.users.LoggedInUser(r)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/smtp"
 	"net/textproto"
+	"strings"
 	"time"
 
 	"github.com/jordan-wright/email"
@@ -13,10 +14,11 @@ import (
 )
 
 func sendEmailFunc(cfg Config) users.SendMailFunc {
+	appName := strings.Title(strings.ToLower(cfg.Name))
 	h := hermes.Hermes{
 		Product: hermes.Product{
-			Name: "Gomodest",
-			Link: "https://gomodest.xyz",
+			Name: appName,
+			Link: cfg.Domain,
 			//Logo: "https://github.com/matcornic/hermes/blob/master/examples/gopher.png?raw=true",
 		},
 	}
@@ -37,17 +39,17 @@ func sendEmailFunc(cfg Config) users.SendMailFunc {
 
 		switch mailType {
 		case users.Confirmation:
-			subject = "Welcome to Gomodest!"
-			emailTmpl = confirmation(name, fmt.Sprintf("%s/confirm/%s", cfg.Domain, token))
+			subject = fmt.Sprintf("Welcome to %s!", appName)
+			emailTmpl = confirmation(appName, name, fmt.Sprintf("%s/confirm/%s", cfg.Domain, token))
 		case users.Recovery:
-			subject = "Reset password on Gomodest.xyz"
-			emailTmpl = recovery(name, fmt.Sprintf("%s/reset/%s", cfg.Domain, token))
+			subject = fmt.Sprintf("Reset password on %s", appName)
+			emailTmpl = recovery(appName, name, fmt.Sprintf("%s/reset/%s", cfg.Domain, token))
 		case users.ChangeEmail:
-			subject = "Change email on Gomodest.xyz"
-			emailTmpl = changeEmail(name, fmt.Sprintf("%s/change/%s", cfg.Domain, token))
+			subject = fmt.Sprintf("Change email on %s", appName)
+			emailTmpl = changeEmail(appName, name, fmt.Sprintf("%s/change/%s", cfg.Domain, token))
 		case users.OTP:
-			subject = "Magic link to log into Gomodest.xyz"
-			emailTmpl = magic(name, fmt.Sprintf("%s/magic-login/%s", cfg.Domain, token))
+			subject = fmt.Sprintf("Magic link to log into %s", appName)
+			emailTmpl = magic(appName, name, fmt.Sprintf("%s/magic-login/%s", cfg.Domain, token))
 		}
 
 		res, err := h.GenerateHTML(emailTmpl)
@@ -67,16 +69,16 @@ func sendEmailFunc(cfg Config) users.SendMailFunc {
 	}
 }
 
-func confirmation(name, link string) hermes.Email {
+func confirmation(appName, name, link string) hermes.Email {
 	return hermes.Email{
 		Body: hermes.Body{
 			Name: name,
 			Intros: []string{
-				"Welcome to Gomodest! We're very excited to have you on board.",
+				fmt.Sprintf("Welcome to %s! We're very excited to have you on board.", appName),
 			},
 			Actions: []hermes.Action{
 				{
-					Instructions: "To get started with Gomodest, please click here:",
+					Instructions: fmt.Sprintf("To get started with %s, please click here:", appName),
 					Button: hermes.Button{
 						Text: "Confirm your account",
 						Link: link,
@@ -90,16 +92,16 @@ func confirmation(name, link string) hermes.Email {
 	}
 }
 
-func changeEmail(name, link string) hermes.Email {
+func changeEmail(appName, name, link string) hermes.Email {
 	return hermes.Email{
 		Body: hermes.Body{
 			Name: name,
 			Intros: []string{
-				"You have received this email because you have requested to change the email linked to your account",
+				fmt.Sprintf("You have received this email because you have requested to change the email linked to your %s account", appName),
 			},
 			Actions: []hermes.Action{
 				{
-					Instructions: "Click the button below to change the email linked to your account",
+					Instructions: fmt.Sprintf("Click the button below to change the email linked to your %s account", appName),
 					Button: hermes.Button{
 						Color: "#DC4D2F",
 						Text:  "Confirm email change",
@@ -115,12 +117,12 @@ func changeEmail(name, link string) hermes.Email {
 	}
 }
 
-func recovery(name, link string) hermes.Email {
+func recovery(appName, name, link string) hermes.Email {
 	return hermes.Email{
 		Body: hermes.Body{
 			Name: name,
 			Intros: []string{
-				"You have received this email because a password reset request for Gomodest account was received.",
+				fmt.Sprintf("You have received this email because a password reset request for %s account was received.", appName),
 			},
 			Actions: []hermes.Action{
 				{
@@ -140,12 +142,12 @@ func recovery(name, link string) hermes.Email {
 	}
 }
 
-func magic(name, link string) hermes.Email {
+func magic(appName, name, link string) hermes.Email {
 	return hermes.Email{
 		Body: hermes.Body{
 			Name: name,
 			Intros: []string{
-				"You have received this email because a request for a magic login link for your Gomodest account was received.",
+				fmt.Sprintf("You have received this email because a request for a magic login link for your %s account was received.", appName),
 			},
 			Actions: []hermes.Action{
 				{
