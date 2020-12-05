@@ -9,6 +9,6 @@ watch-web:
 build-docker:
 	docker build -t gomodest .
 run-docker:
-	docker run -it --rm -p 4000:4000 gomodest:latest
+	docker run -it --rm -p 4000:4000 --env-file env.local gomodest:latest
 mailhog:
 	docker run -d -p 1025:1025 -p 8025:8025 mailhog/mailhog

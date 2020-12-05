@@ -35,7 +35,7 @@ func router(ctx context.Context, cfg Config) chi.Router {
 	//dataSource := "host=0.0.0.0 port=5432 user=gomodest dbname=gomodest sslmode=disable"
 
 	if cfg.Host == "0.0.0.0" || cfg.Host == "localhost" {
-		cfg.Domain = fmt.Sprintf("%s://%s:%d", cfg.Scheme, cfg.Host, cfg.Port)
+		cfg.Domain = fmt.Sprintf("%s://%s:%d", cfg.Scheme, "locahlhost", cfg.Port)
 	}
 
 	defaultUsersConfig := users.Config{
