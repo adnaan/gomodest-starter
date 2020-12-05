@@ -2,7 +2,12 @@ package pkg
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"net/http"
+
+	"github.com/markbates/goth"
+	"github.com/markbates/goth/providers/google"
 
 	"github.com/foolin/goview"
 
@@ -28,11 +33,19 @@ type AppContext struct {
 func router(ctx context.Context, cfg Config) chi.Router {
 	//driver := "postgres"
 	//dataSource := "host=0.0.0.0 port=5432 user=gomodest dbname=gomodest sslmode=disable"
+
+	if cfg.Host == "0.0.0.0" || cfg.Host == "localhost" {
+		cfg.Domain = fmt.Sprintf("%s://%s:%d", cfg.Scheme, cfg.Host, cfg.Port)
+	}
+
 	defaultUsersConfig := users.Config{
 		Driver:        cfg.Driver,
 		Datasource:    cfg.DataSource,
 		SessionSecret: cfg.SessionSecret,
 		SendMail:      sendEmailFunc(cfg),
+		GothProviders: []goth.Provider{
+			google.New(cfg.GoogleClientID, cfg.GoogleSecret, fmt.Sprintf("%s/auth/callback?provider=google", cfg.Domain), "email", "profile"),
+		},
 	}
 	usersAPI, err := users.NewDefaultAPI(ctx, defaultUsersConfig)
 	if err != nil {
@@ -79,6 +92,17 @@ func router(ctx context.Context, cfg Config) chi.Router {
 
 	r.Get("/login", rr("login", loginPage))
 	r.Post("/login", rr("login", loginPageSubmit))
+	r.Get("/auth/callback", rr("login", gothAuthCallbackPage))
+	r.Get("/auth", rr("login", gothAuthPage))
+
+	r.Get("/logout", func(w http.ResponseWriter, r *http.Request) {
+		provider := r.URL.Query().Get("provider")
+		if provider != "" {
+			usersAPI.HandleGothLogout(w, r)
+			return
+		}
+		usersAPI.Logout(w, r)
+	})
 
 	r.Get("/magic-link-sent", rr("magic"))
 	r.Get("/magic-login/{otp}", rr("login", magicLinkLoginConfirm))
@@ -88,8 +112,6 @@ func router(ctx context.Context, cfg Config) chi.Router {
 	r.Get("/reset/{token}", rr("reset"))
 	r.Post("/reset/{token}", rr("reset", resetPageSubmit))
 	r.Get("/change/{token}", rr("changed", confirmEmailChangePage))
-
-	r.Get("/logout", usersAPI.Logout)
 
 	// authenticated
 	r.Route("/account", func(r chi.Router) {

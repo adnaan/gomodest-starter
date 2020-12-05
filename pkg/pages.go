@@ -185,6 +185,36 @@ func loginPage(_ AppContext, _ http.ResponseWriter, r *http.Request) (goview.M, 
 	return goview.M{}, nil
 }
 
+func gothAuthCallbackPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+	err := appCtx.users.HandleGothCallback(w, r)
+	if err != nil {
+		return goview.M{}, err
+	}
+	redirectTo := "/app"
+	from := r.URL.Query().Get("from")
+	if from != "" {
+		redirectTo = from
+	}
+
+	http.Redirect(w, r, redirectTo, http.StatusSeeOther)
+	return goview.M{}, nil
+}
+
+func gothAuthPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+	err := appCtx.users.HandleGothLogin(w, r)
+	if err != nil {
+		return goview.M{}, err
+	}
+	redirectTo := "/app"
+	from := r.URL.Query().Get("from")
+	if from != "" {
+		redirectTo = from
+	}
+
+	http.Redirect(w, r, redirectTo, http.StatusSeeOther)
+	return goview.M{}, nil
+}
+
 func accountPage(_ AppContext, _ http.ResponseWriter, r *http.Request) (goview.M, error) {
 	emailChanged := r.URL.Query().Get("email_changed")
 	if emailChanged == "true" {

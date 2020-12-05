@@ -10,7 +10,8 @@ import (
 type Config struct {
 	Name             string `json:"name" default:"gomodest"`
 	Scheme           string `json:"scheme" default:"http"`
-	Host             string `json:"host" default:"0.0.0.0"`
+	Host             string `json:"host" default:"localhost"`
+	Domain           string `json:"domain" default:"https://gomodest.xyz"`
 	Port             int    `json:"port" default:"4000"`
 	HealthPath       string `json:"health_path" envconfig:"health_path" default:"/healthz"`
 	ReadTimeoutSecs  int    `json:"read_timeout_secs" envconfig:"read_timeout_secs" default:"5"`
@@ -31,6 +32,10 @@ type Config struct {
 	SMTPPass       string `json:"smtp_pass,omitempty" envconfig:"smtp_pass" default:"mypass"`
 	SMTPAdminEmail string `json:"smtp_admin_email" envconfig:"smtp_admin_email" default:"noreply@gomodest.xyz"`
 	SMTPDebug      bool   `json:"smtp_debug" envconfig:"smtp_debug" default:"true"`
+
+	// goth
+	GoogleClientID string `json:"google_client_id" envconfig:"google_client_id"`
+	GoogleSecret   string `json:"google_secret" envconfig:"google_secret"`
 }
 
 func loadConfig(configFile string, envPrefix string) (Config, error) {

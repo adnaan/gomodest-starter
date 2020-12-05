@@ -22,10 +22,9 @@
             </div>
 
 
-
             <div id="magic-login" class="is-hidden">
                 <div class="columns is-mobile is-centered py-5">
-                    <button id="btn-magic-login" class="button is-primary"
+                    <button id="btn-magic-login" class="button is-primary is-rounded"
                             type="button"
                             data-toggle-ids="magic-login,password-login"
                             data-toggle-class="is-hidden"
@@ -37,7 +36,7 @@
                         method="POST">
                     <div class="field">
                         <label class="label">Email</label>
-                        <input data-target="account.email"
+                        <input data-target="account.magicEmail"
                                name="email"
                                pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
                                class="input"
@@ -66,7 +65,7 @@
 
             <div id="password-login">
                 <div class="columns is-mobile is-centered py-5">
-                    <button  id="btn-password-login" type="button" class="button is-primary"
+                    <button  id="btn-password-login" type="button" class="button is-primary is-rounded"
                              data-toggle-ids="magic-login,password-login"
                              data-toggle-class="is-hidden"
                              data-target="navigate.toggler"
@@ -121,6 +120,18 @@
                     Forgot Password ?
                 </a>
             </form>
+            </div>
+            <hr>
+            <div class="control is-expanded">
+                <button class="button is-primary is-outlined is-fullwidth"
+                        data-action="click->navigate#goto"
+                        data-goto="/auth?provider=google"
+                        type="button">
+                        <span class="icon">
+                          <i class="fab fa-google"></i>
+                        </span>
+                    <span>Sign in with Google</span>
+                </button>
             </div>
         </div>
     </div>
