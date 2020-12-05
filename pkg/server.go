@@ -23,7 +23,7 @@ func NewServer(ctx context.Context, configFile, envPrefix string) (*http.Server,
 	return &http.Server{
 		ReadTimeout:  time.Duration(cfg.ReadTimeoutSecs) * time.Second,
 		WriteTimeout: time.Duration(cfg.WriteTimeoutSecs) * time.Second,
-		Addr:         fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
+		Addr:         fmt.Sprintf(":%d", cfg.Port),
 		Handler:      r,
 	}, nil
 }

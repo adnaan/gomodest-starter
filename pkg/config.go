@@ -9,8 +9,6 @@ import (
 
 type Config struct {
 	Name             string `json:"name" default:"gomodest"`
-	Scheme           string `json:"scheme" default:"http"`
-	Host             string `json:"host" default:"0.0.0.0"`
 	Domain           string `json:"domain" default:"https://gomodest.xyz"`
 	Port             int    `json:"port" default:"4000"`
 	HealthPath       string `json:"health_path" envconfig:"health_path" default:"/healthz"`

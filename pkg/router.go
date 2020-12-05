@@ -34,10 +34,6 @@ func router(ctx context.Context, cfg Config) chi.Router {
 	//driver := "postgres"
 	//dataSource := "host=0.0.0.0 port=5432 user=gomodest dbname=gomodest sslmode=disable"
 
-	if cfg.Host == "0.0.0.0" || cfg.Host == "localhost" {
-		cfg.Domain = fmt.Sprintf("%s://%s:%d", cfg.Scheme, "locahlhost", cfg.Port)
-	}
-
 	defaultUsersConfig := users.Config{
 		Driver:        cfg.Driver,
 		Datasource:    cfg.DataSource,
