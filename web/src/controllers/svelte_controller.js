@@ -1,5 +1,5 @@
 import { Controller } from "stimulus";
-import components from "./components";
+import components from "../components";
 
 export default class extends Controller {
     static targets = ["component"]
