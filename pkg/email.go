@@ -38,16 +38,16 @@ func sendEmailFunc(cfg Config) users.SendMailFunc {
 		switch mailType {
 		case users.Confirmation:
 			subject = "Welcome to Gomodest!"
-			emailTmpl = confirmation(name, fmt.Sprintf("%s://%s/confirm/%s", cfg.Domain, token))
+			emailTmpl = confirmation(name, fmt.Sprintf("%s/confirm/%s", cfg.Domain, token))
 		case users.Recovery:
 			subject = "Reset password on Gomodest.xyz"
-			emailTmpl = recovery(name, fmt.Sprintf("%s://%s/reset/%s", cfg.Domain, token))
+			emailTmpl = recovery(name, fmt.Sprintf("%s/reset/%s", cfg.Domain, token))
 		case users.ChangeEmail:
 			subject = "Change email on Gomodest.xyz"
-			emailTmpl = changeEmail(name, fmt.Sprintf("%s://%s/change/%s", cfg.Domain, token))
+			emailTmpl = changeEmail(name, fmt.Sprintf("%s/change/%s", cfg.Domain, token))
 		case users.OTP:
 			subject = "Magic link to log into Gomodest.xyz"
-			emailTmpl = magic(name, fmt.Sprintf("%s://%s/magic-login/%s", cfg.Domain, token))
+			emailTmpl = magic(name, fmt.Sprintf("%s/magic-login/%s", cfg.Domain, token))
 		}
 
 		res, err := h.GenerateHTML(emailTmpl)
