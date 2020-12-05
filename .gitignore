@@ -6,3 +6,4 @@ web/dist
 tmp
 .DS_Store
 bin
+*.local

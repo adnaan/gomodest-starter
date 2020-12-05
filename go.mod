@@ -2,13 +2,13 @@ module gomodest
 
 go 1.15
 
-replace github.com/adnaan/users => ../users
+//replace github.com/adnaan/users => ../users
 
 require (
 	github.com/Masterminds/goutils v1.1.0 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible
-	github.com/adnaan/users v0.0.0-20201204013449-d3fc0dbe98e4
+	github.com/adnaan/users v0.0.0-20201205133156-8f143bf18686
 	github.com/asdine/storm/v3 v3.2.1
 	github.com/facebook/ent v0.5.1 // indirect
 	github.com/foolin/goview v0.3.0
@@ -16,7 +16,9 @@ require (
 	github.com/go-chi/httplog v0.1.6
 	github.com/go-chi/render v1.0.1
 	github.com/go-chi/valve v0.0.0-20170920024740-9e45288364f4
+	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/uuid v1.1.2
+	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/joho/godotenv v1.3.0
@@ -30,6 +32,9 @@ require (
 	go.etcd.io/bbolt v1.3.5 // indirect
 	golang.org/x/crypto v0.0.0-20201203163018-be400aefbc4c // indirect
 	golang.org/x/mod v0.4.0 // indirect
+	golang.org/x/net v0.0.0-20201202161906-c7110b5ffcbb // indirect
+	golang.org/x/oauth2 v0.0.0-20201203001011-0b49973bad19 // indirect
 	golang.org/x/sys v0.0.0-20201126233918-771906719818 // indirect
-	golang.org/x/tools v0.0.0-20201203230154-39497347062d // indirect
+	golang.org/x/tools v0.0.0-20201204222352-654352759326 // indirect
+	google.golang.org/appengine v1.6.7 // indirect
 )
