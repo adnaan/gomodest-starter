@@ -1,6 +1,5 @@
 .env
-web/node_modules
-web/dist
+assets/node_modules
 .idea
 *.db
 tmp

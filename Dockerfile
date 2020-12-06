@@ -6,14 +6,14 @@ RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags '-linkmode external -extldflag
 FROM node:14.3.0-stretch as build-node
 WORKDIR /usr/src/app
 COPY . .
-RUN cd web && npm install
-RUN cd web && npm run build
+RUN cd assets && npm install
+RUN cd assets && npm run build
 
 FROM alpine:latest
 RUN apk add ca-certificates curl
 WORKDIR /opt
 COPY --from=build-go /go/src/app/ /bin
 RUN chmod +x /bin/main
-RUN mkdir -p web
 COPY --from=build-node /usr/src/app/public /opt/public
+COPY --from=build-node /usr/src/app/templates /opt/templates
 CMD ["/bin/main"]

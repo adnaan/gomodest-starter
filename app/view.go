@@ -23,7 +23,7 @@ func first(str string) string {
 
 func viewEngine(cfg Config, baseTemplate string) (*goview.ViewEngine, error) {
 
-	fileInfo, err := ioutil.ReadDir(fmt.Sprintf("%s/html/partials", cfg.WebRoot))
+	fileInfo, err := ioutil.ReadDir(fmt.Sprintf("%s/partials", cfg.Templates))
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func viewEngine(cfg Config, baseTemplate string) (*goview.ViewEngine, error) {
 	}
 
 	return goview.New(goview.Config{
-		Root:         fmt.Sprintf("%s/html", cfg.WebRoot),
+		Root:         cfg.Templates,
 		Extension:    ".html",
 		Master:       fmt.Sprintf("layouts/%s", baseTemplate),
 		Partials:     partials,

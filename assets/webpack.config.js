@@ -7,7 +7,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const PATHS = {
-    html: path.join(__dirname, 'html'),
+    html: path.join(__dirname, '../templates'),
     src: path.join(__dirname, 'src')
 }
 
@@ -26,7 +26,7 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, '../public'),
-        filename: 'js/bundle.js'
+        filename: 'assets/js/bundle.js'
     },
     module: {
         rules: [
@@ -79,12 +79,11 @@ module.exports = {
     },
     plugins: [
         new MiniCssExtractPlugin({
-            filename: 'css/styles.css'
+            filename: 'assets/css/styles.css'
         }),
         new CopyPlugin({
             patterns: [
-                { from: 'images', to: 'images' },
-                { from: 'html', to: 'html' },
+                { from: 'images', to: 'assets/images' },
             ],
         }),
         // new BundleAnalyzerPlugin(),

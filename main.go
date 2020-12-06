@@ -79,7 +79,7 @@ func main() {
 
 	r := app.Router(baseCtx, cfg, apiRoutes)
 	workDir, _ := os.Getwd()
-	public := http.Dir(filepath.Join(workDir, "./", "public"))
+	public := http.Dir(filepath.Join(workDir, "./", "public", "assets"))
 	fileServer(r, "/static", public)
 
 	srv := &http.Server{

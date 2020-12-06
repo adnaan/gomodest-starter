@@ -1,11 +1,11 @@
 install:
-	go get -v ./... && cd web && yarn install
+	go get -v ./... && cd assets && yarn install
 watch-go:
 	air -c .air.toml
 run-go:
 	go run main.go -config env.local
-watch-web:
-	cd web && yarn watch
+watch-assets:
+	cd assets && yarn watch
 build-docker:
 	docker build -t gomodest .
 run-docker:
