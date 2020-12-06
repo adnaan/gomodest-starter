@@ -16,7 +16,7 @@ type Config struct {
 	WriteTimeoutSecs int    `json:"write_timeout_secs" envconfig:"write_timeout_secs" default:"10"`
 	LogLevel         string `json:"log_level" envconfig:"log_level" default:"error"`
 	LogFormatJSON    bool   `json:"log_format_json" envconfig:"log_format_json" default:"false"`
-	WebRoot          string `json:"web_root" envconfig:"web_root" default:"web"`
+	WebRoot          string `json:"web_root" envconfig:"web_root" default:"public"`
 	SessionSecret    string `json:"session_secret" envconfig:"session_secret" default:"mysessionsecret"`
 
 	// datasource

@@ -25,7 +25,7 @@ module.exports = {
         mainFields: ['svelte', 'browser', 'module', 'main']
     },
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, '../public'),
         filename: 'js/bundle.js'
     },
     module: {

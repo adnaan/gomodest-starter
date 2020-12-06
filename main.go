@@ -79,8 +79,8 @@ func main() {
 
 	r := app.Router(baseCtx, cfg, apiRoutes)
 	workDir, _ := os.Getwd()
-	dist := http.Dir(filepath.Join(workDir, "web", "dist"))
-	fileServer(r, "/static", dist)
+	public := http.Dir(filepath.Join(workDir, "./", "public"))
+	fileServer(r, "/static", public)
 
 	srv := &http.Server{
 		ReadTimeout:  time.Duration(cfg.ReadTimeoutSecs) * time.Second,

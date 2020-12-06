@@ -15,6 +15,5 @@ WORKDIR /opt
 COPY --from=build-go /go/src/app/ /bin
 RUN chmod +x /bin/main
 RUN mkdir -p web
-COPY --from=build-node /usr/src/app/web/dist /opt/web/dist
-COPY --from=build-node /usr/src/app/web/html /opt/web/html
+COPY --from=build-node /usr/src/app/public /opt/public
 CMD ["/bin/main"]
