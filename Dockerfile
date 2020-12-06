@@ -1,7 +1,7 @@
 FROM golang:1.15.5-buster as build-go
 WORKDIR /go/src/app
 COPY . .
-RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags '-linkmode external -extldflags "-static"' -o app .
+RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags '-linkmode external -extldflags "-static"' -o main .
 
 FROM node:14.3.0-stretch as build-node
 WORKDIR /usr/src/app
@@ -13,8 +13,8 @@ FROM alpine:latest
 RUN apk add ca-certificates curl
 WORKDIR /opt
 COPY --from=build-go /go/src/app/ /bin
-RUN chmod +x /bin/app
+RUN chmod +x /bin/main
 RUN mkdir -p web
 COPY --from=build-node /usr/src/app/web/dist /opt/web/dist
 COPY --from=build-node /usr/src/app/web/html /opt/web/html
-CMD ["/bin/app"]
+CMD ["/bin/main"]
