@@ -84,6 +84,7 @@ module.exports = {
         new CopyPlugin({
             patterns: [
                 { from: 'images', to: 'images' },
+                { from: 'html', to: 'html' },
             ],
         }),
         // new BundleAnalyzerPlugin(),
