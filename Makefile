@@ -1,5 +1,5 @@
 install:
-	go get -v | cd web && yarn install
+	go get -v ./... && cd web && yarn install
 watch-go:
 	air -c .air.toml
 run-go:

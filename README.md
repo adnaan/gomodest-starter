@@ -25,9 +25,9 @@ Many more things in `go.mod` & `web/package.json`
 To run, clone this repo and: 
 
 ```bash
-$ cd web && yarn install && yarn watch
+$ make install
 # another terminal
-$ go run main.go
+$ make run-go
 ```
 
 The ideas in this starter kit follow the JS gradient as noted [here](https://modestjs.works/book/part-2/the-js-gradient/). I have taken the liberty to organise them into the following big blocks: **server-rendered html**, **sprinkles** and **spots**.
