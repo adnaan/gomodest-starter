@@ -4,7 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"gomodest/pkg"
+	"gomodest"
 	"log"
 	"os"
 	"os/signal"
@@ -25,7 +25,7 @@ func main() {
 	}
 	flag.Parse()
 
-	srv, err := pkg.NewServer(baseCtx, *configFile, envPrefix)
+	srv, err := gomodest.NewServer(baseCtx, *configFile, envPrefix)
 	if err != nil {
 		log.Fatal(err)
 	}
