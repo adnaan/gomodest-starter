@@ -4,14 +4,41 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"gomodest"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strings"
 	"time"
+
+	"github.com/adnaan/gomodest/routes"
+
+	"github.com/go-chi/chi"
 
 	"github.com/go-chi/valve"
 )
+
+// fileServer conveniently sets up a http.FileServer handler to serve
+// static files from a http.FileSystem.
+func fileServer(r chi.Router, path string, root http.FileSystem) {
+	if strings.ContainsAny(path, "{}*") {
+		panic("FileServer does not permit any URL parameters.")
+	}
+
+	if path != "/" && path[len(path)-1] != '/' {
+		r.Get(path, http.RedirectHandler(path+"/", 301).ServeHTTP)
+		path += "/"
+	}
+	path += "*"
+
+	r.Get(path, func(w http.ResponseWriter, r *http.Request) {
+		rctx := chi.RouteContext(r.Context())
+		pathPrefix := strings.TrimSuffix(rctx.RoutePattern(), "/*")
+		fs := http.StripPrefix(pathPrefix, http.FileServer(root))
+		fs.ServeHTTP(w, r)
+	})
+}
 
 func main() {
 	// Our graceful valve shut-off package to manage code preemption and
@@ -25,9 +52,21 @@ func main() {
 	}
 	flag.Parse()
 
-	srv, err := gomodest.NewServer(baseCtx, *configFile, envPrefix)
+	cfg, err := routes.LoadConfig(*configFile, envPrefix)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	r := routes.Router(baseCtx, cfg)
+	workDir, _ := os.Getwd()
+	dist := http.Dir(filepath.Join(workDir, "web", "dist"))
+	fileServer(r, "/static", dist)
+
+	srv := &http.Server{
+		ReadTimeout:  time.Duration(cfg.ReadTimeoutSecs) * time.Second,
+		WriteTimeout: time.Duration(cfg.WriteTimeoutSecs) * time.Second,
+		Addr:         fmt.Sprintf(":%d", cfg.Port),
+		Handler:      r,
 	}
 
 	c := make(chan os.Signal, 1)

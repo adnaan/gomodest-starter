@@ -1,4 +1,4 @@
-package gomodest
+package routes
 
 import (
 	"os"
@@ -36,7 +36,7 @@ type Config struct {
 	GoogleSecret   string `json:"google_secret" envconfig:"google_secret"`
 }
 
-func loadConfig(configFile string, envPrefix string) (Config, error) {
+func LoadConfig(configFile string, envPrefix string) (Config, error) {
 	var config Config
 	if err := loadEnvironment(configFile); err != nil {
 		return config, err

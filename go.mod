@@ -1,4 +1,4 @@
-module gomodest
+module github.com/adnaan/gomodest
 
 go 1.15
 

@@ -1,4 +1,4 @@
-package gomodest
+package routes
 
 import (
 	"context"
@@ -30,7 +30,7 @@ type AppContext struct {
 	cfg        Config
 }
 
-func router(ctx context.Context, cfg Config) chi.Router {
+func Router(ctx context.Context, cfg Config) chi.Router {
 	//driver := "postgres"
 	//dataSource := "host=0.0.0.0 port=5432 user=gomodest dbname=gomodest sslmode=disable"
 

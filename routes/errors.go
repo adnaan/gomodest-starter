@@ -1,4 +1,4 @@
-package gomodest
+package routes
 
 import (
 	"net/http"
