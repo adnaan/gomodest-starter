@@ -28,7 +28,7 @@
                             type="button"
                             data-toggle-ids="magic-login,password-login"
                             data-toggle-class="is-hidden"
-                            data-target="navigate.toggler"
+                            data-navigate-target="toggler"
                             data-action="click->navigate#toggle"> Use Password instead </button>
                 </div>
                 <form
@@ -36,7 +36,7 @@
                         method="POST">
                     <div class="field">
                         <label class="label">Email</label>
-                        <input data-target="account.magicEmail"
+                        <input data-account-target="magicEmail"
                                name="email"
                                pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
                                class="input"
@@ -46,7 +46,7 @@
 
                     </div>
 
-                    <input data-target="account.magic"
+                    <input data-account-target="magic"
                            name="magic"
                            class="input"
                            value="magic"
@@ -68,7 +68,7 @@
                     <button  id="btn-password-login" type="button" class="button is-primary is-rounded"
                              data-toggle-ids="magic-login,password-login"
                              data-toggle-class="is-hidden"
-                             data-target="navigate.toggler"
+                             data-navigate-target="toggler"
                              data-action="click->navigate#toggle"> Use Magic Link instead </button>
                 </div>
             <form
@@ -76,7 +76,7 @@
                   method="POST">
                 <div class="field">
                     <label class="label">Email</label>
-                    <input data-target="account.email"
+                    <input data-account-target="email"
                            name="email"
                            pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
                            class="input"
@@ -88,7 +88,7 @@
 
                 <div class="field">
                     <label class="label">Password</label>
-                    <input data-target="account.password"
+                    <input data-account-target="password"
                            data-action="blur->account.#validatePassword"
                            name="password"
                            class="input"

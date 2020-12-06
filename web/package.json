@@ -24,7 +24,7 @@
     "optimize-css-assets-webpack-plugin": "^5.0.3",
     "purgecss-webpack-plugin": "^2.2.0",
     "sass-loader": "^8.0.2",
-    "stimulus": "^1.1.1",
+    "stimulus": "^2.0.0",
     "style-loader": "^1.2.1",
     "svelte": "^3.24.1",
     "svelte-loader": "^2.13.6",

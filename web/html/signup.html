@@ -9,7 +9,7 @@
                   method="POST">
                 <div class="field">
                     <label class="label">Name</label>
-                    <input data-target="account.name"
+                    <input data-account-target="name"
                            data-action="blur->account#validateName"
                            name="name"
                            class="input"
@@ -20,7 +20,7 @@
                 </div>
                 <div class="field">
                     <label class="label">Email</label>
-                    <input data-target="account.email"
+                    <input data-account-target="email"
                            data-action="blur->account#validateEmail"
                            name="email"
                            pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
@@ -33,7 +33,7 @@
 
                 <div class="field">
                     <label class="label">Password</label>
-                    <input data-target="account.password"
+                    <input data-account-target="password"
                            data-action="blur->account#validatePassword"
                            name="password"
                            class="input"

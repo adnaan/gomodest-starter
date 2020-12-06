@@ -24,7 +24,7 @@
                         <label class="label">Name</label>
                         <div class="control">
                             <input
-                                    data-target="account.name"
+                                    data-account-target="name"
                                     data-action="blur->account#validateName"
                                     maxlength="30"
                                     class="input"
@@ -40,7 +40,7 @@
                         <label class="label">Email</label>
                         <div class="control">
                             <input class="input"
-                                   data-target="account.email"
+                                   data-account-target="email"
                                    data-action="blur->account#validateEmail"
                                    name="email"
                                    type="email"
@@ -73,7 +73,7 @@
                 </button>
                 <div class="modal"
                      id="deleteAccount"
-                     data-target="navigate.modal">
+                     data-navigate-target="modal">
                     <div class="modal-background"></div>
                     <div class="modal-card">
                         <form action="/account/delete" method="POST">
