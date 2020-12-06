@@ -3,7 +3,7 @@ install:
 watch-go:
 	air -c .air.toml
 run-go:
-	go run cmd/main.go -config env.local
+	go run main.go -config env.local
 watch-web:
 	cd web && yarn watch
 build-docker:

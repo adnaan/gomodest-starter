@@ -1,4 +1,4 @@
-package routes
+package todos
 
 import (
 	"net/http"

@@ -12,7 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/adnaan/gomodest/routes"
+	"github.com/adnaan/gomodest/todos"
+
+	"github.com/adnaan/gomodest/app"
 
 	"github.com/go-chi/chi"
 
@@ -52,12 +54,30 @@ func main() {
 	}
 	flag.Parse()
 
-	cfg, err := routes.LoadConfig(*configFile, envPrefix)
+	cfg, err := app.LoadConfig(*configFile, envPrefix)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	r := routes.Router(baseCtx, cfg)
+	apiRoutes := []app.APIRoute{
+		{
+			Method:      "GET",
+			Pattern:     "/todos",
+			HandlerFunc: todos.List,
+		},
+		{
+			Method:      "POST",
+			Pattern:     "/todos",
+			HandlerFunc: todos.Add,
+		},
+		{
+			Method:      "DELETE",
+			Pattern:     "/todos",
+			HandlerFunc: todos.Delete,
+		},
+	}
+
+	r := app.Router(baseCtx, cfg, apiRoutes)
 	workDir, _ := os.Getwd()
 	dist := http.Dir(filepath.Join(workDir, "web", "dist"))
 	fileServer(r, "/static", dist)

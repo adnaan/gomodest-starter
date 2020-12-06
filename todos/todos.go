@@ -1,4 +1,4 @@
-package routes
+package todos
 
 import (
 	"fmt"
@@ -24,7 +24,7 @@ func (t *Todo) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
-func addTodo(w http.ResponseWriter, r *http.Request) {
+func Add(w http.ResponseWriter, r *http.Request) {
 	todo := &Todo{}
 	if err := render.Bind(r, todo); err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))
@@ -50,7 +50,7 @@ func addTodo(w http.ResponseWriter, r *http.Request) {
 	render.Render(w, r, todo)
 }
 
-func deleteTodo(w http.ResponseWriter, r *http.Request) {
+func Delete(w http.ResponseWriter, r *http.Request) {
 	todo := &Todo{}
 	if err := render.Bind(r, todo); err != nil {
 		render.Render(w, r, ErrInvalidRequest(err))
@@ -83,7 +83,7 @@ func todoListResponse(todos []*Todo) []render.Renderer {
 	return list
 }
 
-func listTodos(w http.ResponseWriter, r *http.Request) {
+func List(w http.ResponseWriter, r *http.Request) {
 	db, err := storm.Open("todos.db")
 	if err != nil {
 		render.Render(w, r, ErrInternal(err))

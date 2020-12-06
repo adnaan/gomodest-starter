@@ -1,4 +1,4 @@
-package routes
+package app
 
 import (
 	"context"
@@ -30,7 +30,13 @@ type AppContext struct {
 	cfg        Config
 }
 
-func Router(ctx context.Context, cfg Config) chi.Router {
+type APIRoute struct {
+	Method      string
+	Pattern     string
+	HandlerFunc http.HandlerFunc
+}
+
+func Router(ctx context.Context, cfg Config, apiRoutes []APIRoute) chi.Router {
 	//driver := "postgres"
 	//dataSource := "host=0.0.0.0 port=5432 user=gomodest dbname=gomodest sslmode=disable"
 
@@ -76,7 +82,7 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 	r.Use(setDefaultPageData(appCtx))
 	r.Use(httplog.RequestLogger(logger))
 
-	// routes
+	// app
 	// public
 	r.NotFound(rr("404"))
 	r.Get("/", rr("home"))
@@ -124,9 +130,9 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 	r.Route("/api", func(r chi.Router) {
 		r.Use(usersAPI.IsAuthenticated)
 		r.Use(middleware.AllowContentType("application/json"))
-		r.Get("/todos", listTodos)
-		r.Post("/todos", addTodo)
-		r.Delete("/todos", deleteTodo)
+		for _, apiRoute := range apiRoutes {
+			r.MethodFunc(apiRoute.Method, apiRoute.Pattern, apiRoute.HandlerFunc)
+		}
 	})
 
 	return r
