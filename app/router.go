@@ -41,10 +41,11 @@ func Router(ctx context.Context, cfg Config, apiRoutes []APIRoute) chi.Router {
 	//dataSource := "host=0.0.0.0 port=5432 user=gomodest dbname=gomodest sslmode=disable"
 
 	defaultUsersConfig := users.Config{
-		Driver:        cfg.Driver,
-		Datasource:    cfg.DataSource,
-		SessionSecret: cfg.SessionSecret,
-		SendMail:      sendEmailFunc(cfg),
+		Driver:          cfg.Driver,
+		Datasource:      cfg.DataSource,
+		SessionSecret:   cfg.SessionSecret,
+		APIMasterSecret: cfg.APIMasterSecret,
+		SendMail:        sendEmailFunc(cfg),
 		GothProviders: []goth.Provider{
 			google.New(cfg.GoogleClientID, cfg.GoogleSecret, fmt.Sprintf("%s/auth/callback?provider=google", cfg.Domain), "email", "profile"),
 		},
@@ -117,18 +118,19 @@ func Router(ctx context.Context, cfg Config, apiRoutes []APIRoute) chi.Router {
 
 	// authenticated
 	r.Route("/account", func(r chi.Router) {
-		r.Use(usersAPI.IsAuthenticated)
+		r.Use(usersAPI.IsAuthenticatedByLogin)
 		r.Get("/", rr("account", accountPage))
 		r.Post("/", rr("account", accountPageSubmit))
+		r.Post("/delete", rr("account", deleteAccount))
 	})
 
 	r.Route("/app", func(r chi.Router) {
-		r.Use(usersAPI.IsAuthenticated)
+		r.Use(usersAPI.IsAuthenticatedByLogin)
 		r.Get("/", rr("app", appPage))
 	})
 
 	r.Route("/api", func(r chi.Router) {
-		r.Use(usersAPI.IsAuthenticated)
+		r.Use(usersAPI.IsAuthenticatedByBearer)
 		r.Use(middleware.AllowContentType("application/json"))
 		for _, apiRoute := range apiRoutes {
 			r.MethodFunc(apiRoute.Method, apiRoute.Pattern, apiRoute.HandlerFunc)

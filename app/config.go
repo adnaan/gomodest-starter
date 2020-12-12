@@ -18,6 +18,7 @@ type Config struct {
 	LogFormatJSON    bool   `json:"log_format_json" envconfig:"log_format_json" default:"false"`
 	Templates        string `json:"templates" envconfig:"templates" default:"templates"`
 	SessionSecret    string `json:"session_secret" envconfig:"session_secret" default:"mysessionsecret"`
+	APIMasterSecret  string `json:"api_master_secret" envconfig:"api_master_secret" default:"supersecretkeyyoushouldnotcommit"`
 
 	// datasource
 	Driver     string `json:"driver" envconfig:"driver" default:"sqlite3"`

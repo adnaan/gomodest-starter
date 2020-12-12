@@ -8,9 +8,9 @@ require (
 	github.com/Masterminds/goutils v1.1.0 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible
-	github.com/adnaan/users v0.0.0-20201205133156-8f143bf18686
+	github.com/adnaan/users v0.0.0-20201212105340-d2edb3fc0e77
 	github.com/asdine/storm/v3 v3.2.1
-	github.com/facebook/ent v0.5.1 // indirect
+	github.com/facebook/ent v0.5.2 // indirect
 	github.com/foolin/goview v0.3.0
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-chi/httplog v0.1.6
@@ -25,16 +25,16 @@ require (
 	github.com/jordan-wright/email v4.0.1-0.20200917010138-e1c00e156980+incompatible
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/lib/pq v1.9.0 // indirect
-	github.com/markbates/goth v1.66.0
+	github.com/markbates/goth v1.66.1
 	github.com/matcornic/hermes/v2 v2.1.0
 	github.com/mholt/binding v0.3.0
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	go.etcd.io/bbolt v1.3.5 // indirect
-	golang.org/x/crypto v0.0.0-20201203163018-be400aefbc4c // indirect
+	golang.org/x/crypto v0.0.0-20201208171446-5f87f3452ae9 // indirect
 	golang.org/x/mod v0.4.0 // indirect
-	golang.org/x/net v0.0.0-20201202161906-c7110b5ffcbb // indirect
-	golang.org/x/oauth2 v0.0.0-20201203001011-0b49973bad19 // indirect
-	golang.org/x/sys v0.0.0-20201126233918-771906719818 // indirect
-	golang.org/x/tools v0.0.0-20201204222352-654352759326 // indirect
+	golang.org/x/net v0.0.0-20201209123823-ac852fbbde11 // indirect
+	golang.org/x/oauth2 v0.0.0-20201208152858-08078c50e5b5 // indirect
+	golang.org/x/sys v0.0.0-20201211090839-8ad439b19e0f // indirect
+	golang.org/x/tools v0.0.0-20201211185031-d93e913c1a58 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 )

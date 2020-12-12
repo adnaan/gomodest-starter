@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/google/uuid"
+
 	"github.com/go-chi/chi"
 
 	"github.com/mholt/binding"
@@ -22,10 +24,14 @@ func setDefaultPageData(appCtx AppContext) func(next http.Handler) http.Handler 
 				"app_name": strings.Title(strings.ToLower(appCtx.cfg.Name)),
 			}
 
-			_, email, metadata, err := appCtx.users.LoggedInUser(r)
+			user, err := appCtx.users.LoggedInUser(r)
 			if err == nil {
-				pageData["email"] = email
-				pageData["metadata"] = metadata
+				pageData["email"] = user.Email
+				pageData["metadata"] = user.Metadata
+				if user.IsAPITokenSet {
+					pageData["is_api_token_set"] = true
+				}
+
 				pageData["is_logged_in"] = true
 			}
 
@@ -155,7 +161,7 @@ func magicLinkLoginConfirm(appCtx AppContext, w http.ResponseWriter, r *http.Req
 	return goview.M{}, nil
 }
 
-func loginPage(_ AppContext, _ http.ResponseWriter, r *http.Request) (goview.M, error) {
+func loginPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	confirmed := r.URL.Query().Get("confirmed")
 	if confirmed == "true" {
 		return goview.M{
@@ -184,6 +190,12 @@ func loginPage(_ AppContext, _ http.ResponseWriter, r *http.Request) (goview.M, 
 		}, nil
 	}
 
+	from := r.URL.Query().Get("from")
+	if from != "" {
+		// store from in session to be used by external login(goth)
+		appCtx.users.SetSessionVal(r, w, "from", from)
+	}
+
 	return goview.M{}, nil
 }
 
@@ -193,9 +205,11 @@ func gothAuthCallbackPage(appCtx AppContext, w http.ResponseWriter, r *http.Requ
 		return goview.M{}, err
 	}
 	redirectTo := "/app"
-	from := r.URL.Query().Get("from")
-	if from != "" {
-		redirectTo = from
+
+	fromVal, err := appCtx.users.GetSessionVal(r, "from")
+	if err == nil && fromVal != nil {
+		redirectTo = fromVal.(string)
+		appCtx.users.DelSessionVal(r, w, "from")
 	}
 
 	http.Redirect(w, r, redirectTo, http.StatusSeeOther)
@@ -221,11 +235,14 @@ func accountPage(_ AppContext, _ http.ResponseWriter, r *http.Request) (goview.M
 	emailChanged := r.URL.Query().Get("email_changed")
 	if emailChanged == "true" {
 		return goview.M{
+			"form_token":    uuid.New(),
 			"email_changed": true,
 		}, nil
 	}
 
-	return goview.M{}, nil
+	return goview.M{
+		"form_token": uuid.New(),
+	}, nil
 }
 
 func confirmEmailChangePage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
@@ -267,33 +284,58 @@ func appPage(_ AppContext, _ http.ResponseWriter, _ *http.Request) (goview.M, er
 }
 
 type AccountForm struct {
-	Name  string
-	Email string
+	Name          string
+	Email         string
+	ResetAPIToken bool
+	FormToken     string
 }
 
 // Fieldmap for the accountform. extend it for more fields
 func (af *AccountForm) FieldMap(_ *http.Request) binding.FieldMap {
 	return binding.FieldMap{
-		&af.Name:  "name",
-		&af.Email: "email",
+		&af.Name:          "name",
+		&af.Email:         "email",
+		&af.ResetAPIToken: "reset_api_token",
+		&af.FormToken:     "form_token",
 	}
 }
 
-func accountPageSubmit(appCtx AppContext, _ http.ResponseWriter, r *http.Request) (goview.M, error) {
+func accountPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	accountForm := new(AccountForm)
-	if errs := binding.Bind(r, accountForm); errs != nil {
-		return nil, fmt.Errorf("%v, %w", errs, fmt.Errorf("missing name or email"))
-	}
+	binding.Bind(r, accountForm)
 
 	pageData := goview.M{}
 
-	id, email, metaData, err := appCtx.users.LoggedInUser(r)
+	user, err := appCtx.users.LoggedInUser(r)
 	if err != nil {
 		return nil, err
 	}
 
-	if accountForm.Email != "" && accountForm.Email != email {
-		err = appCtx.users.ChangeEmail(id, accountForm.Email)
+	if accountForm.ResetAPIToken {
+		// check if the form has been previously submitted
+		if accountForm.FormToken != "" {
+			formTokenVal, err := appCtx.users.GetSessionVal(r, "form_token")
+			if err == nil && formTokenVal != nil {
+				formToken := formTokenVal.(string)
+				if formToken == accountForm.FormToken {
+					return goview.M{}, nil
+				}
+			}
+		}
+		apiToken, err := appCtx.users.ResetAPIToken(r)
+		if err != nil {
+			return goview.M{}, err
+		}
+
+		appCtx.users.SetSessionVal(r, w, "form_token", accountForm.FormToken)
+		return goview.M{
+			"is_api_token_set": true,
+			"api_token":        apiToken,
+		}, nil
+	}
+
+	if accountForm.Email != "" && accountForm.Email != user.Email {
+		err = appCtx.users.ChangeEmail(user.ID, accountForm.Email)
 		if err != nil {
 			return nil, err
 		}
@@ -302,17 +344,17 @@ func accountPageSubmit(appCtx AppContext, _ http.ResponseWriter, r *http.Request
 
 	var name string
 	var ok bool
-	if metaData["name"] == nil {
+	if user.Metadata["name"] == nil {
 		name = ""
 	} else {
-		name, ok = metaData["name"].(string)
+		name, ok = user.Metadata["name"].(string)
 		if !ok {
 			return nil, err
 		}
 	}
 
 	if name != accountForm.Name {
-		err = appCtx.users.UpdateMetaData(id, map[string]interface{}{
+		err = appCtx.users.UpdateMetaData(user.ID, map[string]interface{}{
 			"name": accountForm.Name,
 		})
 
@@ -321,10 +363,12 @@ func accountPageSubmit(appCtx AppContext, _ http.ResponseWriter, r *http.Request
 		}
 	}
 
-	pageData["email"] = email
+	appCtx.users.SetSessionVal(r, w, "form_token", accountForm.FormToken)
 
-	metaData["name"] = accountForm.Name
-	pageData["metadata"] = metaData
+	pageData["email"] = user.Email
+
+	user.Metadata["name"] = accountForm.Name
+	pageData["metadata"] = user.Metadata
 	return pageData, nil
 }
 
@@ -364,14 +408,21 @@ func resetPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) 
 		return nil, fmt.Errorf("%v, %w", errs, fmt.Errorf("missing password"))
 	}
 
-	pageData := goview.M{}
-
 	err := appCtx.users.ConfirmRecovery(token, resetForm.Password)
 	if err != nil {
-		return pageData, err
+		return goview.M{}, err
 	}
 
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 
-	return pageData, nil
+	return goview.M{}, nil
+}
+
+func deleteAccount(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+	err := appCtx.users.DeleteUser(r)
+	if err != nil {
+		return goview.M{}, err
+	}
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+	return goview.M{}, nil
 }
