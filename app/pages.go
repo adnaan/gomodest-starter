@@ -231,20 +231,6 @@ func gothAuthPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (go
 	return goview.M{}, nil
 }
 
-func accountPage(_ AppContext, _ http.ResponseWriter, r *http.Request) (goview.M, error) {
-	emailChanged := r.URL.Query().Get("email_changed")
-	if emailChanged == "true" {
-		return goview.M{
-			"form_token":    uuid.New(),
-			"email_changed": true,
-		}, nil
-	}
-
-	return goview.M{
-		"form_token": uuid.New(),
-	}, nil
-}
-
 func confirmEmailChangePage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	token := chi.URLParam(r, "token")
 	err := appCtx.users.ConfirmEmailChange(token)
@@ -280,6 +266,21 @@ func appPage(_ AppContext, _ http.ResponseWriter, _ *http.Request) (goview.M, er
 
 	return goview.M{
 		"Data": string(d),
+	}, nil
+}
+
+func accountPage(appCtx AppContext, _ http.ResponseWriter, r *http.Request) (goview.M, error) {
+	emailChanged := r.URL.Query().Get("email_changed")
+	if emailChanged == "true" {
+		return goview.M{
+			"form_token":    uuid.New(),
+			"email_changed": true,
+		}, nil
+	}
+
+	return goview.M{
+		"form_token": uuid.New(),
+		"plans":      appCtx.cfg.Plans,
 	}, nil
 }
 

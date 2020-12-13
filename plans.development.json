@@ -1,0 +1,22 @@
+[
+  {
+    "stripe_id": "free",
+    "name": "Free",
+    "price": "0",
+    "details": [
+      "1000 API Calls",
+      "10K Events",
+      "100 Alerts"
+    ]
+  },
+  {
+    "stripe_id": "pro",
+    "name": "Pro",
+    "price": "10",
+    "details": [
+      "10000 API Calls",
+      "100K Events",
+      "1000 Alerts"
+    ]
+  }
+]

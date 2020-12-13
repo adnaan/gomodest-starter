@@ -1,0 +1,96 @@
+{{define "plan"}}
+    <div class="tile is-child box">
+        <nav class="level">
+            <div class="level-item has-text-centered">
+                <div>
+                    <p class="heading">Name</p>
+                    <p class="title">{{.Name}}</p>
+                </div>
+            </div>
+
+            <div class="level-item has-text-centered">
+                <div>
+                    <p class="heading">$/Month</p>
+                    <p class="title">{{.Price}}</p>
+                </div>
+            </div>
+            <div class="level-item has-text-centered">
+                <button class="button"
+                        data-modal-target-id="viewSubscriptionDetails-{{.StripeID}}"
+                        data-action="click->navigate#openModal">
+                    View Details
+                </button>
+                <div class="modal"
+                     id="viewSubscriptionDetails-{{.StripeID}}"
+                     data-navigate-target="modal">
+                    <div class="modal-background"></div>
+                    <div class="modal-card width-320">
+                        <header class="modal-card-head">
+                            <p class="modal-card-title">{{.Name}} Plan</p>
+                            <button class="delete"
+                                    data-modal-target-id="viewSubscriptionDetails-{{.StripeID}}"
+                                    data-action="click->navigate#closeModal"
+                                    aria-label="close">
+                            </button>
+                        </header>
+                        <section class="modal-card-body">
+                            <div class="content">
+                                {{range .Details}}
+                                <p class="has-text-weight-semibold">
+                                    {{.}}
+                                </p>
+                                {{end}}
+                            </div>
+
+                        </section>
+                        <footer class="modal-card-foot is-justify-content-flex-end">
+                            <button class="button"
+                                    data-modal-target-id="viewSubscriptionDetails-{{.StripeID}}"
+                                    data-action="click->navigate#closeModal">
+                                OK
+                            </button>
+                        </footer>
+                    </div>
+                </div>
+            </div>
+            <div class="level-item has-text-centered">
+                <button class="button is-primary"
+                        data-modal-target-id="changePlan-{{.StripeID}}"
+                        data-action="click->navigate#openModal">
+                    Change Plan
+                </button>
+                <div class="modal"
+                     id="changePlan-{{.StripeID}}"
+                     data-navigate-target="modal">
+                    <div class="modal-background"></div>
+                    <div class="modal-card">
+                        <form action="/account/plan" method="POST">
+                            <input type="hidden" name="form_token">
+                            <header class="modal-card-head">
+                                <p class="modal-card-title">Are you sure ?</p>
+                                <button class="delete"
+                                        data-modal-target-id="changePlan-{{.StripeID}}"
+                                        data-action="click->navigate#closeModal"
+                                        aria-label="close">
+                                </button>
+                            </header>
+                            <section class="modal-card-body">
+                                <p class="has-text-weight-semibold">
+                                    Changing your current plan will change the invoice immediately.
+                                </p>
+                            </section>
+                            <footer class="modal-card-foot is-justify-content-flex-end">
+                                <button class="button is-danger" type="submit">Yes</button>
+                                <button class="button"
+                                        data-modal-target-id="changePlan-{{.StripeID}}"
+                                        data-action="click->navigate#closeModal">
+                                    Cancel
+                                </button>
+                            </footer>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+{{end}}

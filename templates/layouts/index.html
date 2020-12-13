@@ -5,7 +5,9 @@
     <title>{{.app_name}}</title>
     {{include "partials/header"}}
   </head>
-  <body data-controller="navigate svelte account">
+  <body data-controller="navigate svelte account"
+        data-action="keydown@window->navigate#keyDown"
+        data-navigate-active-class="is-active">
   {{include "partials/top_navbar"}}
     <section class="section">
       <div class="container h-full px-5 py-5">

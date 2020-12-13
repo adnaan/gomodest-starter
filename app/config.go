@@ -1,6 +1,10 @@
 package app
 
 import (
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -35,6 +39,17 @@ type Config struct {
 	// goth
 	GoogleClientID string `json:"google_client_id" envconfig:"google_client_id"`
 	GoogleSecret   string `json:"google_secret" envconfig:"google_secret"`
+
+	// stripe
+	PlansFile string `json:"plans_file" envconfig:"plans_file" default:"plans.development.json"`
+	Plans     []Plan `json:"-" envconfig:"-"`
+}
+
+type Plan struct {
+	StripeID string   `json:"stripe_id"`
+	Name     string   `json:"name"`
+	Price    string   `json:"price"`
+	Details  []string `json:"details"`
 }
 
 func LoadConfig(configFile string, envPrefix string) (Config, error) {
@@ -47,7 +62,39 @@ func LoadConfig(configFile string, envPrefix string) (Config, error) {
 		return config, err
 	}
 
+	plans, err := loadPlans(config.PlansFile)
+	if err == nil {
+		config.Plans = plans
+	} else {
+		fmt.Printf("err loading plan file %v, err %v \n", config.PlansFile, err)
+	}
+
 	return config, nil
+}
+
+func loadPlans(file string) ([]Plan, error) {
+	if file == "" {
+		return []Plan{}, nil
+	}
+
+	var data []byte
+	var err error
+
+	data, err = base64.StdEncoding.DecodeString(file) // check if string is base64 data
+	if err != nil {
+		data, err = ioutil.ReadFile(file) // or is a file path
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var plans []Plan
+	err = json.Unmarshal(data, &plans)
+	if err != nil {
+		return nil, err
+	}
+
+	return plans, nil
 }
 
 func loadEnvironment(filename string) error {

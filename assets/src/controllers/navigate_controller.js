@@ -1,7 +1,8 @@
 import { Controller } from "stimulus"
 
 export default class extends Controller {
-    static targets = ["modal","toggler"]
+    static targets = ["modal","toggler","dropup"]
+    static classes = [ "active" ]
 
     connect(){
 
@@ -33,7 +34,7 @@ export default class extends Controller {
     }
 
     keyDown(e){
-        if (e.keyCode === 27 ){
+        if (e.keyCode === 27){
             this.modalTargets.forEach(item => {
                 item.classList.remove("is-active")
             })
@@ -58,6 +59,10 @@ export default class extends Controller {
         targetToggleIds.forEach(item => {
             document.getElementById(item).classList.toggle(targetToggleClass);
         })
+    }
+
+    toggleIsActive(e){
+       this.dropupTarget.classList.toggle(this.activeClass)
     }
 }
 

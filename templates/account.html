@@ -2,13 +2,13 @@
 <div class="columns is-mobile is-centered">
     <div class="column is-half-desktop">
         {{ if .change_email }}
-        <box class="box has-background-warning"> A verification link has been sent to your inbox for confirming your new
-            email address. Please verify to complete the request.
-        </box>
+            <box class="box has-background-warning"> A verification link has been sent to your inbox for confirming your new
+                email address. Please verify to complete the request.
+            </box>
         {{end}}
 
         {{ if .email_changed }}
-        <box class="box has-background-success"> Your email was updated!</box>
+            <box class="box has-background-success"> Your email was updated!</box>
         {{end}}
 
         <div class="card px-5 py-5">
@@ -72,7 +72,7 @@
             {{ if .api_token }}
 
             <textarea class="textarea has-background-success-light is-small has-fixed-size mb-1"
-                      rows="2"  wrap="hard" data-clipboard-target="source" readonly>{{.api_token}}</textarea>
+                      rows="2" wrap="hard" data-clipboard-target="source" readonly>{{.api_token}}</textarea>
             <div>
                 <button class="button is-small" data-action="clipboard#copy">
                     <span class="icon is-small has-text-success">
@@ -130,7 +130,7 @@
                                 A new API Token will be created
                             </p>
                         </section>
-                        <footer class="modal-card-foot">
+                        <footer class="modal-card-foot is-justify-content-flex-end">
                             <button class="button is-warning" type="submit">Yes</button>
                             <button class="button"
                                     data-modal-target-id="resetAPIToken"
@@ -143,6 +143,17 @@
             </div>
         </div>
         <br/>
+        <div class="card px-5 py-5 mb-5">
+            <h4 class="title is-4">Subscription</h4>
+            <hr>
+            <div class="tile is-ancestor">
+                <div class="tile is-vertical is-parent">
+                    {{ range .plans}}
+                    {{template "plan" .}}
+                    {{end}}
+                </div>
+            </div>
+        </div>
         <div class="card px-5 py-5">
             <h4 class="title is-4">Delete account</h4>
             <hr/>
@@ -172,7 +183,7 @@
                                 Deleting your account is permanent and removes all account data forever.
                             </p>
                         </section>
-                        <footer class="modal-card-foot">
+                        <footer class="modal-card-foot is-justify-content-flex-end">
                             <button class="button is-danger" type="submit">Yes</button>
                             <button class="button"
                                     data-modal-target-id="deleteAccount"
