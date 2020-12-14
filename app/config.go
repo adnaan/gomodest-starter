@@ -46,10 +46,10 @@ type Config struct {
 }
 
 type Plan struct {
-	StripeID string   `json:"stripe_id"`
-	Name     string   `json:"name"`
-	Price    string   `json:"price"`
-	Details  []string `json:"details"`
+	PriceID string   `json:"price_id"`
+	Name    string   `json:"name"`
+	Price   string   `json:"price"`
+	Details []string `json:"details"`
 }
 
 func LoadConfig(configFile string, envPrefix string) (Config, error) {

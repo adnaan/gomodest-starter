@@ -1,6 +1,6 @@
 [
   {
-    "stripe_id": "free",
+    "price_id": "free",
     "name": "Free",
     "price": "0",
     "details": [
@@ -10,7 +10,7 @@
     ]
   },
   {
-    "stripe_id": "pro",
+    "price_id": "pro",
     "name": "Pro",
     "price": "10",
     "details": [
