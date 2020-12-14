@@ -2,15 +2,15 @@ module github.com/adnaan/gomodest
 
 go 1.15
 
-//replace github.com/adnaan/users => ../users
+// replace github.com/adnaan/users => ../users
 
 require (
 	github.com/Masterminds/goutils v1.1.0 // indirect
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible
-	github.com/adnaan/users v0.0.0-20201212105340-d2edb3fc0e77
+	github.com/adnaan/users v0.0.0-20201212153854-b94dfdcdbc7b
 	github.com/asdine/storm/v3 v3.2.1
-	github.com/facebook/ent v0.5.2 // indirect
+	github.com/facebook/ent v0.5.3 // indirect
 	github.com/foolin/goview v0.3.0
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-chi/httplog v0.1.6

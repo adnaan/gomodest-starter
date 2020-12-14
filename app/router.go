@@ -118,19 +118,19 @@ func Router(ctx context.Context, cfg Config, apiRoutes []APIRoute) chi.Router {
 
 	// authenticated
 	r.Route("/account", func(r chi.Router) {
-		r.Use(usersAPI.IsAuthenticatedByLogin)
+		r.Use(usersAPI.IsAuthenticated)
 		r.Get("/", rr("account", accountPage))
 		r.Post("/", rr("account", accountPageSubmit))
 		r.Post("/delete", rr("account", deleteAccount))
 	})
 
 	r.Route("/app", func(r chi.Router) {
-		r.Use(usersAPI.IsAuthenticatedByLogin)
+		r.Use(usersAPI.IsAuthenticated)
 		r.Get("/", rr("app", appPage))
 	})
 
 	r.Route("/api", func(r chi.Router) {
-		r.Use(usersAPI.IsAuthenticatedByBearer)
+		r.Use(usersAPI.IsAuthenticated)
 		r.Use(middleware.AllowContentType("application/json"))
 		for _, apiRoute := range apiRoutes {
 			r.MethodFunc(apiRoute.Method, apiRoute.Pattern, apiRoute.HandlerFunc)
