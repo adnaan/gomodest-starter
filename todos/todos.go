@@ -1,7 +1,6 @@
 package todos
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -56,8 +55,6 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
-
-	fmt.Printf("%+v\n", todo)
 
 	db, err := storm.Open("todos.db")
 	if err != nil {

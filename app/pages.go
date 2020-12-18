@@ -7,6 +7,9 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v72/sub"
+
 	"github.com/google/uuid"
 
 	"github.com/go-chi/chi"
@@ -19,13 +22,36 @@ import (
 func setDefaultPageData(appCtx AppContext) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			pageData := map[string]interface{}{
-				"route":    r.URL.Path,
-				"app_name": strings.Title(strings.ToLower(appCtx.cfg.Name)),
+			pageData := map[string]interface{}{}
+			appCtxData, ok := r.Context().Value(appCtxDataKey).(map[string]interface{})
+			if ok {
+				for k, v := range appCtxData {
+					pageData[k] = v
+				}
+			}
+			pageData["route"] = r.URL.Path
+			pageData["app_name"] = strings.Title(strings.ToLower(appCtx.cfg.Name))
+
+			ctx := r.Context()
+			ctx = context.WithValue(ctx, appCtxDataKey, pageData)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
+func setAuthPageData(appCtx AppContext) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			pageData := map[string]interface{}{}
+			appCtxData, ok := r.Context().Value(appCtxDataKey).(map[string]interface{})
+			if ok {
+				for k, v := range appCtxData {
+					pageData[k] = v
+				}
 			}
 
 			user, err := appCtx.users.LoggedInUser(r)
-			if err == nil {
+			if err == nil && user != nil {
 				pageData["email"] = user.Email
 				pageData["metadata"] = user.Metadata
 				if user.IsAPITokenSet {
@@ -33,6 +59,37 @@ func setDefaultPageData(appCtx AppContext) func(next http.Handler) http.Handler 
 				}
 
 				pageData["is_logged_in"] = true
+
+				if user.BillingID != "" {
+					params := &stripe.SubscriptionListParams{
+						Customer: user.BillingID,
+						Status:   string(stripe.SubscriptionStatusActive),
+					}
+					params.AddExpand("data.items.data.price")
+					params.Filters.AddFilter("limit", "", "1")
+					i := sub.List(params)
+					for i.Next() {
+						s := i.Subscription()
+						if s.Status == stripe.SubscriptionStatusActive {
+							for _, pr := range s.Items.Data {
+								for _, plan := range appCtx.cfg.Plans {
+									if plan.PriceID == pr.Price.ID {
+										pageData["current_plan"] = Plan{
+											Current:   true,
+											PriceID:   plan.PriceID,
+											Name:      plan.Name,
+											Price:     plan.Price,
+											Details:   plan.Details,
+											StripeKey: plan.StripeKey,
+										}
+									}
+								}
+							}
+						}
+
+					}
+				}
+
 			}
 
 			ctx := r.Context()
@@ -248,6 +305,7 @@ func confirmEmailPage(appCtx AppContext, w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		return nil, err
 	}
+
 	http.Redirect(w, r, "/login?confirmed=true", http.StatusSeeOther)
 	return goview.M{}, nil
 }
@@ -275,6 +333,14 @@ func accountPage(appCtx AppContext, _ http.ResponseWriter, r *http.Request) (gov
 		return goview.M{
 			"form_token":    uuid.New(),
 			"email_changed": true,
+		}, nil
+	}
+
+	checkout := r.URL.Query().Get("checkout")
+	if checkout == "success" || checkout == "cancel" {
+		return goview.M{
+			"checkout": checkout,
+			"plans":    appCtx.cfg.Plans,
 		}, nil
 	}
 

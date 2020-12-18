@@ -5,7 +5,7 @@
 
     let todos = [];
     let input = "";
-    const todosAPI = 'http://localhost:4000/api/todos'
+    const todosAPI = '/api/todos'
     onMount(async () => {
         const res = await fetch(todosAPI);
         todos = await res.json();
@@ -47,10 +47,10 @@
 <main class="container is-fluid">
     <div class="columns is-centered is-vcentered is-mobile">
         <div class="column is-narrow" style="width: 70%">
-            <h1 class="has-text-centered title">Svelte TODO</h1>
+            <h1 class="has-text-centered title">todos</h1>
             <form class="field has-addons" style="justify-content: center" on:submit|preventDefault={addTodo}>
                 <div class="control">
-                    <input bind:value={input} class="input" type="text" placeholder="TODO">
+                    <input bind:value={input} class="input" type="text" placeholder="a todo">
                 </div>
                 <div class="control">
                     <button class="button is-primary">

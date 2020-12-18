@@ -40,16 +40,22 @@ type Config struct {
 	GoogleClientID string `json:"google_client_id" envconfig:"google_client_id"`
 	GoogleSecret   string `json:"google_secret" envconfig:"google_secret"`
 
-	// stripe
-	PlansFile string `json:"plans_file" envconfig:"plans_file" default:"plans.development.json"`
-	Plans     []Plan `json:"-" envconfig:"-"`
+	// subscription
+	PlansFile            string `json:"plans_file" envconfig:"plans_file" default:"plans.development.json"`
+	Plans                []Plan `json:"-" envconfig:"-"`
+	StripePublishableKey string `json:"stripe_publishable_key" envconfig:"stripe_publishable_key"`
+	StripeSecretKey      string `json:"stripe_secret_key" envconfig:"stripe_secret_key"`
+	StripeWebhookSecret  string `json:"stripe_webhook_secret" envconfig:"stripe_webhook_secret"`
 }
 
 type Plan struct {
 	PriceID string   `json:"price_id"`
 	Name    string   `json:"name"`
 	Price   string   `json:"price"`
+	Current bool     `json:"-"`
 	Details []string `json:"details"`
+
+	StripeKey string `json:"-"`
 }
 
 func LoadConfig(configFile string, envPrefix string) (Config, error) {
@@ -64,6 +70,9 @@ func LoadConfig(configFile string, envPrefix string) (Config, error) {
 
 	plans, err := loadPlans(config.PlansFile)
 	if err == nil {
+		for i := range plans {
+			plans[i].StripeKey = config.StripePublishableKey
+		}
 		config.Plans = plans
 	} else {
 		fmt.Printf("err loading plan file %v, err %v \n", config.PlansFile, err)

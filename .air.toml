@@ -17,7 +17,7 @@
   # Ignore these filename extensions or directories.
   exclude_dir = ["web", "screenshots", "vendor"]
   # Watch these directories if you specified.
-  include_dir = ["pkg"]
+  include_dir = ["app","todos"]
   # Exclude files.
   exclude_file = ["todos.db",".gitignore"]
   # Exclude unchanged files.

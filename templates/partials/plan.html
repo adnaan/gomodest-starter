@@ -53,12 +53,27 @@
                 </div>
             </div>
         </div>
-        <div class="level-item has-text-centered">
-            <button class="button is-primary"
-                    data-modal-target-id="changePlan-{{.PriceID}}"
-                    data-action="click->navigate#openModal">
-                Change Plan
-            </button>
+        <div class="level-item has-text-centered"
+             data-controller="subscription"
+             data-subscription-stripe-value="{{.StripeKey}}"
+             data-subscription-price-value="{{.PriceID}}">
+
+            {{ if eq .PriceID "default" }}
+                <span class="tag is-current is-medium">Current plan</span>
+            {{ else }}
+                {{ if not .Current }}
+                    <button class="button is-primary"
+                            data-action="subscription#createCheckoutClick">
+                        Upgrade
+                    </button>
+                {{else}}
+                    <button class="button is-primary"
+                            data-action="click->navigate#goto"
+                            data-goto="/account/subscription/manage">
+                        Manage
+                    </button>
+                {{end}}
+            {{end}}
             <div class="modal"
                  id="changePlan-{{.PriceID}}"
                  data-navigate-target="modal">
@@ -79,10 +94,11 @@
                     </section>
                     <footer class="modal-card-foot is-justify-content-flex-end"
                             data-controller="subscription"
+                            data-subscription-stripe-value="{{.StripeKey}}"
                             data-subscription-price-value="{{.PriceID}}">
                         <button class="button is-primary"
                                 type="button"
-                                data-action="subscription#createCheckout">
+                                data-action="subscription#createCheckoutClick   ">
                             Yes
                         </button>
                         <button class="button"

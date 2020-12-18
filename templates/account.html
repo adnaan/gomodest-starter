@@ -1,6 +1,6 @@
 {{define "content"}}
 <div class="columns is-mobile is-centered">
-    <div class="column is-half-desktop">
+    <div class="column is-half">
         {{ if .change_email }}
             <box class="box has-background-warning"> A verification link has been sent to your inbox for confirming your new
                 email address. Please verify to complete the request.
@@ -9,6 +9,15 @@
 
         {{ if .email_changed }}
             <box class="box has-background-success"> Your email was updated!</box>
+        {{end}}
+
+        {{ if .checkout }}
+        {{ if eq .checkout "success"}}
+            <box class="box has-background-success"> Payment was successful!</box>
+        {{end}}
+        {{ if eq .checkout "cancel"}}
+            <box class="box has-background-danger"> Payment was cancelled!</box>
+        {{end}}
         {{end}}
 
         <div class="card px-5 py-5">
@@ -148,8 +157,12 @@
             <hr>
             <div class="tile is-ancestor">
                 <div class="tile is-vertical is-parent">
-                    {{ range .plans}}
-                    {{template "plan" .}}
+                    {{ if .current_plan }}
+                        {{ template "plan" .current_plan }}
+                    {{else}}
+                        {{ range .plans}}
+                            {{template "plan" .}}
+                        {{end}}
                     {{end}}
                 </div>
             </div>

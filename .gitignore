@@ -6,4 +6,5 @@ tmp
 .DS_Store
 bin
 *.local
+*.local.*
 public
