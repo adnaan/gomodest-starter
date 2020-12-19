@@ -72,7 +72,7 @@ func newRenderer(appCtx AppContext) func(page string, pageHandlerFuncs ...PageHa
 				appCtx.pageData = pageData
 				pageHandlerData, err := pageHandlerFunc(appCtx, w, r)
 				if err != nil {
-					fmt.Println(err)
+					fmt.Println("pageHandlerFunc => ", err)
 					userError := errors.Unwrap(err)
 					if userError != nil {
 						pageData["userError"] = first(strings.ToLower(userError.Error()))

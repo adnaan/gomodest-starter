@@ -10,7 +10,7 @@ require (
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/PuerkitoBio/goquery v1.6.0 // indirect
-	github.com/adnaan/users v0.1.2 // indirect
+	github.com/adnaan/users v0.1.3 // indirect
 	github.com/andybalholm/cascadia v1.2.0 // indirect
 	github.com/asdine/storm/v3 v3.2.1
 	github.com/foolin/goview v0.3.0
@@ -37,6 +37,6 @@ require (
 	go.etcd.io/bbolt v1.3.5 // indirect
 	golang.org/x/crypto v0.0.0-20201217014255-9d1352758620 // indirect
 	golang.org/x/net v0.0.0-20201216054612-986b41b23924 // indirect
-	golang.org/x/sys v0.0.0-20201214210602-f9fddec55a1e // indirect
-	golang.org/x/tools v0.0.0-20201217235154-5b06639e575e // indirect
+	golang.org/x/sys v0.0.0-20201218084310-7d0127a74742 // indirect
+	golang.org/x/tools v0.0.0-20201218024724-ae774e9781d2 // indirect
 )

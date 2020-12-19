@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 
@@ -22,79 +23,70 @@ import (
 func setDefaultPageData(appCtx AppContext) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
 			pageData := map[string]interface{}{}
-			appCtxData, ok := r.Context().Value(appCtxDataKey).(map[string]interface{})
-			if ok {
-				for k, v := range appCtxData {
-					pageData[k] = v
-				}
-			}
 			pageData["route"] = r.URL.Path
 			pageData["app_name"] = strings.Title(strings.ToLower(appCtx.cfg.Name))
-
-			ctx := r.Context()
-			ctx = context.WithValue(ctx, appCtxDataKey, pageData)
-			next.ServeHTTP(w, r.WithContext(ctx))
-		})
-	}
-}
-
-func setAuthPageData(appCtx AppContext) func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			pageData := map[string]interface{}{}
-			appCtxData, ok := r.Context().Value(appCtxDataKey).(map[string]interface{})
-			if ok {
-				for k, v := range appCtxData {
-					pageData[k] = v
-				}
-			}
+			defer func() {
+				ctx := r.Context()
+				ctx = context.WithValue(ctx, appCtxDataKey, pageData)
+				next.ServeHTTP(w, r.WithContext(ctx))
+			}()
 
 			user, err := appCtx.users.LoggedInUser(r)
-			if err == nil && user != nil {
-				pageData["email"] = user.Email
-				pageData["metadata"] = user.Metadata
-				if user.IsAPITokenSet {
-					pageData["is_api_token_set"] = true
+			if err != nil {
+				return
+			}
+
+			pageData["is_logged_in"] = true
+			pageData["email"] = user.Email
+			pageData["metadata"] = user.Metadata
+			if user.IsAPITokenSet {
+				pageData["is_api_token_set"] = true
+			}
+
+			currentPriceID := appCtx.users.GetSessionStringVal(r, "current_price_id")
+			// get currentPriceID using stripe customer ID
+			if user.BillingID != "" && currentPriceID == nil {
+				params := &stripe.SubscriptionListParams{
+					Customer: user.BillingID,
+					Status:   string(stripe.SubscriptionStatusActive),
+				}
+				params.AddExpand("data.items.data.price")
+				params.Filters.AddFilter("limit", "", "1")
+
+				i := sub.List(params)
+				for i.Next() {
+					s := i.Subscription()
+					if s.Status == stripe.SubscriptionStatusActive {
+						for _, pr := range s.Items.Data {
+							currentPriceID = &pr.Price.ID
+						}
+					}
+
+				}
+			}
+
+			if currentPriceID != nil {
+				err = appCtx.users.SetSessionVal(r, w, "current_price_id", *currentPriceID)
+				if err != nil {
+					log.Println("SetSessionVal", err)
 				}
 
-				pageData["is_logged_in"] = true
-
-				if user.BillingID != "" {
-					params := &stripe.SubscriptionListParams{
-						Customer: user.BillingID,
-						Status:   string(stripe.SubscriptionStatusActive),
-					}
-					params.AddExpand("data.items.data.price")
-					params.Filters.AddFilter("limit", "", "1")
-					i := sub.List(params)
-					for i.Next() {
-						s := i.Subscription()
-						if s.Status == stripe.SubscriptionStatusActive {
-							for _, pr := range s.Items.Data {
-								for _, plan := range appCtx.cfg.Plans {
-									if plan.PriceID == pr.Price.ID {
-										pageData["current_plan"] = Plan{
-											Current:   true,
-											PriceID:   plan.PriceID,
-											Name:      plan.Name,
-											Price:     plan.Price,
-											Details:   plan.Details,
-											StripeKey: plan.StripeKey,
-										}
-									}
-								}
-							}
+				for _, plan := range appCtx.cfg.Plans {
+					if plan.PriceID == *currentPriceID {
+						pageData["current_plan"] = Plan{
+							Current:   true,
+							PriceID:   plan.PriceID,
+							Name:      plan.Name,
+							Price:     plan.Price,
+							Details:   plan.Details,
+							StripeKey: plan.StripeKey,
 						}
-
 					}
 				}
 
 			}
-
-			ctx := r.Context()
-			ctx = context.WithValue(ctx, appCtxDataKey, pageData)
-			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }

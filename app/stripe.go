@@ -112,9 +112,15 @@ func handleManageSubscription(appCtx AppContext) http.HandlerFunc {
 			return
 		}
 
+		// expect plan to be change
+		err = appCtx.users.DelSessionVal(r, w, "current_price_id")
+		if err != nil {
+			log.Println("DelSessionVal, current_price_id failed", err)
+		}
+
 		params := &stripe.BillingPortalSessionParams{
 			Customer:  stripe.String(user.BillingID),
-			ReturnURL: stripe.String(appCtx.cfg.Domain),
+			ReturnURL: stripe.String(appCtx.cfg.Domain + "/account"),
 		}
 
 		ps, err := portalsession.New(params)

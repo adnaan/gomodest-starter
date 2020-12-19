@@ -82,47 +82,50 @@ func Router(ctx context.Context, cfg Config, apiRoutes []APIRoute) chi.Router {
 	r.Use(middleware.Compress(5))
 	r.Use(middleware.Heartbeat(cfg.HealthPath))
 	r.Use(middleware.Recoverer)
-	r.Use(setDefaultPageData(appCtx))
 	r.Use(httplog.RequestLogger(logger))
+	//r.Use(setDefaultPageData(appCtx))
 
 	// app
-	// public
+
 	r.NotFound(rr("404"))
-	r.Get("/", rr("home"))
-	r.Post("/webhook/{source}", handleWebhook(appCtx))
+	// public
+	r.Route("/", func(r chi.Router) {
+		r.Use(setDefaultPageData(appCtx))
+		r.Get("/", rr("home"))
+		r.Post("/webhook/{source}", handleWebhook(appCtx))
 
-	r.Get("/signup", rr("signup"))
-	r.Post("/signup", rr("signup", signupPageSubmit))
+		r.Get("/signup", rr("signup"))
+		r.Post("/signup", rr("signup", signupPageSubmit))
 
-	r.Get("/confirm/{token}", rr("confirmed", confirmEmailPage))
+		r.Get("/confirm/{token}", rr("confirmed", confirmEmailPage))
 
-	r.Get("/login", rr("login", loginPage))
-	r.Post("/login", rr("login", loginPageSubmit))
-	r.Get("/auth/callback", rr("login", gothAuthCallbackPage))
-	r.Get("/auth", rr("login", gothAuthPage))
+		r.Get("/login", rr("login", loginPage))
+		r.Post("/login", rr("login", loginPageSubmit))
+		r.Get("/auth/callback", rr("login", gothAuthCallbackPage))
+		r.Get("/auth", rr("login", gothAuthPage))
 
-	r.Get("/logout", func(w http.ResponseWriter, r *http.Request) {
-		provider := r.URL.Query().Get("provider")
-		if provider != "" {
-			usersAPI.HandleGothLogout(w, r)
-			return
-		}
-		usersAPI.Logout(w, r)
+		r.Get("/logout", func(w http.ResponseWriter, r *http.Request) {
+			provider := r.URL.Query().Get("provider")
+			if provider != "" {
+				usersAPI.HandleGothLogout(w, r)
+				return
+			}
+			usersAPI.Logout(w, r)
+		})
+		r.Get("/magic-link-sent", rr("magic"))
+		r.Get("/magic-login/{otp}", rr("login", magicLinkLoginConfirm))
+
+		r.Get("/forgot", rr("forgot"))
+		r.Post("/forgot", rr("forgot", forgotPageSubmit))
+		r.Get("/reset/{token}", rr("reset"))
+		r.Post("/reset/{token}", rr("reset", resetPageSubmit))
+		r.Get("/change/{token}", rr("changed", confirmEmailChangePage))
 	})
-
-	r.Get("/magic-link-sent", rr("magic"))
-	r.Get("/magic-login/{otp}", rr("login", magicLinkLoginConfirm))
-
-	r.Get("/forgot", rr("forgot"))
-	r.Post("/forgot", rr("forgot", forgotPageSubmit))
-	r.Get("/reset/{token}", rr("reset"))
-	r.Post("/reset/{token}", rr("reset", resetPageSubmit))
-	r.Get("/change/{token}", rr("changed", confirmEmailChangePage))
 
 	// authenticated
 	r.Route("/account", func(r chi.Router) {
 		r.Use(usersAPI.IsAuthenticated)
-		r.Use(setAuthPageData(appCtx))
+		r.Use(setDefaultPageData(appCtx))
 		r.Get("/", rr("account", accountPage))
 		r.Post("/", rr("account", accountPageSubmit))
 		r.Post("/delete", rr("account", deleteAccount))
@@ -135,7 +138,7 @@ func Router(ctx context.Context, cfg Config, apiRoutes []APIRoute) chi.Router {
 
 	r.Route("/app", func(r chi.Router) {
 		r.Use(usersAPI.IsAuthenticated)
-		r.Use(setAuthPageData(appCtx))
+		r.Use(setDefaultPageData(appCtx))
 		r.Get("/", rr("app", appPage))
 	})
 

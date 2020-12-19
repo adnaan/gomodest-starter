@@ -119,3 +119,39 @@ func loadEnvironment(filename string) error {
 	}
 	return err
 }
+
+func stringFromMap(m map[string]interface{}, k string) *string {
+	v, ok := m[k]
+	if !ok {
+		return nil
+	}
+	val, ok := v.(string)
+	if !ok {
+		return nil
+	}
+	return &val
+}
+
+func int64FromMap(m map[string]interface{}, k string) *int64 {
+	v, ok := m[k]
+	if !ok {
+		return nil
+	}
+	val, ok := v.(int64)
+	if !ok {
+		return nil
+	}
+	return &val
+}
+
+func float64FromMap(m map[string]interface{}, k string) *float64 {
+	v, ok := m[k]
+	if !ok {
+		return nil
+	}
+	val, ok := v.(float64)
+	if !ok {
+		return nil
+	}
+	return &val
+}
