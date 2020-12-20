@@ -2,7 +2,7 @@ module github.com/adnaan/gomodest
 
 go 1.15
 
-replace github.com/adnaan/users => ../users
+//replace github.com/adnaan/users => ../users
 
 require (
 	cloud.google.com/go v0.74.0 // indirect
