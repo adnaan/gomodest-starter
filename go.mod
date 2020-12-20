@@ -2,7 +2,7 @@ module github.com/adnaan/gomodest
 
 go 1.15
 
-//replace github.com/adnaan/users => ../users
+replace github.com/adnaan/users => ../users
 
 require (
 	cloud.google.com/go v0.74.0 // indirect
@@ -10,7 +10,7 @@ require (
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/PuerkitoBio/goquery v1.6.0 // indirect
-	github.com/adnaan/users v0.1.3 // indirect
+	github.com/adnaan/users v0.1.4
 	github.com/andybalholm/cascadia v1.2.0 // indirect
 	github.com/asdine/storm/v3 v3.2.1
 	github.com/foolin/goview v0.3.0

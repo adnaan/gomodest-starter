@@ -413,7 +413,7 @@ func accountPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request
 	}
 
 	if name != accountForm.Name {
-		err = appCtx.users.UpdateMetaData(user.ID, map[string]interface{}{
+		err = appCtx.users.UpdateMetaData(r, map[string]interface{}{
 			"name": accountForm.Name,
 		})
 
