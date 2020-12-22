@@ -18,7 +18,7 @@ type errResponse struct {
 	Error string `json:"error"`
 }
 
-func handleCreateCheckoutSession(appCtx AppContext) http.HandlerFunc {
+func handleCreateCheckoutSession(appCtx Context) http.HandlerFunc {
 
 	var req struct {
 		Price string `json:"price"`
@@ -70,7 +70,7 @@ func handleCreateCheckoutSession(appCtx AppContext) http.HandlerFunc {
 	}
 }
 
-func handleCheckoutSuccess(appCtx AppContext) http.HandlerFunc {
+func handleCheckoutSuccess(appCtx Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		sessionID := r.URL.Query().Get("session_id")
 		if sessionID == "" {
@@ -97,13 +97,13 @@ func handleCheckoutSuccess(appCtx AppContext) http.HandlerFunc {
 	}
 }
 
-func handleCheckoutCancel(appCtx AppContext) http.HandlerFunc {
+func handleCheckoutCancel(appCtx Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/account?checkout=cancel", http.StatusSeeOther)
 	}
 }
 
-func handleManageSubscription(appCtx AppContext) http.HandlerFunc {
+func handleManageSubscription(appCtx Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, err := appCtx.users.LoggedInUser(r)
 		if err != nil {

@@ -17,9 +17,9 @@
   # Ignore these filename extensions or directories.
   exclude_dir = ["web", "screenshots", "vendor"]
   # Watch these directories if you specified.
-  include_dir = ["app","todos"]
+  include_dir = ["app","tasks"]
   # Exclude files.
-  exclude_file = ["todos.db",".gitignore"]
+  exclude_file = ["tasks.db",".gitignore"]
   # Exclude unchanged files.
   exclude_unchanged = true
   # This log file places in your tmp_dir.

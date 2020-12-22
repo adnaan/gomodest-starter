@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
+
+	"github.com/go-chi/render"
 
 	"github.com/stripe/stripe-go/v72"
 
@@ -25,7 +28,7 @@ const (
 	appCtxDataKey = "app_ctx_data"
 )
 
-type AppContext struct {
+type Context struct {
 	users      *users.API
 	viewEngine *goview.ViewEngine
 	pageData   goview.M
@@ -38,10 +41,12 @@ type APIRoute struct {
 	HandlerFunc http.HandlerFunc
 }
 
-func Router(ctx context.Context, cfg Config, apiRoutes []APIRoute) chi.Router {
+func Router(ctx context.Context, cfg Config) chi.Router {
 	//driver := "postgres"
 	//dataSource := "host=0.0.0.0 port=5432 user=gomodest dbname=gomodest sslmode=disable"
 	stripe.Key = cfg.StripeSecretKey
+
+	tasksCtx := NewTasksContext(ctx, cfg)
 	defaultUsersConfig := users.Config{
 		Driver:          cfg.Driver,
 		Datasource:      cfg.DataSource,
@@ -50,6 +55,9 @@ func Router(ctx context.Context, cfg Config, apiRoutes []APIRoute) chi.Router {
 		SendMail:        sendEmailFunc(cfg),
 		GothProviders: []goth.Provider{
 			google.New(cfg.GoogleClientID, cfg.GoogleSecret, fmt.Sprintf("%s/auth/callback?provider=google", cfg.Domain), "email", "profile"),
+		},
+		Roles: map[string][]users.Permission{
+			"owner": ownerRole(tasksCtx),
 		},
 	}
 	usersAPI, err := users.NewDefaultAPI(ctx, defaultUsersConfig)
@@ -69,7 +77,7 @@ func Router(ctx context.Context, cfg Config, apiRoutes []APIRoute) chi.Router {
 		panic(err)
 	}
 
-	appCtx := AppContext{
+	appCtx := Context{
 		users:      usersAPI,
 		viewEngine: indexLayout,
 		cfg:        cfg,
@@ -142,13 +150,45 @@ func Router(ctx context.Context, cfg Config, apiRoutes []APIRoute) chi.Router {
 		r.Get("/", rr("app", appPage))
 	})
 
+	authz := func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// GET /api/tasks/ => get:api:tasks
+			action := buildRestAction(r.Method, r.URL.Path)
+			target := chi.URLParam(r, "id")
+			if target == "" {
+				target = "*"
+			}
+			allow, err := usersAPI.Can(r, action, target)
+			if !allow || err != nil {
+				log.Printf("Can err: %v\n", err)
+				render.Render(w, r, ErrUnauthorized(err))
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+
 	r.Route("/api", func(r chi.Router) {
 		r.Use(usersAPI.IsAuthenticated)
 		r.Use(middleware.AllowContentType("application/json"))
-		for _, apiRoute := range apiRoutes {
-			r.MethodFunc(apiRoute.Method, apiRoute.Pattern, apiRoute.HandlerFunc)
-		}
+		r.With(authz).Route("/tasks", func(r chi.Router) {
+			r.Get("/", List(tasksCtx))
+			r.Post("/", Create(tasksCtx))
+		})
+		r.With(authz).Route("/tasks/{id}", func(r chi.Router) {
+			r.Put("/status", UpdateStatus(tasksCtx))
+			r.Put("/text", UpdateText(tasksCtx))
+			r.Delete("/", Delete(tasksCtx))
+		})
+
 	})
 
 	return r
+}
+
+func buildRestAction(method, path string) string {
+	return fmt.Sprintf("%s%s", strings.ToLower(method),
+		strings.ToLower(
+			strings.TrimRight(
+				strings.Replace(path, "/", ":", -1), ":")))
 }

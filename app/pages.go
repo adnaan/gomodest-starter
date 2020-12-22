@@ -20,7 +20,7 @@ import (
 	"github.com/foolin/goview"
 )
 
-func setDefaultPageData(appCtx AppContext) func(next http.Handler) http.Handler {
+func setDefaultPageData(appCtx Context) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -91,7 +91,7 @@ func setDefaultPageData(appCtx AppContext) func(next http.Handler) http.Handler 
 	}
 }
 
-func signupPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+func signupPageSubmit(appCtx Context, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	var email, password string
 	metadata := make(map[string]interface{})
 	_ = r.ParseForm()
@@ -128,7 +128,7 @@ func signupPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request)
 		}
 	}
 
-	err := appCtx.users.Signup(email, password, metadata)
+	err := appCtx.users.Signup(email, password, "owner", metadata)
 	if err != nil {
 		return goview.M{}, err
 	}
@@ -166,7 +166,7 @@ func (l *LoginForm) FieldMap(_ *http.Request) binding.FieldMap {
 	}
 }
 
-func loginPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+func loginPageSubmit(appCtx Context, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	loginForm := new(LoginForm)
 	if errs := binding.Bind(r, loginForm); errs != nil {
 		return nil, fmt.Errorf("%v, %w", errs, fmt.Errorf("missing email"))
@@ -196,7 +196,7 @@ func loginPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) 
 	return goview.M{}, nil
 }
 
-func magicLinkLoginConfirm(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+func magicLinkLoginConfirm(appCtx Context, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	otp := chi.URLParam(r, "otp")
 	err := appCtx.users.LoginWithOTP(w, r, otp)
 	if err != nil {
@@ -210,7 +210,7 @@ func magicLinkLoginConfirm(appCtx AppContext, w http.ResponseWriter, r *http.Req
 	return goview.M{}, nil
 }
 
-func loginPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+func loginPage(appCtx Context, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	confirmed := r.URL.Query().Get("confirmed")
 	if confirmed == "true" {
 		return goview.M{
@@ -248,8 +248,8 @@ func loginPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (govie
 	return goview.M{}, nil
 }
 
-func gothAuthCallbackPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
-	err := appCtx.users.HandleGothCallback(w, r)
+func gothAuthCallbackPage(appCtx Context, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+	err := appCtx.users.HandleGothCallback(w, r, "owner", nil)
 	if err != nil {
 		return goview.M{}, err
 	}
@@ -265,7 +265,7 @@ func gothAuthCallbackPage(appCtx AppContext, w http.ResponseWriter, r *http.Requ
 	return goview.M{}, nil
 }
 
-func gothAuthPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+func gothAuthPage(appCtx Context, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	err := appCtx.users.HandleGothLogin(w, r)
 	if err != nil {
 		return goview.M{}, err
@@ -280,7 +280,7 @@ func gothAuthPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (go
 	return goview.M{}, nil
 }
 
-func confirmEmailChangePage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+func confirmEmailChangePage(appCtx Context, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	token := chi.URLParam(r, "token")
 	err := appCtx.users.ConfirmEmailChange(token)
 	if err != nil {
@@ -291,7 +291,7 @@ func confirmEmailChangePage(appCtx AppContext, w http.ResponseWriter, r *http.Re
 	return goview.M{}, nil
 }
 
-func confirmEmailPage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+func confirmEmailPage(appCtx Context, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	token := chi.URLParam(r, "token")
 	err := appCtx.users.ConfirmEmail(token)
 	if err != nil {
@@ -302,7 +302,7 @@ func confirmEmailPage(appCtx AppContext, w http.ResponseWriter, r *http.Request)
 	return goview.M{}, nil
 }
 
-func appPage(_ AppContext, _ http.ResponseWriter, _ *http.Request) (goview.M, error) {
+func appPage(_ Context, _ http.ResponseWriter, _ *http.Request) (goview.M, error) {
 	dummy := struct {
 		Title string `json:"title"`
 	}{
@@ -319,7 +319,7 @@ func appPage(_ AppContext, _ http.ResponseWriter, _ *http.Request) (goview.M, er
 	}, nil
 }
 
-func accountPage(appCtx AppContext, _ http.ResponseWriter, r *http.Request) (goview.M, error) {
+func accountPage(appCtx Context, _ http.ResponseWriter, r *http.Request) (goview.M, error) {
 	emailChanged := r.URL.Query().Get("email_changed")
 	if emailChanged == "true" {
 		return goview.M{
@@ -359,7 +359,7 @@ func (af *AccountForm) FieldMap(_ *http.Request) binding.FieldMap {
 	}
 }
 
-func accountPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+func accountPageSubmit(appCtx Context, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	accountForm := new(AccountForm)
 	binding.Bind(r, accountForm)
 
@@ -431,7 +431,7 @@ func accountPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request
 	return pageData, nil
 }
 
-func forgotPageSubmit(appCtx AppContext, _ http.ResponseWriter, r *http.Request) (goview.M, error) {
+func forgotPageSubmit(appCtx Context, _ http.ResponseWriter, r *http.Request) (goview.M, error) {
 	accountForm := new(AccountForm)
 	if errs := binding.Bind(r, accountForm); errs != nil {
 		return nil, fmt.Errorf("%v, %w", errs, "email or password missing")
@@ -460,7 +460,7 @@ func (rf *ResetForm) FieldMap(_ *http.Request) binding.FieldMap {
 	}
 }
 
-func resetPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+func resetPageSubmit(appCtx Context, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	token := chi.URLParam(r, "token")
 	resetForm := new(ResetForm)
 	if errs := binding.Bind(r, resetForm); errs != nil {
@@ -477,7 +477,7 @@ func resetPageSubmit(appCtx AppContext, w http.ResponseWriter, r *http.Request) 
 	return goview.M{}, nil
 }
 
-func deleteAccount(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+func deleteAccount(appCtx Context, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	err := appCtx.users.DeleteUser(r)
 	if err != nil {
 		return goview.M{}, err

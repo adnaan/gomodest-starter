@@ -12,8 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/adnaan/gomodest/todos"
-
 	"github.com/adnaan/gomodest/app"
 
 	"github.com/go-chi/chi"
@@ -59,25 +57,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	apiRoutes := []app.APIRoute{
-		{
-			Method:      "GET",
-			Pattern:     "/todos",
-			HandlerFunc: todos.List,
-		},
-		{
-			Method:      "POST",
-			Pattern:     "/todos",
-			HandlerFunc: todos.Add,
-		},
-		{
-			Method:      "DELETE",
-			Pattern:     "/todos",
-			HandlerFunc: todos.Delete,
-		},
-	}
-
-	r := app.Router(baseCtx, cfg, apiRoutes)
+	r := app.Router(baseCtx, cfg)
 	workDir, _ := os.Getwd()
 	public := http.Dir(filepath.Join(workDir, "./", "public", "assets"))
 	fileServer(r, "/static", public)

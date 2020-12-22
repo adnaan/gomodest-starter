@@ -45,13 +45,13 @@ func viewEngine(cfg Config, baseTemplate string) (*goview.ViewEngine, error) {
 	}), nil
 }
 
-type PageHandlerFunc func(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error)
+type PageHandlerFunc func(appCtx Context, w http.ResponseWriter, r *http.Request) (goview.M, error)
 
-func simplePage(appCtx AppContext, w http.ResponseWriter, r *http.Request) (goview.M, error) {
+func simplePage(appCtx Context, w http.ResponseWriter, r *http.Request) (goview.M, error) {
 	return goview.M{}, nil
 }
 
-func newRenderer(appCtx AppContext) func(page string, pageHandlerFuncs ...PageHandlerFunc) http.HandlerFunc {
+func newRenderer(appCtx Context) func(page string, pageHandlerFuncs ...PageHandlerFunc) http.HandlerFunc {
 	return func(page string, pageHandlerFuncs ...PageHandlerFunc) http.HandlerFunc {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// merge app context data set by isAuthenticated Middleware with the passed page data

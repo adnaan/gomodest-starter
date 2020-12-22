@@ -1,6 +1,7 @@
-package todos
+package app
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/render"
@@ -35,7 +36,7 @@ func ErrInvalidRequest(err error) render.Renderer {
 		Err:            err,
 		HTTPStatusCode: 400,
 		StatusText:     "Invalid request.",
-		ErrorText:      err.Error(),
+		ErrorText:      fmt.Sprintf("%v", err),
 	}
 }
 
@@ -44,7 +45,7 @@ func ErrRender(err error) render.Renderer {
 		Err:            err,
 		HTTPStatusCode: 422,
 		StatusText:     "Error rendering response.",
-		ErrorText:      err.Error(),
+		ErrorText:      fmt.Sprintf("%v", err),
 	}
 }
 
@@ -53,7 +54,7 @@ func ErrInternal(err error) render.Renderer {
 		Err:            err,
 		HTTPStatusCode: 500,
 		StatusText:     "Internal error.",
-		ErrorText:      err.Error(),
+		ErrorText:      fmt.Sprintf("%v", err),
 	}
 }
 
@@ -62,7 +63,7 @@ func ErrUnauthorized(err error) render.Renderer {
 		Err:            err,
 		HTTPStatusCode: 401,
 		StatusText:     "Unauthorized",
-		ErrorText:      err.Error(),
+		ErrorText:      fmt.Sprintf("%v", err),
 	}
 }
 

@@ -5,7 +5,7 @@
 
     let todos = [];
     let input = "";
-    const todosAPI = '/api/todos'
+    const todosAPI = '/api/tasks'
     onMount(async () => {
         const res = await fetch(todosAPI);
         todos = await res.json();
@@ -29,12 +29,9 @@
     }
 
     const removeTodo = async(id) => {
-        const res = await fetch(todosAPI, {
+        const res = await fetch(todosAPI +"/" + id, {
             method: 'DELETE',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                id: id
-            })
+            headers: {'Content-Type': 'application/json'}
         });
         const index = todos.findIndex(todo => todo.id === id);
         todos.splice(index, 1);

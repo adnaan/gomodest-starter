@@ -12,7 +12,7 @@ import (
 	"github.com/go-chi/chi"
 )
 
-func handleWebhook(appCtx AppContext) http.HandlerFunc {
+func handleWebhook(appCtx Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		source := chi.URLParam(r, "source")
 
