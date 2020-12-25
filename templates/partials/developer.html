@@ -1,0 +1,79 @@
+{{define "developer"}}
+<div class="card px-5 py-5" data-controller="clipboard" data-clipboard-copied-class="is-hidden">
+    <h4 class="title is-4">Api Token</h4>
+    <hr/>
+    {{ if .is_api_token_set }}
+    {{ if .api_token }}
+
+    <textarea class="textarea has-background-success-light is-small has-fixed-size mb-1"
+              rows="2" wrap="hard" data-clipboard-target="source" readonly>{{.api_token}}</textarea>
+    <div>
+        <button class="button is-small" data-action="clipboard#copy">
+                        <span class="icon is-small has-text-success">
+                          <i class="fas fa-clipboard"></i>
+                        </span>
+        </button>
+        <p class="tag is-success is-light is-hidden" data-clipboard-target="copied">Copied to Clipboard!</p>
+    </div>
+    <br>
+    <br>
+    <div>
+        <p class="has-background-warning px-5 py-2">
+            Please copy the API Token and save it in a safe place.
+            You won't be able to see the token again once this page is closed or reloaded.
+        </p>
+    </div>
+
+    {{ else }}
+    <p class="box"> You have previously generated an API Token and hopefully saved it in a safe place.
+    </p>
+    <button class="button is-warning"
+            data-modal-target-id="resetAPIToken"
+            data-action="click->navigate#openModal">
+        Regenerate API Token
+    </button>
+    {{ end }}
+    {{ else }}
+    <button class="button is-warning"
+            data-modal-target-id="resetAPIToken"
+            data-action="click->navigate#openModal">
+        Generate API Token
+    </button>
+    {{ end }}
+
+    <div class="modal"
+         id="resetAPIToken"
+         data-navigate-target="modal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <input type="hidden" name="form_token" value="{{.form_token}}">
+            <form method="POST">
+                <input type="hidden" name="form_token" value="{{.form_token}}">
+                <input type="hidden" name="reset_api_token" value="true">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Are you sure ?</p>
+                    <button class="delete"
+                            data-modal-target-id="resetAPIToken"
+                            data-action="click->navigate#closeModal"
+                            aria-label="close">
+                    </button>
+                </header>
+                <section class="modal-card-body">
+                    <p class="has-text-weight-semibold">
+                        Resetting will make the current API Token unusable forever.
+                        A new API Token will be created
+                    </p>
+                </section>
+                <footer class="modal-card-foot is-justify-content-flex-end">
+                    <button class="button is-warning" type="submit">Yes</button>
+                    <button class="button"
+                            data-modal-target-id="resetAPIToken"
+                            data-action="click->navigate#closeModal">
+                        Cancel
+                    </button>
+                </footer>
+            </form>
+        </div>
+    </div>
+</div>
+{{end}}

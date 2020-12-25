@@ -1,0 +1,17 @@
+{{define "subscription"}}
+<div class="card px-5 py-5 mb-5">
+    <h4 class="title is-4">Subscription</h4>
+    <hr>
+    <div class="tile is-ancestor">
+        <div class="tile is-vertical is-parent">
+            {{ if .current_plan }}
+            {{ template "plan" .current_plan }}
+            {{else}}
+            {{ range .plans}}
+            {{template "plan" .}}
+            {{end}}
+            {{end}}
+        </div>
+    </div>
+</div>
+{{end}}

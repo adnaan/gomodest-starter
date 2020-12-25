@@ -1,6 +1,6 @@
 {{define "content"}}
 <div class="columns is-mobile is-centered">
-    <div class="column is-half-desktop">
+    <div class="column is-three-quarters-desktop">
         {{ if .change_email }}
             <box class="box has-background-warning"> A verification link has been sent to your inbox for confirming your new
                 email address. Please verify to complete the request.
@@ -8,206 +8,90 @@
         {{end}}
 
         {{ if .email_changed }}
-            <box class="box has-background-success"> Your email was updated!</box>
+            <box class="box has-background-success">Your email was updated!</box>
         {{end}}
 
         {{ if .checkout }}
         {{ if eq .checkout "success"}}
-            <box class="box has-background-success"> Payment was successful!</box>
+            <box class="box has-background-success">Payment was successful!</box>
         {{end}}
         {{ if eq .checkout "cancel"}}
-            <box class="box has-background-danger"> Payment was cancelled!</box>
+            <box class="box has-background-danger">Payment was cancelled!</box>
         {{end}}
         {{end}}
 
-        <div class="card px-5 py-5">
-            <h4 class="title is-4">Profile</h4>
-            <hr/>
-            <form
-                    data-action="submit->account#submitAccountForm"
-                    method="POST">
-                <input type="hidden" name="form_token" value="{{.form_token}}">
-                {{if .Error}}
-                <div class="field has-background-danger has-text-white px-6 py-5">
-                    {{.Error}}
-                </div>
-                {{end}}
-                <div class="field">
-                    <label class="label">Name</label>
-                    <div class="control">
-                        <input
-                                data-account-target="name"
-                                data-action="blur->account#validateName"
-                                maxlength="30"
-                                class="input"
-                                name="name"
-                                type="text"
-                                placeholder="e.g Alex Smith"
-                                value="{{.metadata.name}}">
-                    </div>
-                </div>
-
-                {{if .email}}
-                <div class="field">
-                    <label class="label">Email</label>
-                    <div class="control">
-                        <input class="input"
-                               data-account-target="email"
-                               data-action="blur->account#validateEmail"
-                               name="email"
-                               type="email"
-                               aria-label="Email"
-                               pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
-                               placeholder="e.g. alexsmith@gmail.com"
-                               value="{{.email}}">
-                    </div>
-                </div>
-                {{end}}
-
-                <div class="field">
-                    <p class="control">
-                        <button class="button is-link" type="submit">
-                            Update
-                        </button>
+        <div class="columns is-mobile is-centered"
+             data-controller="tabs"
+             data-tabs-active-class="is-active"
+             data-tabs-hidden-class="is-hidden"
+             data-tabs-default-tabkey-value="profile">
+            <div class="column is-one-quarter-desktop">
+                <aside class="menu">
+                    <p class="menu-label">
+                        Account
                     </p>
+                    <ul class="menu-list">
+                        <li>
+                            <a data-tabkey="profile"
+                               data-tabs-target="tab"
+                               data-action="tabs#activate">
+                                My profile
+                            </a>
+                        </li>
+                        <li>
+                            <a data-tabkey="subscription"
+                               data-tabs-target="tab"
+                               data-action="tabs#activate">
+                                My subscription
+                            </a>
+                        </li>
+                    </ul>
+                    <p class="menu-label">
+                        Workspace
+                    </p>
+                    <ul class="menu-list">
+                        <li>
+                            <a data-tabkey="developer"
+                               data-tabs-target="tab"
+                               data-action="tabs#activate">
+                                Developer Settings
+                            </a>
+                        </li>
+                        <li>
+                            <a data-tabkey="organisations"
+                               data-tabs-target="tab"
+                               data-action="tabs#activate">
+                                Organisations & Teams
+                            </a>
+                        </li>
+                    </ul>
+                </aside>
+            </div>
+            <div class="column is-three-quarters-desktop">
+                <div class="is-hidden"
+                     data-tabkey="profile"
+                     data-tabs-target="tabPanel">
+                    {{template "profile" .}}
                 </div>
-            </form>
+                <div class="is-hidden"
+                     data-tabkey="subscription"
+                     data-tabs-target="tabPanel">
+                    {{template "subscription" .}}
+                </div>
+                <div class="is-hidden"
+                     data-tabkey="developer"
+                     data-tabs-target="tabPanel">
+                    {{template "developer" .}}
+                </div>
+                <div class="is-hidden"
+                     data-tabs-target="tabPanel"
+                     data-tabkey="organisations">
+                    {{template "organisations" .}}
+                </div>
+            </div>
         </div>
-        <br/>
-        <div class="card px-5 py-5" data-controller="clipboard" data-clipboard-copied-class="is-hidden">
-            <h4 class="title is-4">Api Token</h4>
-            <hr/>
-            {{ if .is_api_token_set }}
-            {{ if .api_token }}
 
-            <textarea class="textarea has-background-success-light is-small has-fixed-size mb-1"
-                      rows="2" wrap="hard" data-clipboard-target="source" readonly>{{.api_token}}</textarea>
-            <div>
-                <button class="button is-small" data-action="clipboard#copy">
-                    <span class="icon is-small has-text-success">
-                      <i class="fas fa-clipboard"></i>
-                    </span>
-                </button>
-                <p class="tag is-success is-light is-hidden" data-clipboard-target="copied">Copied to Clipboard!</p>
-            </div>
-            <br>
-            <br>
-            <div>
-                <p class="has-background-warning px-5 py-2">
-                    Please copy the API Token and save it in a safe place.
-                    You won't be able to see the token again once this page is closed or reloaded.
-                </p>
-            </div>
 
-            {{ else }}
-            <p class="box"> You have previously generated an API Token and hopefully saved it in a safe place.
-            </p>
-            <button class="button is-warning"
-                    data-modal-target-id="resetAPIToken"
-                    data-action="click->navigate#openModal">
-                Regenerate API Token
-            </button>
-            {{ end }}
-            {{ else }}
-            <button class="button is-warning"
-                    data-modal-target-id="resetAPIToken"
-                    data-action="click->navigate#openModal">
-                Generate API Token
-            </button>
-            {{ end }}
-
-            <div class="modal"
-                 id="resetAPIToken"
-                 data-navigate-target="modal">
-                <div class="modal-background"></div>
-                <div class="modal-card">
-                    <input type="hidden" name="form_token" value="{{.form_token}}">
-                    <form method="POST">
-                        <input type="hidden" name="form_token" value="{{.form_token}}">
-                        <input type="hidden" name="reset_api_token" value="true">
-                        <header class="modal-card-head">
-                            <p class="modal-card-title">Are you sure ?</p>
-                            <button class="delete"
-                                    data-modal-target-id="resetAPIToken"
-                                    data-action="click->navigate#closeModal"
-                                    aria-label="close">
-                            </button>
-                        </header>
-                        <section class="modal-card-body">
-                            <p class="has-text-weight-semibold">
-                                Resetting will make the current API Token unusable forever.
-                                A new API Token will be created
-                            </p>
-                        </section>
-                        <footer class="modal-card-foot is-justify-content-flex-end">
-                            <button class="button is-warning" type="submit">Yes</button>
-                            <button class="button"
-                                    data-modal-target-id="resetAPIToken"
-                                    data-action="click->navigate#closeModal">
-                                Cancel
-                            </button>
-                        </footer>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <br/>
-        <div class="card px-5 py-5 mb-5">
-            <h4 class="title is-4">Subscription</h4>
-            <hr>
-            <div class="tile is-ancestor">
-                <div class="tile is-vertical is-parent">
-                    {{ if .current_plan }}
-                        {{ template "plan" .current_plan }}
-                    {{else}}
-                        {{ range .plans}}
-                            {{template "plan" .}}
-                        {{end}}
-                    {{end}}
-                </div>
-            </div>
-        </div>
-        <div class="card px-5 py-5">
-            <h4 class="title is-4">Delete account</h4>
-            <hr/>
-            <p>All data related to your account will be completely removed and unrecoverable.</p>
-            <button class="button is-danger mt-5"
-                    data-modal-target-id="deleteAccount"
-                    data-action="click->navigate#openModal">
-                Delete your account
-            </button>
-            <div class="modal"
-                 id="deleteAccount"
-                 data-navigate-target="modal">
-                <div class="modal-background"></div>
-                <div class="modal-card">
-                    <form action="/account/delete" method="POST">
-                        <input type="hidden" name="form_token" value="{{.form_token}}">
-                        <header class="modal-card-head">
-                            <p class="modal-card-title">Are you sure ?</p>
-                            <button class="delete"
-                                    data-modal-target-id="deleteAccount"
-                                    data-action="click->navigate#closeModal"
-                                    aria-label="close">
-                            </button>
-                        </header>
-                        <section class="modal-card-body">
-                            <p class="has-text-weight-semibold">
-                                Deleting your account is permanent and removes all account data forever.
-                            </p>
-                        </section>
-                        <footer class="modal-card-foot is-justify-content-flex-end">
-                            <button class="button is-danger" type="submit">Yes</button>
-                            <button class="button"
-                                    data-modal-target-id="deleteAccount"
-                                    data-action="click->navigate#closeModal">
-                                Cancel
-                            </button>
-                        </footer>
-                    </form>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 

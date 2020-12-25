@@ -1,0 +1,49 @@
+import { Controller } from "stimulus"
+
+export default class extends Controller {
+
+    static targets = [ "tab", "tabPanel" ]
+    static values = {
+        defaultTabkey: String
+    }
+    static classes = [ "active", "hidden" ]
+
+    connect() {
+        let activeTabKey = undefined;
+        if (window.location.hash){
+            activeTabKey = window.location.hash.substring(1);
+        }else{
+            activeTabKey = localStorage.getItem('tabkey')
+        }
+        if (!activeTabKey){
+            activeTabKey = this.defaultTabkeyValue;
+        }
+
+        this.activateTab(activeTabKey)
+    }
+
+    activateTab(tabkey){
+        this.tabPanelTargets.forEach((el, i) => {
+            if(el.dataset.tabkey === tabkey){
+                el.classList.remove(this.hiddenClass)
+            } else {
+                el.classList.add(this.hiddenClass)
+            }
+        })
+
+        this.tabTargets.forEach((el, i) => {
+            if(el.dataset.tabkey === tabkey){
+                el.classList.add(this.activeClass)
+                history.replaceState(null,null,`#${el.dataset.tabkey}`)
+                localStorage.setItem("tabkey",el.dataset.tabkey)
+            } else {
+                el.classList.remove(this.activeClass)
+            }
+        })
+    }
+
+    activate(e){
+       this.activateTab(e.currentTarget.dataset.tabkey);
+    }
+
+}
