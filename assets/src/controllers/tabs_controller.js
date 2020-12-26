@@ -11,9 +11,9 @@ export default class extends Controller {
 
     connect() {
         let activeTabKey = undefined;
-        if (window.location.hash){
+        if (window.location.hash && !this.disableHistoryValue){
             activeTabKey = window.location.hash.substring(1);
-        }else{
+        }else if (!this.disableHistoryValue){
             activeTabKey = localStorage.getItem('tabkey')
         }
         if (!activeTabKey){
