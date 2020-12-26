@@ -19,9 +19,9 @@
                                 {{ if $currentPlan }}
                                     {{ if eq $currentPlan.PriceID .PriceID }}
                                         <div>
-                                           <span class="tag is-current is-small has-text-weight-semibold has-text-grey-light">
+                                           <div class="tag is-current is-small has-text-weight-semibold has-text-grey-light">
                                                 Current plan
-                                            </span>
+                                            </div>
                                         </div>
                                         <div class="py-2">
                                             <button class="button is-primary is-small"
@@ -33,9 +33,9 @@
                                     {{ end }}
                                 {{ else }}
                                     {{ if eq .PriceID "default" }}
-                                    <span class="tag is-current is-small has-text-weight-semibold has-text-grey-light">
-                                            Current plan
-                                        </span>
+                                        <div class="tag is-current is-small has-text-weight-semibold has-text-grey-light">
+                                                Current plan
+                                        </div>
                                     {{ else }}
                                         <button class="button is-primary is-small"
                                                 data-action="subscription#createCheckoutClick">

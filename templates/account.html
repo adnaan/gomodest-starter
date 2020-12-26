@@ -20,12 +20,12 @@
         {{end}}
         {{end}}
 
-        <div class="columns is-multiline is-mobile is-variable is-8"
+        <div class="columns is-multiline is-mobile is-centered is-variable is-8"
              data-controller="tabs"
              data-tabs-active-class="is-active"
              data-tabs-hidden-class="is-hidden"
              data-tabs-default-tabkey-value="profile">
-            <div class="column is-one-quarter-desktop is-full-mobile">
+            <div class="column is-one-quarter-desktop is-four-fifths-mobile">
                 <aside class="menu">
                     <p class="menu-label">
                         Account
@@ -67,23 +67,27 @@
                     </ul>
                 </aside>
             </div>
-            <div class="column is-three-quarters-desktop has-background-white-bis py-5">
+            <div class="column is-three-quarters-desktop is-four-fifths-mobile has-background-white-bis py-5">
                 <div class="is-hidden"
+                     style="min-width: 360px;"
                      data-tabkey="profile"
                      data-tabs-target="tabPanel">
                     {{template "profile" .}}
                 </div>
                 <div class="is-hidden"
+                     style="min-width: 360px;"
                      data-tabkey="plans"
                      data-tabs-target="tabPanel">
                     {{template "plans" .}}
                 </div>
                 <div class="is-hidden"
+                     style="min-width: 360px;"
                      data-tabkey="developer"
                      data-tabs-target="tabPanel">
                     {{template "developer" .}}
                 </div>
                 <div class="is-hidden"
+                     style="min-width: 360px;"
                      data-tabs-target="tabPanel"
                      data-tabkey="members">
                     {{template "members" .}}
