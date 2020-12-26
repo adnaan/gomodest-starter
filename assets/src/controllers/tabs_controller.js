@@ -4,7 +4,8 @@ export default class extends Controller {
 
     static targets = [ "tab", "tabPanel" ]
     static values = {
-        defaultTabkey: String
+        defaultTabkey: String,
+        disableHistory: Boolean
     }
     static classes = [ "active", "hidden" ]
 
@@ -34,8 +35,10 @@ export default class extends Controller {
         this.tabTargets.forEach((el, i) => {
             if(el.dataset.tabkey === tabkey){
                 el.classList.add(this.activeClass)
-                history.replaceState(null,null,`#${el.dataset.tabkey}`)
-                localStorage.setItem("tabkey",el.dataset.tabkey)
+                if (!this.disableHistoryValue){
+                    history.replaceState(null,null,`#${el.dataset.tabkey}`)
+                    localStorage.setItem("tabkey",el.dataset.tabkey)
+                }
             } else {
                 el.classList.remove(this.activeClass)
             }
@@ -43,7 +46,13 @@ export default class extends Controller {
     }
 
     activate(e){
-       this.activateTab(e.currentTarget.dataset.tabkey);
+        let tabkey = undefined;
+        if(e.currentTarget.dataset.tabkey){
+            tabkey = e.currentTarget.dataset.tabkey;
+        } else  if(e.currentTarget.parentElement.dataset.tabkey){
+          tabkey = e.currentTarget.parentElement.dataset.tabkey
+        }
+       this.activateTab(tabkey);
     }
 
 }

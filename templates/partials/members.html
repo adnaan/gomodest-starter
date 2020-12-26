@@ -1,3 +1,42 @@
 {{define "members"}}
-Members
+<div class="card px-5 py-5"
+     data-controller="tabs"
+     data-tabs-active-class="is-active"
+     data-tabs-hidden-class="is-hidden"
+     data-tabs-default-tabkey-value="members"
+     data-tabs-disable-history-value="true">
+    <div class="tabs">
+        <ul>
+            <li data-tabkey="members"
+                data-tabs-target="tab">
+                <a data-action="tabs#activate">Members</a>
+            </li>
+            <li data-tabkey="groups"
+                data-tabs-target="tab">
+                <a data-action="tabs#activate">Groups</a>
+            </li>
+            <li data-tabkey="guests"
+                data-tabs-target="tab">
+                <a data-action="tabs#activate">Guests</a>
+            </li>
+        </ul>
+    </div>
+
+        <div class="is-hidden"
+             data-tabkey="members"
+             data-tabs-target="tabPanel">
+            {{template "list_members" .}}
+        </div>
+        <div class="is-hidden"
+             data-tabkey="groups"
+             data-tabs-target="tabPanel">
+            {{template "groups" .}}
+        </div>
+        <div class="is-hidden"
+             data-tabkey="guests"
+             data-tabs-target="tabPanel">
+            {{template "guests" .}}
+        </div>
+
+</div>
 {{end}}
