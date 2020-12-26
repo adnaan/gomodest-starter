@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Usage",
+    "features": [
+      {
+        "id": "api_calls",
+        "title": "API Calls",
+        "value_type": "int"
+      },
+      {
+        "id": "events",
+        "title": "Events",
+        "value_type": "int"
+      },
+      {
+        "id": "alerts",
+        "title": "Alerts",
+        "value_type": "int"
+      }
+    ]
+  }
+]

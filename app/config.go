@@ -41,19 +41,33 @@ type Config struct {
 	GoogleSecret   string `json:"google_secret" envconfig:"google_secret"`
 
 	// subscription
-	PlansFile            string `json:"plans_file" envconfig:"plans_file" default:"plans.development.json"`
-	Plans                []Plan `json:"-" envconfig:"-"`
-	StripePublishableKey string `json:"stripe_publishable_key" envconfig:"stripe_publishable_key"`
-	StripeSecretKey      string `json:"stripe_secret_key" envconfig:"stripe_secret_key"`
-	StripeWebhookSecret  string `json:"stripe_webhook_secret" envconfig:"stripe_webhook_secret"`
+	FeatureGroupsFile    string         `json:"feature_groups_file" envconfig:"feature_groups_file" default:"feature_groups.development.json"`
+	FeatureGroups        []FeatureGroup `json:"-" envconfig:"-"`
+	PlansFile            string         `json:"plans_file" envconfig:"plans_file" default:"plans.development.json"`
+	Plans                []Plan         `json:"-" envconfig:"-"`
+	StripePublishableKey string         `json:"stripe_publishable_key" envconfig:"stripe_publishable_key"`
+	StripeSecretKey      string         `json:"stripe_secret_key" envconfig:"stripe_secret_key"`
+	StripeWebhookSecret  string         `json:"stripe_webhook_secret" envconfig:"stripe_webhook_secret"`
+}
+
+type FeatureGroup struct {
+	Name     string    `json:"name"`
+	Features []Feature `json:"features"`
+}
+
+type Feature struct {
+	ID        string `json:"id"`
+	Title     string `json:"title"`
+	ValueType string `json:"value_type"`
 }
 
 type Plan struct {
-	PriceID string   `json:"price_id"`
-	Name    string   `json:"name"`
-	Price   string   `json:"price"`
-	Current bool     `json:"-"`
-	Details []string `json:"details"`
+	PriceID  string                 `json:"price_id"`
+	Name     string                 `json:"name"`
+	Price    string                 `json:"price"`
+	Current  bool                   `json:"-"`
+	Details  []string               `json:"details"`
+	Features map[string]interface{} `json:"features"`
 
 	StripeKey string `json:"-"`
 }
@@ -76,6 +90,13 @@ func LoadConfig(configFile string, envPrefix string) (Config, error) {
 		config.Plans = plans
 	} else {
 		fmt.Printf("err loading plan file %v, err %v \n", config.PlansFile, err)
+	}
+
+	featureGroups, err := loadFeatureGroups(config.FeatureGroupsFile)
+	if err == nil {
+		config.FeatureGroups = featureGroups
+	} else {
+		fmt.Printf("err loading feature groups file %v, err %v \n", config.FeatureGroupsFile, err)
 	}
 
 	return config, nil
@@ -104,6 +125,31 @@ func loadPlans(file string) ([]Plan, error) {
 	}
 
 	return plans, nil
+}
+
+func loadFeatureGroups(file string) ([]FeatureGroup, error) {
+	if file == "" {
+		return []FeatureGroup{}, nil
+	}
+
+	var data []byte
+	var err error
+
+	data, err = base64.StdEncoding.DecodeString(file) // check if string is base64 data
+	if err != nil {
+		data, err = ioutil.ReadFile(file) // or is a file path
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var featureGroups []FeatureGroup
+	err = json.Unmarshal(data, &featureGroups)
+	if err != nil {
+		return nil, err
+	}
+
+	return featureGroups, nil
 }
 
 func loadEnvironment(filename string) error {

@@ -38,13 +38,6 @@
                                 My profile
                             </a>
                         </li>
-                        <li>
-                            <a data-tabkey="subscription"
-                               data-tabs-target="tab"
-                               data-action="tabs#activate">
-                                My subscription
-                            </a>
-                        </li>
                     </ul>
                     <p class="menu-label">
                         Workspace
@@ -64,6 +57,13 @@
                                 Members
                             </a>
                         </li>
+                        <li>
+                            <a data-tabkey="plans"
+                               data-tabs-target="tab"
+                               data-action="tabs#activate">
+                                Plans
+                            </a>
+                        </li>
                     </ul>
                 </aside>
             </div>
@@ -74,9 +74,9 @@
                     {{template "profile" .}}
                 </div>
                 <div class="is-hidden"
-                     data-tabkey="subscription"
+                     data-tabkey="plans"
                      data-tabs-target="tabPanel">
-                    {{template "subscription" .}}
+                    {{template "plans" .}}
                 </div>
                 <div class="is-hidden"
                      data-tabkey="developer"

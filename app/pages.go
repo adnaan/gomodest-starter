@@ -27,6 +27,7 @@ func setDefaultPageData(appCtx Context) func(next http.Handler) http.Handler {
 			pageData := map[string]interface{}{}
 			pageData["route"] = r.URL.Path
 			pageData["app_name"] = strings.Title(strings.ToLower(appCtx.cfg.Name))
+			pageData["feature_groups"] = appCtx.cfg.FeatureGroups
 			defer func() {
 				ctx := r.Context()
 				ctx = context.WithValue(ctx, appCtxDataKey, pageData)

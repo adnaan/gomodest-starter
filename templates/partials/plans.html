@@ -1,0 +1,76 @@
+{{define "plans"}}
+<div>
+    <h4 class="title is-4">Plans</h4>
+    <hr>
+    <div class="table-container">
+        <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+            <thead>
+                <tr>
+                    {{ $currentPlan := .current_plan }}
+                    <th></th>
+                    {{ range .plans}}
+                        <th class="pl-4 pt-3"
+                            data-controller="subscription"
+                            data-subscription-stripe-value="{{.StripeKey}}"
+                            data-subscription-price-value="{{.PriceID}}">
+                            <div> {{.Name}} </div>
+                            <div class="has-text-weight-light py-2">${{.Price}} per month</div>
+                            <div class="py-2">
+                                {{ if $currentPlan }}
+                                    {{ if eq $currentPlan.PriceID .PriceID }}
+                                        <div>
+                                           <span class="tag is-current is-small has-text-weight-semibold has-text-grey-light">
+                                                Current plan
+                                            </span>
+                                        </div>
+                                        <div class="py-2">
+                                            <button class="button is-primary is-small"
+                                                    data-action="click->navigate#goto"
+                                                    data-goto="/account/subscription/manage">
+                                                Manage
+                                            </button>
+                                        </div>
+                                    {{ end }}
+                                {{ else }}
+                                    {{ if eq .PriceID "default" }}
+                                    <span class="tag is-current is-small has-text-weight-semibold has-text-grey-light">
+                                            Current plan
+                                        </span>
+                                    {{ else }}
+                                        <button class="button is-primary is-small"
+                                                data-action="subscription#createCheckoutClick">
+                                            Upgrade
+                                        </button>
+                                    {{ end }}
+                                {{ end }}
+                            </div>
+                        </th>
+                    {{ end }}
+                </tr>
+            </thead>
+            <tbody>
+            {{ $plans := .plans }}
+            {{ range .feature_groups }}
+                <tr>
+                    <th>{{ .Name }}</th>
+                    {{ range $plans }}
+                        <td></td>
+                    {{ end }}
+                </tr>
+
+                {{ range .Features }}
+                    {{$featureID := .ID}}
+                    <tr>
+                        <th class="has-text-weight-light">{{.Title}}</th>
+                        {{ range $plans }}
+                            <td> {{ index .Features $featureID}}</td>
+                        {{ end }}
+                    </tr>
+                {{ end }}
+
+            {{ end }}
+            </tbody>
+        </table>
+    </div>
+</div>
+{{end}}
