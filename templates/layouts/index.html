@@ -9,8 +9,7 @@
         data-action="keydown@window->navigate#keyDown "
         data-navigate-active-class="is-active">
   {{include "partials/top_navbar"}}
-    <section class="section">
-      <div class="container h-full px-5 py-5">
+      <div class="container h-full px-5">
         {{if .userError}}
           <div class="columns is-mobile is-centered is-vcentered">
             <div class="column is-one-third-desktop has-text-centered is-narrow">
@@ -29,7 +28,6 @@
         </div>
         {{template "content" .}}
       </div>
-    </section>
     {{include "partials/footer"}}
     <script src="/static/js/bundle.js" async></script>
   </body>

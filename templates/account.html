@@ -20,6 +20,8 @@
         {{end}}
         {{end}}
 
+        {{ template "workspace_switcher" .}}
+
         <div class="columns is-multiline is-mobile is-centered is-variable is-8"
              data-controller="tabs"
              data-tabs-active-class="is-active"
@@ -36,6 +38,11 @@
                                data-tabs-target="tab"
                                data-action="tabs#activate">
                                 My profile
+                            </a>
+                        </li>
+                        <li>
+                            <a  href="/logout">
+                                Log out
                             </a>
                         </li>
                     </ul>

@@ -42,6 +42,7 @@ func setDefaultPageData(appCtx Context) func(next http.Handler) http.Handler {
 			pageData["is_logged_in"] = true
 			pageData["email"] = user.Email
 			pageData["metadata"] = user.Metadata
+			pageData["workspaces"] = user.Workspaces
 			if user.IsAPITokenSet {
 				pageData["is_api_token_set"] = true
 			}

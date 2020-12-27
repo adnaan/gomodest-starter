@@ -1,0 +1,39 @@
+{{define "workspace_switcher"}}
+<div class="columns is-multiline is-mobile is-centered">
+    <div class="column is-one-quarter-desktop is-four-fifths-mobile">
+        <aside class="menu">
+            <ul class="menu-list">
+                <li>
+                    <div class="dropdown"
+                         data-navigate-target="dropup">
+                        <div class="dropdown-trigger">
+                            <button class="button"
+                                    aria-haspopup="true"
+                                    aria-controls="dropdown-menu"
+                                    data-action="navigate#toggleIsActive">
+                                <span>Switch Workspace</span>
+                                <span class="icon is-small">
+                                            <i class="fas fa-angle-down" aria-hidden="true"></i>
+                                        </span>
+                            </button>
+                        </div>
+                        <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                            <div class="dropdown-content">
+                                {{ range .workspaces }}
+                                <hr class="dropdown-divider">
+                                <div class="dropdown-item">
+                                    <p>{{ .Name }}</p>
+                                    <p> {{ .Role }}</p>
+                                </div>
+                                {{ end }}
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </aside>
+    </div>
+    <div class="column is-three-quarters-desktop is-hidden-mobile py-5">
+    </div>
+</div>
+{{end}}
