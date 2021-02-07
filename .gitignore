@@ -8,3 +8,4 @@ bin
 *.local
 *.local.*
 public
+ops/build

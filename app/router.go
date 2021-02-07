@@ -20,19 +20,15 @@ import (
 
 	"github.com/go-chi/httplog"
 
+	rl "github.com/adnaan/renderlayout"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
 
-const (
-	appCtxDataKey = "app_ctx_data"
-)
-
 type Context struct {
-	users      *users.API
-	viewEngine *goview.ViewEngine
-	pageData   goview.M
-	cfg        Config
+	users    *users.API
+	pageData goview.M
+	cfg      Config
 }
 
 type APIRoute struct {
@@ -72,18 +68,19 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 			LogLevel: cfg.LogLevel,
 		})
 
-	indexLayout, err := viewEngine(cfg, "index")
-	if err != nil {
-		panic(err)
-	}
-
 	appCtx := Context{
-		users:      usersAPI,
-		viewEngine: indexLayout,
-		cfg:        cfg,
+		users: usersAPI,
+		cfg:   cfg,
 	}
 
-	rr := newRenderer(appCtx)
+	indexLayout, err := rl.New(
+		rl.Layout("index"),
+		rl.DisableCache(true),
+		rl.DefaultHandler(defaultPageHandler(appCtx)))
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// middlewares
 	r := chi.NewRouter()
@@ -95,22 +92,22 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 
 	// app
 
-	r.NotFound(rr("404"))
+	r.NotFound(indexLayout.HandleStatic("404"))
 	// public
 	r.Route("/", func(r chi.Router) {
-		r.Use(setDefaultPageData(appCtx))
-		r.Get("/", rr("home"))
+		//r.Use(setDefaultPageData(appCtx))
+
 		r.Post("/webhook/{source}", handleWebhook(appCtx))
+		r.Get("/", indexLayout.HandleStatic("home"))
+		r.Get("/signup", indexLayout.HandleStatic("signup"))
+		r.Post("/signup", indexLayout.Handle("signup", signupPageSubmit(appCtx)))
 
-		r.Get("/signup", rr("signup"))
-		r.Post("/signup", rr("signup", signupPageSubmit))
+		r.Get("/confirm/{token}", indexLayout.Handle("confirmed", confirmEmailPage(appCtx)))
 
-		r.Get("/confirm/{token}", rr("confirmed", confirmEmailPage))
-
-		r.Get("/login", rr("login", loginPage))
-		r.Post("/login", rr("login", loginPageSubmit))
-		r.Get("/auth/callback", rr("login", gothAuthCallbackPage))
-		r.Get("/auth", rr("login", gothAuthPage))
+		r.Get("/login", indexLayout.Handle("login", loginPage(appCtx)))
+		r.Post("/login", indexLayout.Handle("login", loginPageSubmit(appCtx)))
+		r.Get("/auth/callback", indexLayout.Handle("login", gothAuthCallbackPage(appCtx)))
+		r.Get("/auth", indexLayout.Handle("login", gothAuthPage(appCtx)))
 
 		r.Get("/logout", func(w http.ResponseWriter, r *http.Request) {
 			provider := r.URL.Query().Get("provider")
@@ -120,23 +117,22 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 			}
 			usersAPI.Logout(w, r)
 		})
-		r.Get("/magic-link-sent", rr("magic"))
-		r.Get("/magic-login/{otp}", rr("login", magicLinkLoginConfirm))
+		r.Get("/magic-link-sent", indexLayout.HandleStatic("magic"))
+		r.Get("/magic-login/{otp}", indexLayout.Handle("login", magicLinkLoginConfirm(appCtx)))
 
-		r.Get("/forgot", rr("forgot"))
-		r.Post("/forgot", rr("forgot", forgotPageSubmit))
-		r.Get("/reset/{token}", rr("reset"))
-		r.Post("/reset/{token}", rr("reset", resetPageSubmit))
-		r.Get("/change/{token}", rr("changed", confirmEmailChangePage))
+		r.Get("/forgot", indexLayout.HandleStatic("forgot"))
+		r.Post("/forgot", indexLayout.Handle("forgot", forgotPageSubmit(appCtx)))
+		r.Get("/reset/{token}", indexLayout.HandleStatic("reset"))
+		r.Post("/reset/{token}", indexLayout.Handle("reset", resetPageSubmit(appCtx)))
+		r.Get("/change/{token}", indexLayout.Handle("changed", confirmEmailChangePage(appCtx)))
 	})
 
 	// authenticated
 	r.Route("/account", func(r chi.Router) {
 		r.Use(usersAPI.IsAuthenticated)
-		r.Use(setDefaultPageData(appCtx))
-		r.Get("/", rr("account", accountPage))
-		r.Post("/", rr("account", accountPageSubmit))
-		r.Post("/delete", rr("account", deleteAccount))
+		r.Get("/", indexLayout.Handle("account", accountPage(appCtx)))
+		r.Post("/", indexLayout.Handle("account", accountPageSubmit(appCtx)))
+		r.Post("/delete", indexLayout.Handle("account", deleteAccount(appCtx)))
 
 		r.Post("/checkout", handleCreateCheckoutSession(appCtx))
 		r.Get("/checkout/success", handleCheckoutSuccess(appCtx))
@@ -146,8 +142,7 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 
 	r.Route("/app", func(r chi.Router) {
 		r.Use(usersAPI.IsAuthenticated)
-		r.Use(setDefaultPageData(appCtx))
-		r.Get("/", rr("app", appPage))
+		r.Get("/", indexLayout.Handle("app", appPage(appCtx)))
 	})
 
 	authz := func(next http.Handler) http.Handler {
