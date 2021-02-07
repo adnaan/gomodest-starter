@@ -8,7 +8,7 @@ require (
 	cloud.google.com/go v0.74.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/PuerkitoBio/goquery v1.6.0 // indirect
-	github.com/adnaan/renderlayout v0.0.0-20210207225225-a164f0726876
+	github.com/adnaan/renderlayout v0.0.2-0.20210207232213-f3ce0da49905
 	github.com/adnaan/users v0.1.7
 	github.com/andybalholm/cascadia v1.2.0 // indirect
 	github.com/facebook/ent v0.5.3

@@ -57,6 +57,8 @@ github.com/PuerkitoBio/goquery v1.6.0 h1:j7taAbelrdcsOlGeMenZxc2AWXD5fieT1/znArd
 github.com/PuerkitoBio/goquery v1.6.0/go.mod h1:GsLWisAFVj4WgDibEWF4pvYnkVQBpKBKeU+7zCJoLcc=
 github.com/adnaan/renderlayout v0.0.0-20210207225225-a164f0726876 h1:0/LHNrJJovkdxzu3+hSE3xuN3d+CEkYo0PWoHUzeEOU=
 github.com/adnaan/renderlayout v0.0.0-20210207225225-a164f0726876/go.mod h1:kuCuOpbwVtlnVXHWZTDSQdtxzi29tihqTo/1FWmIG50=
+github.com/adnaan/renderlayout v0.0.2-0.20210207232213-f3ce0da49905 h1:ZM4QTqTEMI/F2eh6kz5OUrg/PpkzZvPq0cAIWpyK8xM=
+github.com/adnaan/renderlayout v0.0.2-0.20210207232213-f3ce0da49905/go.mod h1:kuCuOpbwVtlnVXHWZTDSQdtxzi29tihqTo/1FWmIG50=
 github.com/adnaan/users v0.1.7 h1:twf9eQgx1EjgrcDS21umbNn1GFJW9Q/zN2Rnk28GY8M=
 github.com/adnaan/users v0.1.7/go.mod h1:Ico2htotC0DTxJx4/2mf6TI4msF6b3NtEgHesjOOpIs=
 github.com/akavel/rsrc v0.8.0/go.mod h1:uLoCtb9J+EyAqh+26kdrTgmzRBFPGOolLWKpdxkKq+c=

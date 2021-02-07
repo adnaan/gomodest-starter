@@ -14,8 +14,6 @@ import (
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/google"
 
-	"github.com/foolin/goview"
-
 	"github.com/adnaan/users"
 
 	"github.com/go-chi/httplog"
@@ -26,9 +24,8 @@ import (
 )
 
 type Context struct {
-	users    *users.API
-	pageData goview.M
-	cfg      Config
+	users *users.API
+	cfg   Config
 }
 
 type APIRoute struct {
@@ -76,7 +73,9 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 	indexLayout, err := rl.New(
 		rl.Layout("index"),
 		rl.DisableCache(true),
-		rl.DefaultHandler(defaultPageHandler(appCtx)))
+		rl.DefaultHandler(defaultPageHandler(appCtx)),
+		rl.ErrorKey("userError"),
+	)
 
 	if err != nil {
 		log.Fatal(err)
