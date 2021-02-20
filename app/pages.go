@@ -548,3 +548,20 @@ func createNewTaskSubmit(appCtx Context) rl.ViewHandlerFunc {
 		return rl.M{}, nil
 	}
 }
+
+func deleteTaskSubmit(appCtx Context) rl.ViewHandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+		id := chi.URLParam(r, "id")
+
+		userID := r.Context().Value(users.CtxUserIdKey).(string)
+
+		_, err := appCtx.db.Task.Delete().Where(task.And(
+			task.Owner(userID), task.ID(id),
+		)).Exec(appCtx.ctx)
+		if err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
+
+		return rl.M{}, nil
+	}
+}
