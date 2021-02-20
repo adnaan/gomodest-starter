@@ -2,7 +2,24 @@
 <div class="columns is-mobile is-centered">
     <div class="column is-half-desktop">
         <turbo-frame id="app">
-            {{ template "new_task" .}}
+            <form  method="POST" action="/app/tasks/new">
+                <div class="field columns">
+                    <div class="control column is-10-desktop is-10-mobile">
+                        <input class="input"
+                               name="Text"
+                               type="text"
+                               placeholder="A new todo">
+                    </div>
+                    <div class="control column is-2-desktop is-2-mobile">
+                        <button type="submit" class="button is-primary">
+                            <span class="icon">
+                              <i class="fas fa-plus"></i>
+                            </span>
+                            <span>New</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
             <div class="mt-5">
                 {{ range .tasks }}
                 <li class="box">

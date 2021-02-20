@@ -516,22 +516,30 @@ func createNewTaskSubmit(appCtx Context) rl.ViewHandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
-		req := new(req)
-		err := r.ParseForm()
+		userID := r.Context().Value(users.CtxUserIdKey).(string)
+		tasks, err := appCtx.db.Task.Query().Where(task.Owner(userID)).All(appCtx.ctx)
 		if err != nil {
 			return nil, fmt.Errorf("%w", err)
+		}
+
+		data := rl.M{
+			"tasks": tasks,
+		}
+
+		req := new(req)
+		err = r.ParseForm()
+		if err != nil {
+			return data, fmt.Errorf("%w", err)
 		}
 
 		err = appCtx.formDecoder.Decode(req, r.Form)
 		if err != nil {
-			return nil, fmt.Errorf("%w", err)
+			return data, fmt.Errorf("%w", err)
 		}
 
 		if req.Text == "" {
-			return nil, fmt.Errorf("%w", fmt.Errorf("empty task"))
+			return data, fmt.Errorf("%w", fmt.Errorf("empty task"))
 		}
-
-		userID := r.Context().Value(users.CtxUserIdKey).(string)
 
 		_, err = appCtx.db.Task.Create().
 			SetID(shortuuid.New()).
@@ -540,12 +548,19 @@ func createNewTaskSubmit(appCtx Context) rl.ViewHandlerFunc {
 			SetText(req.Text).
 			Save(appCtx.ctx)
 		if err != nil {
+			return data, fmt.Errorf("%w", err)
+		}
+
+		tasks, err = appCtx.db.Task.Query().Where(task.Owner(userID)).All(appCtx.ctx)
+		if err != nil {
 			return nil, fmt.Errorf("%w", err)
 		}
 
-		http.Redirect(w, r, "/app", http.StatusSeeOther)
+		data = rl.M{
+			"tasks": tasks,
+		}
 
-		return rl.M{}, nil
+		return data, nil
 	}
 }
 
@@ -562,6 +577,13 @@ func deleteTaskSubmit(appCtx Context) rl.ViewHandlerFunc {
 			return nil, fmt.Errorf("%w", err)
 		}
 
-		return rl.M{}, nil
+		tasks, err := appCtx.db.Task.Query().Where(task.Owner(userID)).All(appCtx.ctx)
+		if err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
+
+		return rl.M{
+			"tasks": tasks,
+		}, nil
 	}
 }
