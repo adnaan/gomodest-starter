@@ -11,10 +11,10 @@ func allowAll(_ string) rbac.Matcher {
 	}
 }
 
-func ifTaskOwner(t TasksContext) func(string) rbac.Matcher {
+func ifTaskOwner(t Context) func(string) rbac.Matcher {
 	return func(userID string) rbac.Matcher {
 		return func(target string) (bool, error) {
-			tsk, err := t.client.Task.Get(t.ctx, target)
+			tsk, err := t.db.Task.Get(t.ctx, target)
 			if err != nil {
 				return false, err
 			}
@@ -28,7 +28,7 @@ func ifTaskOwner(t TasksContext) func(string) rbac.Matcher {
 	}
 }
 
-func ownerRole(t TasksContext) []users.Permission {
+func ownerRole(t Context) []users.Permission {
 	return []users.Permission{
 		users.NewPermission("get:api:tasks", allowAll),
 		users.NewPermission("post:api:tasks", allowAll),

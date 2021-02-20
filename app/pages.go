@@ -1,11 +1,15 @@
 package app
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/adnaan/gomodest/app/internal/models/task"
+	"github.com/lithammer/shortuuid/v3"
+
+	"github.com/adnaan/users"
 
 	rl "github.com/adnaan/renderlayout"
 
@@ -314,21 +318,17 @@ func confirmEmailPage(appCtx Context) rl.ViewHandlerFunc {
 		return rl.M{}, nil
 	}
 }
-func appPage(_ Context) rl.ViewHandlerFunc {
+func appPage(appCtx Context) rl.ViewHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
-		dummy := struct {
-			Title string `json:"title"`
-		}{
-			Title: "Hello Props",
-		}
 
-		d, err := json.Marshal(&dummy)
+		userID := r.Context().Value(users.CtxUserIdKey).(string)
+		tasks, err := appCtx.db.Task.Query().Where(task.Owner(userID)).All(appCtx.ctx)
 		if err != nil {
-			return nil, fmt.Errorf("%v: %w", err, fmt.Errorf("encoding failed"))
+			return nil, fmt.Errorf("%w", err)
 		}
 
 		return rl.M{
-			"Data": string(d),
+			"tasks": tasks,
 		}, nil
 	}
 }
@@ -506,6 +506,45 @@ func deleteAccount(appCtx Context) rl.ViewHandlerFunc {
 			return rl.M{}, err
 		}
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return rl.M{}, nil
+	}
+}
+
+func createNewTaskSubmit(appCtx Context) rl.ViewHandlerFunc {
+	type req struct {
+		Text string `json:"text"`
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+		req := new(req)
+		err := r.ParseForm()
+		if err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
+
+		err = appCtx.formDecoder.Decode(req, r.Form)
+		if err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
+
+		if req.Text == "" {
+			return nil, fmt.Errorf("%w", fmt.Errorf("empty task"))
+		}
+
+		userID := r.Context().Value(users.CtxUserIdKey).(string)
+
+		_, err = appCtx.db.Task.Create().
+			SetID(shortuuid.New()).
+			SetStatus(task.StatusInprogress).
+			SetOwner(userID).
+			SetText(req.Text).
+			Save(appCtx.ctx)
+		if err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
+
+		http.Redirect(w, r, "/app", http.StatusSeeOther)
+
 		return rl.M{}, nil
 	}
 }

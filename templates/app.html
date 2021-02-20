@@ -1,12 +1,25 @@
 {{define "content"}}
-    <div class="columns is-mobile is-centered">
-        <div class="column is-half-desktop">
-            <div
-                    data-svelte-target="component"
-                    data-component-name="app"
-                    data-component-props="{{.Data}}">
+<div class="columns is-mobile is-centered">
+    <div class="column is-half-desktop">
+        <turbo-frame id="app">
+            {{ template "new_task" .}}
+            <div class="mt-5">
+                {{ range .tasks }}
+                <li class="box">
+                    <div class="is-flex" style="align-items: center">
+                        <span class="is-pulled-left">{{.Text}}</span>
+                        <div style="flex: 1"></div>
+                        <a class="button is-text is-pulled-right is-small">
+                            <span class="icon">
+                                  <i class="fas fa-trash"></i>
+                            </span>
+                        </a>
+                    </div>
+                </li>
+                {{ end }}
             </div>
-        </div>
+        </turbo-frame>
     </div>
-    </div>
+</div>
+</div>
 {{end}}

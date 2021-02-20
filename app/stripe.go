@@ -20,10 +20,11 @@ type errResponse struct {
 
 func handleCreateCheckoutSession(appCtx Context) http.HandlerFunc {
 
-	var req struct {
+	type req struct {
 		Price string `json:"price"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
+		req := new(req)
 		user, err := appCtx.users.LoggedInUser(r)
 		if err != nil {
 			log.Printf("users.LoggednIuser: %v", err)

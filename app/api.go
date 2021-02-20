@@ -1,7 +1,6 @@
 package app
 
 import (
-	"context"
 	"net/http"
 	"time"
 
@@ -13,36 +12,13 @@ import (
 
 	"github.com/go-chi/render"
 
-	"github.com/adnaan/gomodest/app/internal/models"
 	"github.com/adnaan/gomodest/app/internal/models/task"
 )
 
-type TasksContext struct {
-	client *models.Client
-	cfg    Config
-	ctx    context.Context
-}
-
-func NewTasksContext(ctx context.Context, cfg Config) TasksContext {
-	client, err := models.Open(cfg.Driver, cfg.DataSource)
-	if err != nil {
-		panic(err)
-	}
-	if err := client.Schema.Create(ctx); err != nil {
-		panic(err)
-	}
-
-	return TasksContext{
-		client: client,
-		cfg:    cfg,
-		ctx:    ctx,
-	}
-}
-
-func List(t TasksContext) http.HandlerFunc {
+func List(t Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := r.Context().Value(users.CtxUserIdKey).(string)
-		tasks, err := t.client.Task.Query().Where(task.Owner(userID)).All(t.ctx)
+		tasks, err := t.db.Task.Query().Where(task.Owner(userID)).All(t.ctx)
 		if err != nil {
 			render.Render(w, r, ErrInternal(err))
 			return
@@ -52,11 +28,12 @@ func List(t TasksContext) http.HandlerFunc {
 	}
 }
 
-func Create(t TasksContext) http.HandlerFunc {
-	var req struct {
+func Create(t Context) http.HandlerFunc {
+	type req struct {
 		Text string `json:"text"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
+		req := new(req)
 		userID := r.Context().Value(users.CtxUserIdKey).(string)
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
@@ -64,7 +41,7 @@ func Create(t TasksContext) http.HandlerFunc {
 			return
 		}
 
-		newTask, err := t.client.Task.Create().
+		newTask, err := t.db.Task.Create().
 			SetID(shortuuid.New()).
 			SetStatus(task.StatusInprogress).
 			SetOwner(userID).
@@ -78,11 +55,12 @@ func Create(t TasksContext) http.HandlerFunc {
 	}
 }
 
-func UpdateStatus(t TasksContext) http.HandlerFunc {
-	var req struct {
+func UpdateStatus(t Context) http.HandlerFunc {
+	type req struct {
 		Status string `json:"status"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
+		req := new(req)
 		id := chi.URLParam(r, "id")
 
 		err := render.DecodeJSON(r.Body, &req)
@@ -91,7 +69,7 @@ func UpdateStatus(t TasksContext) http.HandlerFunc {
 			return
 		}
 
-		updatedTask, err := t.client.Task.
+		updatedTask, err := t.db.Task.
 			UpdateOneID(id).
 			SetUpdatedAt(time.Now()).
 			SetStatus(task.Status(req.Status)).
@@ -104,11 +82,12 @@ func UpdateStatus(t TasksContext) http.HandlerFunc {
 	}
 }
 
-func UpdateText(t TasksContext) http.HandlerFunc {
-	var req struct {
+func UpdateText(t Context) http.HandlerFunc {
+	type req struct {
 		Text string `json:"text"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
+		req := new(req)
 		id := chi.URLParam(r, "id")
 
 		err := render.DecodeJSON(r.Body, &req)
@@ -117,7 +96,7 @@ func UpdateText(t TasksContext) http.HandlerFunc {
 			return
 		}
 
-		updatedTask, err := t.client.Task.
+		updatedTask, err := t.db.Task.
 			UpdateOneID(id).
 			SetUpdatedAt(time.Now()).
 			SetText(req.Text).
@@ -130,10 +109,10 @@ func UpdateText(t TasksContext) http.HandlerFunc {
 	}
 }
 
-func Delete(t TasksContext) http.HandlerFunc {
+func Delete(t Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
-		err := t.client.Task.DeleteOneID(id).Exec(t.ctx)
+		err := t.db.Task.DeleteOneID(id).Exec(t.ctx)
 		if err != nil {
 			render.Render(w, r, ErrInternal(err))
 			return

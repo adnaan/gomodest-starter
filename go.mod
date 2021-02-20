@@ -17,6 +17,7 @@ require (
 	github.com/go-chi/httplog v0.1.8
 	github.com/go-chi/render v1.0.1
 	github.com/go-chi/valve v0.0.0-20170920024740-9e45288364f4
+	github.com/go-playground/form v3.1.4+incompatible // indirect
 	github.com/google/uuid v1.2.0
 	github.com/jaytaylor/html2text v0.0.0-20200412013138-3577fbdbcff7 // indirect
 	github.com/joho/godotenv v1.3.0

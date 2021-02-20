@@ -7,6 +7,10 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/adnaan/gomodest/app/internal/models"
+
+	"github.com/go-playground/form"
+
 	"github.com/go-chi/render"
 
 	"github.com/stripe/stripe-go/v72"
@@ -24,8 +28,11 @@ import (
 )
 
 type Context struct {
-	users *users.API
-	cfg   Config
+	users       *users.API
+	cfg         Config
+	formDecoder *form.Decoder
+	db          *models.Client
+	ctx         context.Context
 }
 
 type APIRoute struct {
@@ -39,7 +46,21 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 	//dataSource := "host=0.0.0.0 port=5432 user=gomodest dbname=gomodest sslmode=disable"
 	stripe.Key = cfg.StripeSecretKey
 
-	tasksCtx := NewTasksContext(ctx, cfg)
+	db, err := models.Open(cfg.Driver, cfg.DataSource)
+	if err != nil {
+		panic(err)
+	}
+	if err := db.Schema.Create(ctx); err != nil {
+		panic(err)
+	}
+
+	appCtx := Context{
+		db:          db,
+		ctx:         ctx,
+		cfg:         cfg,
+		formDecoder: form.NewDecoder(),
+	}
+
 	defaultUsersConfig := users.Config{
 		Driver:          cfg.Driver,
 		Datasource:      cfg.DataSource,
@@ -50,7 +71,7 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 			google.New(cfg.GoogleClientID, cfg.GoogleSecret, fmt.Sprintf("%s/auth/callback?provider=google", cfg.Domain), "email", "profile"),
 		},
 		Roles: map[string][]users.Permission{
-			"owner": ownerRole(tasksCtx),
+			"owner": ownerRole(appCtx),
 		},
 	}
 	usersAPI, err := users.NewDefaultAPI(ctx, defaultUsersConfig)
@@ -58,17 +79,14 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 		log.Fatal(err)
 	}
 
+	appCtx.users = usersAPI
+
 	// logger
 	logger := httplog.NewLogger(cfg.Name,
 		httplog.Options{
 			JSON:     cfg.LogFormatJSON,
 			LogLevel: cfg.LogLevel,
 		})
-
-	appCtx := Context{
-		users: usersAPI,
-		cfg:   cfg,
-	}
 
 	indexLayout, err := rl.New(
 		rl.Layout("index"),
@@ -87,9 +105,6 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 	r.Use(middleware.Heartbeat(cfg.HealthPath))
 	r.Use(middleware.Recoverer)
 	r.Use(httplog.RequestLogger(logger))
-	//r.Use(setDefaultPageData(appCtx))
-
-	// app
 
 	r.NotFound(indexLayout.HandleStatic("404"))
 	// public
@@ -142,6 +157,7 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 	r.Route("/app", func(r chi.Router) {
 		r.Use(usersAPI.IsAuthenticated)
 		r.Get("/", indexLayout.Handle("app", appPage(appCtx)))
+		r.Post("/tasks/new", indexLayout.Handle("new_task", createNewTaskSubmit(appCtx)))
 	})
 
 	authz := func(next http.Handler) http.Handler {
@@ -166,13 +182,13 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 		r.Use(usersAPI.IsAuthenticated)
 		r.Use(middleware.AllowContentType("application/json"))
 		r.With(authz).Route("/tasks", func(r chi.Router) {
-			r.Get("/", List(tasksCtx))
-			r.Post("/", Create(tasksCtx))
+			r.Get("/", List(appCtx))
+			r.Post("/", Create(appCtx))
 		})
 		r.With(authz).Route("/tasks/{id}", func(r chi.Router) {
-			r.Put("/status", UpdateStatus(tasksCtx))
-			r.Put("/text", UpdateText(tasksCtx))
-			r.Delete("/", Delete(tasksCtx))
+			r.Put("/status", UpdateStatus(appCtx))
+			r.Put("/text", UpdateText(appCtx))
+			r.Delete("/", Delete(appCtx))
 		})
 
 	})
