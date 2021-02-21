@@ -22,18 +22,87 @@
             </form>
             <div class="mt-5">
                 {{ range .tasks }}
-                <li class="box">
-                    <div class="is-flex" style="align-items: center">
-                        <span class="is-pulled-left">{{.Text}}</span>
-                        <div style="flex: 1"></div>
-                        <a class="button is-text is-pulled-right is-small"
-                           href="/app/tasks/delete/{{.ID}}">
-                            <span class="icon">
-                                  <i class="fas fa-trash"></i>
-                            </span>
-                        </a>
-                    </div>
-                </li>
+                    <li id="view-{{.ID}}" class="box">
+                        <div class="is-flex" style="align-items: center">
+                            <span class="is-pulled-left">{{.Text}}</span>
+                            <div style="flex: 1"></div>
+                            <button class="button is-text is-pulled-right is-small"
+                               data-toggle-ids="view-{{.ID}},edit-{{.ID}}"
+                               data-toggle-class="is-hidden"
+                               data-navigate-target="toggler"
+                               data-action="click->navigate#toggle">
+                                    <span class="icon">
+                                          <i class="fas fa-edit"></i>
+                                    </span>
+                            </button>
+                            <a class="button is-text is-pulled-right is-small"
+                               data-toggle-ids="view-{{.ID}},delete-{{.ID}}"
+                               data-toggle-class="is-hidden"
+                               data-navigate-target="toggler"
+                               data-action="click->navigate#toggle">
+                                <span class="icon">
+                                      <i class="fas fa-trash"></i>
+                                </span>
+                            </a>
+                        </div>
+                    </li>
+                    <li id="edit-{{.ID}}" class="box is-hidden">
+                        <form  method="POST" action="/app/tasks/{{.ID}}/edit">
+                            <div class="field columns is-vcentered" >
+                                <div class="control column is-10-desktop is-10-mobile">
+                                    <input class="input"
+                                           name="Text"
+                                           type="text"
+                                           value="{{.Text}}">
+                                </div>
+                                <div class="control column is-2-desktop is-2-mobile">
+                                    <button type="submit" class="button is-primary is-small">
+                                        <span class="icon">
+                                          <i class="fas fa-check"></i>
+                                        </span>
+                                    </button>
+                                    <button type="button"
+                                            class="button is-primary is-small"
+                                            data-toggle-ids="view-{{.ID}},edit-{{.ID}}"
+                                            data-toggle-class="is-hidden"
+                                            data-navigate-target="toggler"
+                                            data-action="click->navigate#toggle">
+                                        <span class="icon">
+                                          <i class="fas fa-window-close"></i>
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </li>
+
+                    <li id="delete-{{.ID}}" class="box is-hidden">
+                        <form  method="POST" action="/app/tasks/{{.ID}}/delete">
+                            <div class="field columns is-vcentered" >
+                                <div class="control column is-10-desktop is-10-mobile">
+                                    <p class="message py-2 px-3 is-danger">Are you sure ?</p>
+                                </div>
+                                <div class="control column is-2-desktop is-2-mobile">
+                                    <button type="submit" class="button is-primary is-small">
+                                            <span class="icon">
+                                              <i class="fas fa-check"></i>
+                                            </span>
+                                    </button>
+                                    <button type="button"
+                                            class="button is-primary is-small"
+                                            data-toggle-ids="view-{{.ID}},delete-{{.ID}}"
+                                            data-toggle-class="is-hidden"
+                                            data-navigate-target="toggler"
+                                            data-action="click->navigate#toggle">
+                                            <span class="icon">
+                                              <i class="fas fa-window-close"></i>
+                                            </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </li>
+
                 {{ end }}
             </div>
         </turbo-frame>

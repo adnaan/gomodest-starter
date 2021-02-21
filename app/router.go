@@ -158,7 +158,8 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 		r.Use(usersAPI.IsAuthenticated)
 		r.Get("/", indexLayout.Handle("app", appPage(appCtx)))
 		r.Post("/tasks/new", indexLayout.Handle("app", createNewTaskSubmit(appCtx)))
-		r.Get("/tasks/delete/{id}", indexLayout.Handle("app", deleteTaskSubmit(appCtx)))
+		r.Post("/tasks/{id}/edit", indexLayout.Handle("app", editTaskSubmit(appCtx)))
+		r.Post("/tasks/{id}/delete", indexLayout.Handle("app", deleteTaskSubmit(appCtx)))
 	})
 
 	authz := func(next http.Handler) http.Handler {

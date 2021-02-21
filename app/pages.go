@@ -587,3 +587,45 @@ func deleteTaskSubmit(appCtx Context) rl.ViewHandlerFunc {
 		}, nil
 	}
 }
+
+func editTaskSubmit(appCtx Context) rl.ViewHandlerFunc {
+	type req struct {
+		Text string `json:"text"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+		id := chi.URLParam(r, "id")
+
+		userID := r.Context().Value(users.CtxUserIdKey).(string)
+
+		req := new(req)
+		err := r.ParseForm()
+		if err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
+
+		err = appCtx.formDecoder.Decode(req, r.Form)
+		if err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
+
+		if req.Text == "" {
+			return nil, fmt.Errorf("%w", fmt.Errorf("empty task"))
+		}
+
+		err = appCtx.db.Task.Update().Where(task.And(
+			task.Owner(userID), task.ID(id),
+		)).SetText(req.Text).Exec(appCtx.ctx)
+		if err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
+
+		tasks, err := appCtx.db.Task.Query().Where(task.Owner(userID)).All(appCtx.ctx)
+		if err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
+
+		return rl.M{
+			"tasks": tasks,
+		}, nil
+	}
+}

@@ -26,7 +26,7 @@ type Config struct {
 
 	// datasource
 	Driver     string `json:"driver" envconfig:"driver" default:"sqlite3"`
-	DataSource string `json:"datasource" envconfig:"datasource" default:"file:users.db?mode=memory&cache=shared&_fk=1"`
+	DataSource string `json:"datasource" envconfig:"datasource" default:"file:gomodest.db?mode=memory&cache=shared&_fk=1"`
 
 	// smtp
 	SMTPHost       string `json:"smtp_host" envconfig:"smtp_host" default:"0.0.0.0"`
