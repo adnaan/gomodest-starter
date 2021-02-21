@@ -21,30 +21,31 @@
                     </div>
                 </div>
             </form>
-            <div class="mt-5">
+            <div class="mt-5 is-hoverable">
                 {{ range .tasks }}
+                    <!-- the three states of the li item: view, edit, delete are toggled using stimulus attrs -->
                     <li id="view-{{.ID}}" class="box">
                         <div class="is-flex" style="align-items: center">
                             <span class="is-pulled-left">{{.Text}}</span>
                             <div style="flex: 1"></div>
-                            <button class="button is-text is-pulled-right is-small"
-                               data-toggle-ids="view-{{.ID}},edit-{{.ID}}"
-                               data-toggle-class="is-hidden"
-                               data-navigate-target="toggler"
-                               data-action="click->navigate#toggle">
+                            <div class="is-pulled-right">
+                                <button class="button is-text  is-small"
+                                        data-toggle-ids="view-{{.ID}},edit-{{.ID}}"
+                                        data-toggle-class="is-hidden"
+                                        data-action="click->navigate#toggle">
                                     <span class="icon">
                                           <i class="fas fa-edit"></i>
                                     </span>
-                            </button>
-                            <a class="button is-text is-pulled-right is-small"
-                               data-toggle-ids="view-{{.ID}},delete-{{.ID}}"
-                               data-toggle-class="is-hidden"
-                               data-navigate-target="toggler"
-                               data-action="click->navigate#toggle">
-                                <span class="icon">
-                                      <i class="fas fa-trash"></i>
-                                </span>
-                            </a>
+                                </button>
+                                <a class="button is-text  is-small"
+                                   data-toggle-ids="view-{{.ID}},delete-{{.ID}}"
+                                   data-toggle-class="is-hidden"
+                                   data-action="click->navigate#toggle">
+                                    <span class="icon">
+                                          <i class="fas fa-trash"></i>
+                                    </span>
+                                </a>
+                            </div>
                         </div>
                     </li>
                     <li id="edit-{{.ID}}" class="box is-hidden">
@@ -66,7 +67,7 @@
                                             class="button is-primary is-small"
                                             data-toggle-ids="view-{{.ID}},edit-{{.ID}}"
                                             data-toggle-class="is-hidden"
-                                            data-navigate-target="toggler"
+                                            
                                             data-action="click->navigate#toggle">
                                         <span class="icon">
                                           <i class="fas fa-window-close"></i>
@@ -93,7 +94,6 @@
                                             class="button is-primary is-small"
                                             data-toggle-ids="view-{{.ID}},delete-{{.ID}}"
                                             data-toggle-class="is-hidden"
-                                            data-navigate-target="toggler"
                                             data-action="click->navigate#toggle">
                                             <span class="icon">
                                               <i class="fas fa-window-close"></i>
