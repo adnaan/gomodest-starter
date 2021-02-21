@@ -24,9 +24,14 @@
             <div class="mt-5 is-hoverable">
                 {{ range .tasks }}
                     <!-- the three states of the li item: view, edit, delete are toggled using stimulus attrs -->
-                    <li id="view-{{.ID}}" class="box" data-controller="hover-hidden">
+                    <div id="view-{{.ID}}" data-controller="hover-hidden">
                         <div class="columns is-vcentered is-mobile is-gapless">
-                            <div class="column is-10-desktop is-9-mobile">{{.Text}}</div>
+                            <div class="column is-10-desktop is-9-mobile">
+                                <div class="box mt-2">
+                                    {{.Text}}
+                                </div>
+
+                            </div>
                             <div class="column is-hidden is-2-desktop is-3-mobile"
                                  data-hover-hidden-target="tools"
                                  style="text-align:right;">
@@ -38,18 +43,18 @@
                                           <i class="fas fa-edit"></i>
                                     </span>
                                 </button>
-                                <a class="button is-text  is-small"
+                                <button class="button is-text  is-small"
                                    data-toggle-ids="view-{{.ID}},delete-{{.ID}}"
                                    data-toggle-class="is-hidden"
                                    data-action="click->navigate#toggle">
                                     <span class="icon">
                                           <i class="fas fa-trash"></i>
                                     </span>
-                                </a>
+                                </button>
                             </div>
                         </div>
-                    </li>
-                    <li id="edit-{{.ID}}" class="box is-hidden">
+                    </div>
+                    <div id="edit-{{.ID}}" class="box is-hidden">
                         <form  method="POST" action="/app/tasks/{{.ID}}/edit">
                             <div class="field columns is-vcentered is-mobile" >
                                 <div class="control column is-10-desktop is-9-mobile">
@@ -77,9 +82,9 @@
                                 </div>
                             </div>
                         </form>
-                    </li>
+                    </div>
 
-                    <li id="delete-{{.ID}}" class="box is-hidden">
+                    <div id="delete-{{.ID}}" class="box is-hidden">
                         <form  method="POST" action="/app/tasks/{{.ID}}/delete">
                             <div class="field columns is-vcentered is-mobile" >
                                 <div class="control column is-10-desktop is-9-mobile">
@@ -103,7 +108,7 @@
                                 </div>
                             </div>
                         </form>
-                    </li>
+                    </div>
 
                 {{ end }}
             </div>

@@ -503,7 +503,6 @@ func deleteAccount(appCtx Context) rl.ViewHandlerFunc {
 
 func listTasks(appCtx Context) rl.ViewHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
-
 		userID := r.Context().Value(users.CtxUserIdKey).(string)
 		tasks, err := appCtx.db.Task.Query().Where(task.Owner(userID)).All(appCtx.ctx)
 		if err != nil {
