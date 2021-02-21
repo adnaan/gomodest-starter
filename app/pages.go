@@ -522,8 +522,6 @@ func createNewTask(appCtx Context) rl.ViewHandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
-		userID := r.Context().Value(users.CtxUserIdKey).(string)
-
 		req := new(req)
 		err := r.ParseForm()
 		if err != nil {
@@ -539,6 +537,7 @@ func createNewTask(appCtx Context) rl.ViewHandlerFunc {
 			return nil, fmt.Errorf("%w", fmt.Errorf("empty task"))
 		}
 
+		userID := r.Context().Value(users.CtxUserIdKey).(string)
 		_, err = appCtx.db.Task.Create().
 			SetID(shortuuid.New()).
 			SetStatus(task.StatusInprogress).
@@ -556,7 +555,6 @@ func createNewTask(appCtx Context) rl.ViewHandlerFunc {
 func deleteTask(appCtx Context) rl.ViewHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
 		id := chi.URLParam(r, "id")
-
 		userID := r.Context().Value(users.CtxUserIdKey).(string)
 
 		_, err := appCtx.db.Task.Delete().Where(task.And(
@@ -575,10 +573,6 @@ func editTask(appCtx Context) rl.ViewHandlerFunc {
 		Text string `json:"text"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
-		id := chi.URLParam(r, "id")
-
-		userID := r.Context().Value(users.CtxUserIdKey).(string)
-
 		req := new(req)
 		err := r.ParseForm()
 		if err != nil {
@@ -594,6 +588,8 @@ func editTask(appCtx Context) rl.ViewHandlerFunc {
 			return nil, fmt.Errorf("%w", fmt.Errorf("empty task"))
 		}
 
+		id := chi.URLParam(r, "id")
+		userID := r.Context().Value(users.CtxUserIdKey).(string)
 		err = appCtx.db.Task.Update().Where(task.And(
 			task.Owner(userID), task.ID(id),
 		)).SetText(req.Text).Exec(appCtx.ctx)

@@ -24,12 +24,13 @@
             <div class="mt-5 is-hoverable">
                 {{ range .tasks }}
                     <!-- the three states of the li item: view, edit, delete are toggled using stimulus attrs -->
-                    <li id="view-{{.ID}}" class="box">
-                        <div class="is-flex" style="align-items: center">
-                            <span class="is-pulled-left">{{.Text}}</span>
-                            <div style="flex: 1"></div>
-                            <div class="is-pulled-right">
-                                <button class="button is-text  is-small"
+                    <li id="view-{{.ID}}" class="box" data-controller="hover-hidden">
+                        <div class="columns is-vcentered is-mobile is-gapless">
+                            <div class="column is-10-desktop is-9-mobile">{{.Text}}</div>
+                            <div class="column is-hidden is-2-desktop is-3-mobile"
+                                 data-hover-hidden-target="tools"
+                                 style="text-align:right;">
+                                <button class="button is-text is-small"
                                         data-toggle-ids="view-{{.ID}},edit-{{.ID}}"
                                         data-toggle-class="is-hidden"
                                         data-action="click->navigate#toggle">
@@ -50,14 +51,14 @@
                     </li>
                     <li id="edit-{{.ID}}" class="box is-hidden">
                         <form  method="POST" action="/app/tasks/{{.ID}}/edit">
-                            <div class="field columns is-vcentered" >
-                                <div class="control column is-10-desktop is-10-mobile">
+                            <div class="field columns is-vcentered is-mobile" >
+                                <div class="control column is-10-desktop is-9-mobile">
                                     <input class="input"
                                            name="Text"
                                            type="text"
                                            value="{{.Text}}">
                                 </div>
-                                <div class="control column is-2-desktop is-2-mobile">
+                                <div class="control column is-2-desktop is-3-mobile">
                                     <button type="submit" class="button is-primary is-small">
                                         <span class="icon">
                                           <i class="fas fa-check"></i>
@@ -80,11 +81,11 @@
 
                     <li id="delete-{{.ID}}" class="box is-hidden">
                         <form  method="POST" action="/app/tasks/{{.ID}}/delete">
-                            <div class="field columns is-vcentered" >
-                                <div class="control column is-10-desktop is-10-mobile">
+                            <div class="field columns is-vcentered is-mobile" >
+                                <div class="control column is-10-desktop is-9-mobile">
                                     <p class="message py-2 px-3 is-danger">Are you sure ?</p>
                                 </div>
-                                <div class="control column is-2-desktop is-2-mobile">
+                                <div class="control column is-2-desktop is-3-mobile">
                                     <button type="submit" class="button is-primary is-small">
                                             <span class="icon">
                                               <i class="fas fa-check"></i>
