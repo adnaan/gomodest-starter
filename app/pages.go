@@ -320,16 +320,7 @@ func confirmEmailPage(appCtx Context) rl.ViewHandlerFunc {
 }
 func appPage(appCtx Context) rl.ViewHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
-
-		userID := r.Context().Value(users.CtxUserIdKey).(string)
-		tasks, err := appCtx.db.Task.Query().Where(task.Owner(userID)).All(appCtx.ctx)
-		if err != nil {
-			return nil, fmt.Errorf("%w", err)
-		}
-
-		return rl.M{
-			"tasks": tasks,
-		}, nil
+		return rl.M{}, nil
 	}
 }
 
@@ -510,35 +501,42 @@ func deleteAccount(appCtx Context) rl.ViewHandlerFunc {
 	}
 }
 
-func createNewTaskSubmit(appCtx Context) rl.ViewHandlerFunc {
-	type req struct {
-		Text string `json:"text"`
-	}
-
+func listTasks(appCtx Context) rl.ViewHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+
 		userID := r.Context().Value(users.CtxUserIdKey).(string)
 		tasks, err := appCtx.db.Task.Query().Where(task.Owner(userID)).All(appCtx.ctx)
 		if err != nil {
 			return nil, fmt.Errorf("%w", err)
 		}
 
-		data := rl.M{
+		return rl.M{
 			"tasks": tasks,
-		}
+		}, nil
+	}
+}
+
+func createNewTask(appCtx Context) rl.ViewHandlerFunc {
+	type req struct {
+		Text string `json:"text"`
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+		userID := r.Context().Value(users.CtxUserIdKey).(string)
 
 		req := new(req)
-		err = r.ParseForm()
+		err := r.ParseForm()
 		if err != nil {
-			return data, fmt.Errorf("%w", err)
+			return nil, fmt.Errorf("%w", err)
 		}
 
 		err = appCtx.formDecoder.Decode(req, r.Form)
 		if err != nil {
-			return data, fmt.Errorf("%w", err)
+			return nil, fmt.Errorf("%w", err)
 		}
 
 		if req.Text == "" {
-			return data, fmt.Errorf("%w", fmt.Errorf("empty task"))
+			return nil, fmt.Errorf("%w", fmt.Errorf("empty task"))
 		}
 
 		_, err = appCtx.db.Task.Create().
@@ -548,23 +546,14 @@ func createNewTaskSubmit(appCtx Context) rl.ViewHandlerFunc {
 			SetText(req.Text).
 			Save(appCtx.ctx)
 		if err != nil {
-			return data, fmt.Errorf("%w", err)
-		}
-
-		tasks, err = appCtx.db.Task.Query().Where(task.Owner(userID)).All(appCtx.ctx)
-		if err != nil {
 			return nil, fmt.Errorf("%w", err)
 		}
 
-		data = rl.M{
-			"tasks": tasks,
-		}
-
-		return data, nil
+		return nil, nil
 	}
 }
 
-func deleteTaskSubmit(appCtx Context) rl.ViewHandlerFunc {
+func deleteTask(appCtx Context) rl.ViewHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
 		id := chi.URLParam(r, "id")
 
@@ -577,18 +566,11 @@ func deleteTaskSubmit(appCtx Context) rl.ViewHandlerFunc {
 			return nil, fmt.Errorf("%w", err)
 		}
 
-		tasks, err := appCtx.db.Task.Query().Where(task.Owner(userID)).All(appCtx.ctx)
-		if err != nil {
-			return nil, fmt.Errorf("%w", err)
-		}
-
-		return rl.M{
-			"tasks": tasks,
-		}, nil
+		return nil, nil
 	}
 }
 
-func editTaskSubmit(appCtx Context) rl.ViewHandlerFunc {
+func editTask(appCtx Context) rl.ViewHandlerFunc {
 	type req struct {
 		Text string `json:"text"`
 	}
@@ -619,13 +601,6 @@ func editTaskSubmit(appCtx Context) rl.ViewHandlerFunc {
 			return nil, fmt.Errorf("%w", err)
 		}
 
-		tasks, err := appCtx.db.Task.Query().Where(task.Owner(userID)).All(appCtx.ctx)
-		if err != nil {
-			return nil, fmt.Errorf("%w", err)
-		}
-
-		return rl.M{
-			"tasks": tasks,
-		}, nil
+		return nil, nil
 	}
 }

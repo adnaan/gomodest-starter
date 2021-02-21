@@ -2,6 +2,7 @@
 <div class="columns is-mobile is-centered">
     <div class="column is-half-desktop">
         <turbo-frame id="app">
+            {{template "error" .}}
             <form  method="POST" action="/app/tasks/new">
                 <div class="field columns">
                     <div class="control column is-10-desktop is-10-mobile">
