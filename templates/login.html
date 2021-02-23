@@ -6,30 +6,37 @@
             {{end}}
 
             {{ if .confirmed }}
-                <box class="box has-background-success"> Thank you for confirming your email. Sign in to get started ! </box>
+                <box class="box has-background-success">
+                    Thank you for confirming your email. Sign in to get started !
+                </box>
             {{end}}
 
             {{ if .not_confirmed }}
-                <box class="box has-background-warning"> Email not confirmed yet ! An email was sent to your inbox for confirmation. Please confirm to login.</box>
+                <box class="box has-background-warning">
+                    Email not confirmed yet ! An email was sent to your inbox for confirmation. Please confirm to login.
+                </box>
             {{end}}
 
             {{ if .confirmation_sent }}
-                <box class="box has-background-warning"> An email has been sent to your inbox for confirmation. Please confirm to login. </box>
+                <box class="box has-background-warning">
+                    An email has been sent to your inbox for confirmation. Please confirm to login.
+                </box>
             {{end}}
 
             <div class="columns is-mobile is-centered pb-5">
                 <p class="title is-3">Sign in to {{.app_name}}</p>
             </div>
 
-
-            <div id="magic-login" class="is-hidden">
+            <div data-controller="toggle"
+                 data-toggle-toggle-class-value="is-hidden">
+            <div id="magic-login" class="is-hidden" data-toggle-target="toggled">
                 <div class="columns is-mobile is-centered py-5">
-                    <button id="btn-magic-login" class="button is-primary is-rounded"
+                    <button id="btn-magic-login"
+                            class="button is-primary is-rounded"
                             type="button"
-                            data-toggle-ids="magic-login,password-login"
-                            data-toggle-class="is-hidden"
-                            data-navigate-target="toggler"
-                            data-action="click->navigate#toggle"> Use Password instead </button>
+                            data-action="click->toggle#it">
+                        Use Password instead
+                    </button>
                 </div>
                 <form
                         data-action="submit->account#submitMagicLoginForm"
@@ -63,13 +70,11 @@
                 </form>
             </div>
 
-            <div id="password-login">
+            <div id="password-login" data-toggle-target="toggled">
                 <div class="columns is-mobile is-centered py-5">
-                    <button  id="btn-password-login" type="button" class="button is-primary is-rounded"
-                             data-toggle-ids="magic-login,password-login"
-                             data-toggle-class="is-hidden"
-                             data-navigate-target="toggler"
-                             data-action="click->navigate#toggle"> Use Magic Link instead </button>
+                    <button  id="btn-password-login" type="button"
+                             class="button is-primary is-rounded"
+                             data-action="click->toggle#it"> Use Magic Link instead </button>
                 </div>
             <form
                   data-action="submit->account#submitLoginForm"
@@ -120,6 +125,7 @@
                     Forgot Password ?
                 </a>
             </form>
+            </div>
             </div>
             <hr>
             <div class="control is-expanded">
