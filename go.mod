@@ -6,13 +6,11 @@ go 1.16
 
 require (
 	cloud.google.com/go v0.74.0 // indirect
-	entgo.io/ent v0.6.0 // indirect
-	github.com/Masterminds/sprig v2.22.0+incompatible
+	entgo.io/ent v0.6.0
 	github.com/PuerkitoBio/goquery v1.6.0 // indirect
 	github.com/adnaan/renderlayout v0.0.2-0.20210221022928-23b27076629b
 	github.com/adnaan/users v0.1.7
 	github.com/andybalholm/cascadia v1.2.0 // indirect
-	github.com/foolin/goview v0.3.0
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-chi/httplog v0.1.8
 	github.com/go-chi/render v1.0.1
@@ -26,7 +24,6 @@ require (
 	github.com/lithammer/shortuuid/v3 v3.0.5
 	github.com/markbates/goth v1.66.1
 	github.com/matcornic/hermes/v2 v2.1.0
-	github.com/mattn/go-sqlite3 v1.14.6 // indirect
 	github.com/mholt/binding v0.3.0
 	github.com/rs/zerolog v1.20.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
@@ -34,7 +31,8 @@ require (
 	github.com/vanng822/go-premailer v1.9.0 // indirect
 	github.com/zpatrick/rbac v0.0.0-20180829190353-d2c4f050cf28
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83 // indirect
+	golang.org/x/mod v0.4.1 // indirect
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b // indirect
-	golang.org/x/sys v0.0.0-20201223074533-0d417f636930 // indirect
-	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
+	golang.org/x/sys v0.0.0-20210223212115-eede4237b368 // indirect
+	golang.org/x/tools v0.1.0 // indirect
 )
