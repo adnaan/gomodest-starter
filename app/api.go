@@ -12,7 +12,7 @@ import (
 
 	"github.com/go-chi/render"
 
-	"github.com/adnaan/gomodest/app/internal/models/task"
+	"github.com/adnaan/gomodest/app/gen/models/task"
 )
 
 func List(t Context) http.HandlerFunc {

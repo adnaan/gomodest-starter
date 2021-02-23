@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/adnaan/gomodest/app/internal/models/task"
+	"github.com/adnaan/gomodest/app/gen/models/task"
 	"github.com/lithammer/shortuuid/v3"
 
 	"github.com/adnaan/users"

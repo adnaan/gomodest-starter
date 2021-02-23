@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/adnaan/gomodest/app/internal/models"
+	"github.com/adnaan/gomodest/app/gen/models"
 
 	"github.com/go-playground/form"
 

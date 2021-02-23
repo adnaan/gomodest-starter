@@ -19,4 +19,4 @@ run-docker:
 mailhog:
 	docker run -d -p 1025:1025 -p 8025:8025 mailhog/mailhog
 generate-models:
-	go generate ./app/internal/models
+	go generate ./app/generator

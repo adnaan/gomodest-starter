@@ -1,17 +1,17 @@
 module github.com/adnaan/gomodest
 
-go 1.15
+go 1.16
 
 //replace github.com/adnaan/users => ../users
 
 require (
 	cloud.google.com/go v0.74.0 // indirect
+	entgo.io/ent v0.6.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/PuerkitoBio/goquery v1.6.0 // indirect
 	github.com/adnaan/renderlayout v0.0.2-0.20210221022928-23b27076629b
 	github.com/adnaan/users v0.1.7
 	github.com/andybalholm/cascadia v1.2.0 // indirect
-	github.com/facebook/ent v0.5.3
 	github.com/foolin/goview v0.3.0
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-chi/httplog v0.1.8
@@ -36,6 +36,5 @@ require (
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83 // indirect
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b // indirect
 	golang.org/x/sys v0.0.0-20201223074533-0d417f636930 // indirect
-	golang.org/x/tools v0.0.0-20201226215659-b1c90890d22a // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )
