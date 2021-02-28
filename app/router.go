@@ -88,10 +88,10 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 			LogLevel: cfg.LogLevel,
 		})
 
-	indexLayout, err := rl.New(
+	index, err := rl.New(
 		rl.Layout("index"),
 		rl.DisableCache(true),
-		rl.DefaultHandler(defaultPageHandler(appCtx)),
+		rl.DefaultData(defaultPageHandler(appCtx)),
 		rl.ErrorKey("userError"),
 	)
 
@@ -106,22 +106,22 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 	r.Use(middleware.Recoverer)
 	r.Use(httplog.RequestLogger(logger))
 
-	r.NotFound(indexLayout.HandleStatic("404"))
+	r.NotFound(index("404"))
 	// public
 	r.Route("/", func(r chi.Router) {
 		//r.Use(setDefaultPageData(appCtx))
 
 		r.Post("/webhook/{source}", handleWebhook(appCtx))
-		r.Get("/", indexLayout.HandleStatic("home"))
-		r.Get("/signup", indexLayout.HandleStatic("signup"))
-		r.Post("/signup", indexLayout.Handle("signup", signupPageSubmit(appCtx)))
+		r.Get("/", index("home"))
+		r.Get("/signup", index("signup"))
+		r.Post("/signup", index("signup", signupPageSubmit(appCtx)))
 
-		r.Get("/confirm/{token}", indexLayout.Handle("confirmed", confirmEmailPage(appCtx)))
+		r.Get("/confirm/{token}", index("confirmed", confirmEmailPage(appCtx)))
 
-		r.Get("/login", indexLayout.Handle("login", loginPage(appCtx)))
-		r.Post("/login", indexLayout.Handle("login", loginPageSubmit(appCtx)))
-		r.Get("/auth/callback", indexLayout.Handle("login", gothAuthCallbackPage(appCtx)))
-		r.Get("/auth", indexLayout.Handle("login", gothAuthPage(appCtx)))
+		r.Get("/login", index("login", loginPage(appCtx)))
+		r.Post("/login", index("login", loginPageSubmit(appCtx)))
+		r.Get("/auth/callback", index("login", gothAuthCallbackPage(appCtx)))
+		r.Get("/auth", index("login", gothAuthPage(appCtx)))
 
 		r.Get("/logout", func(w http.ResponseWriter, r *http.Request) {
 			provider := r.URL.Query().Get("provider")
@@ -131,22 +131,22 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 			}
 			usersAPI.Logout(w, r)
 		})
-		r.Get("/magic-link-sent", indexLayout.HandleStatic("magic"))
-		r.Get("/magic-login/{otp}", indexLayout.Handle("login", magicLinkLoginConfirm(appCtx)))
+		r.Get("/magic-link-sent", index("magic"))
+		r.Get("/magic-login/{otp}", index("login", magicLinkLoginConfirm(appCtx)))
 
-		r.Get("/forgot", indexLayout.HandleStatic("forgot"))
-		r.Post("/forgot", indexLayout.Handle("forgot", forgotPageSubmit(appCtx)))
-		r.Get("/reset/{token}", indexLayout.HandleStatic("reset"))
-		r.Post("/reset/{token}", indexLayout.Handle("reset", resetPageSubmit(appCtx)))
-		r.Get("/change/{token}", indexLayout.Handle("changed", confirmEmailChangePage(appCtx)))
+		r.Get("/forgot", index("forgot"))
+		r.Post("/forgot", index("forgot", forgotPageSubmit(appCtx)))
+		r.Get("/reset/{token}", index("reset"))
+		r.Post("/reset/{token}", index("reset", resetPageSubmit(appCtx)))
+		r.Get("/change/{token}", index("changed", confirmEmailChangePage(appCtx)))
 	})
 
 	// authenticated
 	r.Route("/account", func(r chi.Router) {
 		r.Use(usersAPI.IsAuthenticated)
-		r.Get("/", indexLayout.Handle("account", accountPage(appCtx)))
-		r.Post("/", indexLayout.Handle("account", accountPageSubmit(appCtx)))
-		r.Post("/delete", indexLayout.Handle("account", deleteAccount(appCtx)))
+		r.Get("/", index("account", accountPage(appCtx)))
+		r.Post("/", index("account", accountPageSubmit(appCtx)))
+		r.Post("/delete", index("account", deleteAccount(appCtx)))
 
 		r.Post("/checkout", handleCreateCheckoutSession(appCtx))
 		r.Get("/checkout/success", handleCheckoutSuccess(appCtx))
@@ -156,10 +156,10 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 
 	r.Route("/app", func(r chi.Router) {
 		r.Use(usersAPI.IsAuthenticated)
-		r.Get("/", indexLayout.Handle("app", appPage(appCtx), listTasks(appCtx)))
-		r.Post("/tasks/new", indexLayout.Handle("app", createNewTask(appCtx), listTasks(appCtx)))
-		r.Post("/tasks/{id}/edit", indexLayout.Handle("app", editTask(appCtx), listTasks(appCtx)))
-		r.Post("/tasks/{id}/delete", indexLayout.Handle("app", deleteTask(appCtx), listTasks(appCtx)))
+		r.Get("/", index("app", appPage(appCtx), listTasks(appCtx)))
+		r.Post("/tasks/new", index("app", createNewTask(appCtx), listTasks(appCtx)))
+		r.Post("/tasks/{id}/edit", index("app", editTask(appCtx), listTasks(appCtx)))
+		r.Post("/tasks/{id}/delete", index("app", deleteTask(appCtx), listTasks(appCtx)))
 	})
 
 	authz := func(next http.Handler) http.Handler {
