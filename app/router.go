@@ -113,15 +113,15 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 
 		r.Post("/webhook/{source}", handleWebhook(appCtx))
 		r.Get("/", index("home"))
-		r.Get("/signup", index("signup"))
-		r.Post("/signup", index("signup", signupPageSubmit(appCtx)))
+		r.Get("/signup", index("account/signup"))
+		r.Post("/signup", index("account/signup", signupPageSubmit(appCtx)))
 
-		r.Get("/confirm/{token}", index("confirmed", confirmEmailPage(appCtx)))
+		r.Get("/confirm/{token}", index("account/confirmed", confirmEmailPage(appCtx)))
 
-		r.Get("/login", index("login", loginPage(appCtx)))
-		r.Post("/login", index("login", loginPageSubmit(appCtx)))
-		r.Get("/auth/callback", index("login", gothAuthCallbackPage(appCtx)))
-		r.Get("/auth", index("login", gothAuthPage(appCtx)))
+		r.Get("/login", index("account/login", loginPage(appCtx)))
+		r.Post("/login", index("account/login", loginPageSubmit(appCtx)))
+		r.Get("/auth/callback", index("account/login", gothAuthCallbackPage(appCtx)))
+		r.Get("/auth", index("account/login", gothAuthPage(appCtx)))
 
 		r.Get("/logout", func(w http.ResponseWriter, r *http.Request) {
 			provider := r.URL.Query().Get("provider")
@@ -131,22 +131,22 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 			}
 			usersAPI.Logout(w, r)
 		})
-		r.Get("/magic-link-sent", index("magic"))
-		r.Get("/magic-login/{otp}", index("login", magicLinkLoginConfirm(appCtx)))
+		r.Get("/magic-link-sent", index("account/magic"))
+		r.Get("/magic-login/{otp}", index("account/login", magicLinkLoginConfirm(appCtx)))
 
-		r.Get("/forgot", index("forgot"))
-		r.Post("/forgot", index("forgot", forgotPageSubmit(appCtx)))
-		r.Get("/reset/{token}", index("reset"))
-		r.Post("/reset/{token}", index("reset", resetPageSubmit(appCtx)))
-		r.Get("/change/{token}", index("changed", confirmEmailChangePage(appCtx)))
+		r.Get("/forgot", index("account/forgot"))
+		r.Post("/forgot", index("account/forgot", forgotPageSubmit(appCtx)))
+		r.Get("/reset/{token}", index("account/reset"))
+		r.Post("/reset/{token}", index("account/reset", resetPageSubmit(appCtx)))
+		r.Get("/change/{token}", index("account/changed", confirmEmailChangePage(appCtx)))
 	})
 
 	// authenticated
 	r.Route("/account", func(r chi.Router) {
 		r.Use(usersAPI.IsAuthenticated)
-		r.Get("/", index("account", accountPage(appCtx)))
-		r.Post("/", index("account", accountPageSubmit(appCtx)))
-		r.Post("/delete", index("account", deleteAccount(appCtx)))
+		r.Get("/", index("account/main", accountPage(appCtx)))
+		r.Post("/", index("account/main", accountPageSubmit(appCtx)))
+		r.Post("/delete", index("account/main", deleteAccount(appCtx)))
 
 		r.Post("/checkout", handleCreateCheckoutSession(appCtx))
 		r.Get("/checkout/success", handleCheckoutSuccess(appCtx))

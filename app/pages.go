@@ -23,8 +23,8 @@ import (
 	"github.com/mholt/binding"
 )
 
-func defaultPageHandler(appCtx Context) rl.ViewHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+func defaultPageHandler(appCtx Context) rl.Data {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		pageData := map[string]interface{}{}
 		pageData["route"] = r.URL.Path
 		pageData["app_name"] = strings.Title(strings.ToLower(appCtx.cfg.Name))
@@ -90,19 +90,19 @@ func defaultPageHandler(appCtx Context) rl.ViewHandlerFunc {
 	}
 }
 
-func signupPageSubmit(appCtx Context) rl.ViewHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+func signupPageSubmit(appCtx Context) rl.Data {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		var email, password string
 		metadata := make(map[string]interface{})
 		_ = r.ParseForm()
 		for k, v := range r.Form {
 
 			if k == "email" && len(v) == 0 {
-				return rl.M{}, fmt.Errorf("email is required")
+				return rl.D{}, fmt.Errorf("email is required")
 			}
 
 			if k == "password" && len(v) == 0 {
-				return rl.M{}, fmt.Errorf("password is required")
+				return rl.D{}, fmt.Errorf("password is required")
 			}
 
 			if len(v) == 0 {
@@ -130,12 +130,12 @@ func signupPageSubmit(appCtx Context) rl.ViewHandlerFunc {
 
 		err := appCtx.users.Signup(email, password, "owner", metadata)
 		if err != nil {
-			return rl.M{}, err
+			return rl.D{}, err
 		}
 
 		http.Redirect(w, r, "/login?confirmation_sent=true", http.StatusSeeOther)
 
-		return rl.M{}, nil
+		return rl.D{}, nil
 	}
 }
 
@@ -167,8 +167,8 @@ func (l *LoginForm) FieldMap(_ *http.Request) binding.FieldMap {
 	}
 }
 
-func loginPageSubmit(appCtx Context) rl.ViewHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+func loginPageSubmit(appCtx Context) rl.Data {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		loginForm := new(LoginForm)
 		if errs := binding.Bind(r, loginForm); errs != nil {
 			return nil, fmt.Errorf("%v, %w",
@@ -196,12 +196,12 @@ func loginPageSubmit(appCtx Context) rl.ViewHandlerFunc {
 			http.Redirect(w, r, redirectTo, http.StatusSeeOther)
 		}
 
-		return rl.M{}, nil
+		return rl.D{}, nil
 	}
 }
 
-func magicLinkLoginConfirm(appCtx Context) rl.ViewHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+func magicLinkLoginConfirm(appCtx Context) rl.Data {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		otp := chi.URLParam(r, "otp")
 		err := appCtx.users.LoginWithOTP(w, r, otp)
 		if err != nil {
@@ -212,37 +212,37 @@ func magicLinkLoginConfirm(appCtx Context) rl.ViewHandlerFunc {
 
 		http.Redirect(w, r, redirectTo, http.StatusSeeOther)
 
-		return rl.M{}, nil
+		return rl.D{}, nil
 	}
 }
 
-func loginPage(appCtx Context) rl.ViewHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+func loginPage(appCtx Context) rl.Data {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 
 		confirmed := r.URL.Query().Get("confirmed")
 		if confirmed == "true" {
-			return rl.M{
+			return rl.D{
 				"confirmed": true,
 			}, nil
 		}
 
 		notConfirmed := r.URL.Query().Get("not_confirmed")
 		if notConfirmed == "true" {
-			return rl.M{
+			return rl.D{
 				"not_confirmed": true,
 			}, nil
 		}
 
 		confirmationSent := r.URL.Query().Get("confirmation_sent")
 		if confirmationSent == "true" {
-			return rl.M{
+			return rl.D{
 				"confirmation_sent": true,
 			}, nil
 		}
 
 		emailChanged := r.URL.Query().Get("email_changed")
 		if emailChanged == "true" {
-			return rl.M{
+			return rl.D{
 				"email_changed": true,
 			}, nil
 		}
@@ -253,15 +253,15 @@ func loginPage(appCtx Context) rl.ViewHandlerFunc {
 			appCtx.users.SetSessionVal(r, w, "from", from)
 		}
 
-		return rl.M{}, nil
+		return rl.D{}, nil
 	}
 }
 
-func gothAuthCallbackPage(appCtx Context) rl.ViewHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+func gothAuthCallbackPage(appCtx Context) rl.Data {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		err := appCtx.users.HandleGothCallback(w, r, "owner", nil)
 		if err != nil {
-			return rl.M{}, err
+			return rl.D{}, err
 		}
 		redirectTo := "/app"
 
@@ -272,15 +272,15 @@ func gothAuthCallbackPage(appCtx Context) rl.ViewHandlerFunc {
 		}
 
 		http.Redirect(w, r, redirectTo, http.StatusSeeOther)
-		return rl.M{}, nil
+		return rl.D{}, nil
 	}
 }
 
-func gothAuthPage(appCtx Context) rl.ViewHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+func gothAuthPage(appCtx Context) rl.Data {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		err := appCtx.users.HandleGothLogin(w, r)
 		if err != nil {
-			return rl.M{}, err
+			return rl.D{}, err
 		}
 		redirectTo := "/app"
 		from := r.URL.Query().Get("from")
@@ -289,12 +289,12 @@ func gothAuthPage(appCtx Context) rl.ViewHandlerFunc {
 		}
 
 		http.Redirect(w, r, redirectTo, http.StatusSeeOther)
-		return rl.M{}, nil
+		return rl.D{}, nil
 	}
 }
 
-func confirmEmailChangePage(appCtx Context) rl.ViewHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+func confirmEmailChangePage(appCtx Context) rl.Data {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		token := chi.URLParam(r, "token")
 		err := appCtx.users.ConfirmEmailChange(token)
 		if err != nil {
@@ -302,12 +302,12 @@ func confirmEmailChangePage(appCtx Context) rl.ViewHandlerFunc {
 		}
 		http.Redirect(w, r, "/account?email_changed=true", http.StatusSeeOther)
 
-		return rl.M{}, nil
+		return rl.D{}, nil
 	}
 }
 
-func confirmEmailPage(appCtx Context) rl.ViewHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+func confirmEmailPage(appCtx Context) rl.Data {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		token := chi.URLParam(r, "token")
 		err := appCtx.users.ConfirmEmail(token)
 		if err != nil {
@@ -315,20 +315,20 @@ func confirmEmailPage(appCtx Context) rl.ViewHandlerFunc {
 		}
 
 		http.Redirect(w, r, "/login?confirmed=true", http.StatusSeeOther)
-		return rl.M{}, nil
+		return rl.D{}, nil
 	}
 }
-func appPage(appCtx Context) rl.ViewHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
-		return rl.M{}, nil
+func appPage(appCtx Context) rl.Data {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
+		return rl.D{}, nil
 	}
 }
 
-func accountPage(appCtx Context) rl.ViewHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+func accountPage(appCtx Context) rl.Data {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		emailChanged := r.URL.Query().Get("email_changed")
 		if emailChanged == "true" {
-			return rl.M{
+			return rl.D{
 				"form_token":    uuid.New(),
 				"email_changed": true,
 			}, nil
@@ -336,13 +336,13 @@ func accountPage(appCtx Context) rl.ViewHandlerFunc {
 
 		checkout := r.URL.Query().Get("checkout")
 		if checkout == "success" || checkout == "cancel" {
-			return rl.M{
+			return rl.D{
 				"checkout": checkout,
 				"plans":    appCtx.cfg.Plans,
 			}, nil
 		}
 
-		return rl.M{
+		return rl.D{
 			"form_token": uuid.New(),
 			"plans":      appCtx.cfg.Plans,
 		}, nil
@@ -366,8 +366,8 @@ func (af *AccountForm) FieldMap(_ *http.Request) binding.FieldMap {
 	}
 }
 
-func accountPageSubmit(appCtx Context) rl.ViewHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+func accountPageSubmit(appCtx Context) rl.Data {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		accountForm := new(AccountForm)
 		binding.Bind(r, accountForm)
 
@@ -385,17 +385,17 @@ func accountPageSubmit(appCtx Context) rl.ViewHandlerFunc {
 				if err == nil && formTokenVal != nil {
 					formToken := formTokenVal.(string)
 					if formToken == accountForm.FormToken {
-						return rl.M{}, nil
+						return rl.D{}, nil
 					}
 				}
 			}
 			apiToken, err := appCtx.users.ResetAPIToken(r)
 			if err != nil {
-				return rl.M{}, err
+				return rl.D{}, err
 			}
 
 			appCtx.users.SetSessionVal(r, w, "form_token", accountForm.FormToken)
-			return rl.M{
+			return rl.D{
 				"is_api_token_set": true,
 				"api_token":        apiToken,
 			}, nil
@@ -440,8 +440,8 @@ func accountPageSubmit(appCtx Context) rl.ViewHandlerFunc {
 	}
 }
 
-func forgotPageSubmit(appCtx Context) rl.ViewHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+func forgotPageSubmit(appCtx Context) rl.Data {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		accountForm := new(AccountForm)
 		if errs := binding.Bind(r, accountForm); errs != nil {
 			return nil, fmt.Errorf("%v, %w", errs, "email or password missing")
@@ -471,8 +471,8 @@ func (rf *ResetForm) FieldMap(_ *http.Request) binding.FieldMap {
 	}
 }
 
-func resetPageSubmit(appCtx Context) rl.ViewHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+func resetPageSubmit(appCtx Context) rl.Data {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		token := chi.URLParam(r, "token")
 		resetForm := new(ResetForm)
 		if errs := binding.Bind(r, resetForm); errs != nil {
@@ -481,46 +481,46 @@ func resetPageSubmit(appCtx Context) rl.ViewHandlerFunc {
 
 		err := appCtx.users.ConfirmRecovery(token, resetForm.Password)
 		if err != nil {
-			return rl.M{}, err
+			return rl.D{}, err
 		}
 
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 
-		return rl.M{}, nil
+		return rl.D{}, nil
 	}
 }
 
-func deleteAccount(appCtx Context) rl.ViewHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+func deleteAccount(appCtx Context) rl.Data {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		err := appCtx.users.DeleteUser(r)
 		if err != nil {
-			return rl.M{}, err
+			return rl.D{}, err
 		}
 		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return rl.M{}, nil
+		return rl.D{}, nil
 	}
 }
 
-func listTasks(appCtx Context) rl.ViewHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+func listTasks(appCtx Context) rl.Data {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		userID := r.Context().Value(users.CtxUserIdKey).(string)
 		tasks, err := appCtx.db.Task.Query().Where(task.Owner(userID)).All(appCtx.ctx)
 		if err != nil {
 			return nil, fmt.Errorf("%w", err)
 		}
 
-		return rl.M{
+		return rl.D{
 			"tasks": tasks,
 		}, nil
 	}
 }
 
-func createNewTask(appCtx Context) rl.ViewHandlerFunc {
+func createNewTask(appCtx Context) rl.Data {
 	type req struct {
 		Text string `json:"text"`
 	}
 
-	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		req := new(req)
 		err := r.ParseForm()
 		if err != nil {
@@ -551,8 +551,8 @@ func createNewTask(appCtx Context) rl.ViewHandlerFunc {
 	}
 }
 
-func deleteTask(appCtx Context) rl.ViewHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+func deleteTask(appCtx Context) rl.Data {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		id := chi.URLParam(r, "id")
 		userID := r.Context().Value(users.CtxUserIdKey).(string)
 
@@ -567,11 +567,11 @@ func deleteTask(appCtx Context) rl.ViewHandlerFunc {
 	}
 }
 
-func editTask(appCtx Context) rl.ViewHandlerFunc {
+func editTask(appCtx Context) rl.Data {
 	type req struct {
 		Text string `json:"text"`
 	}
-	return func(w http.ResponseWriter, r *http.Request) (rl.M, error) {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		req := new(req)
 		err := r.ParseForm()
 		if err != nil {
