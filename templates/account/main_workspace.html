@@ -1,4 +1,5 @@
 {{define "content"}}
+<!--this page is work in progress-->
 <div class="columns is-mobile is-centered">
     <div class="column is-three-quarters-desktop">
         {{ if .change_email }}
@@ -20,6 +21,7 @@
         {{end}}
         {{end}}
 
+        {{ template "workspace_switcher" .}}
 
         <div class="columns is-multiline is-mobile is-centered is-variable is-8"
              data-controller="tabs"
@@ -57,6 +59,13 @@
                             </a>
                         </li>
                         <li>
+                            <a data-tabkey="members"
+                               data-tabs-target="tab"
+                               data-action="tabs#activate">
+                                Members
+                            </a>
+                        </li>
+                        <li>
                             <a data-tabkey="plans"
                                data-tabs-target="tab"
                                data-action="tabs#activate">
@@ -84,6 +93,12 @@
                      data-tabkey="developer"
                      data-tabs-target="tabPanel">
                     {{template "developer" .}}
+                </div>
+                <div class="is-hidden"
+                     style="min-width: 360px;"
+                     data-tabs-target="tabPanel"
+                     data-tabkey="members">
+                    {{template "members" .}}
                 </div>
             </div>
         </div>
