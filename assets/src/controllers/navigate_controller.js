@@ -25,7 +25,7 @@ export default class extends Controller {
     }
 
     closeModal(e){
-        if (e.type === "click"){
+        if (e.type === "click" || e.type === "turbo:submit-end"){
             const targetModal = this.modalTargets.find(i => i.id === e.currentTarget.dataset.modalTargetId);
             targetModal.classList.remove("is-active")
             e.preventDefault();
