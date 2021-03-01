@@ -91,8 +91,8 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 	index, err := rl.New(
 		rl.Layout("index"),
 		rl.DisableCache(true),
+		rl.Debug(true),
 		rl.DefaultData(defaultPageHandler(appCtx)),
-		rl.ErrorKey("userError"),
 	)
 
 	if err != nil {
