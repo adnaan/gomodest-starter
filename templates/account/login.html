@@ -1,10 +1,8 @@
 {{define "content"}}
+    <turbo-frame id="login">
     <div class="columns is-mobile is-centered">
         <div class="column is-one-third-desktop">
-            {{ if .error }}
-                <p> {{.error}} </p>
-            {{end}}
-
+            {{template "errors" .}}
             {{ if .confirmed }}
                 <box class="box has-background-success">
                     Thank you for confirming your email. Sign in to get started !
@@ -13,7 +11,8 @@
 
             {{ if .not_confirmed }}
                 <box class="box has-background-warning">
-                    Email not confirmed yet ! An email was sent to your inbox for confirmation. Please confirm to login.
+                    Email not confirmed yet ! An email was sent to your inbox for confirmation.
+                    Please confirm to login.
                 </box>
             {{end}}
 
@@ -79,6 +78,7 @@
             <form
                   data-action="submit->account#submitLoginForm"
                   method="POST">
+                <p class="has-text-success"> {{.userErrs}} </p>
                 <div class="field">
                     <label class="label">Email</label>
                     <input data-account-target="email"
@@ -94,7 +94,6 @@
                 <div class="field">
                     <label class="label">Password</label>
                     <input data-account-target="password"
-                           data-action="blur->account.#validatePassword"
                            name="password"
                            class="input"
                            type="password"
@@ -141,6 +140,5 @@
             </div>
         </div>
     </div>
-    </div>
-
+    </turbo-frame>
 {{end}}

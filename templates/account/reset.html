@@ -1,7 +1,8 @@
 {{define "content"}}
+<turbo-frame id="reset">
     <div class="columns is-mobile is-centered">
         <div class="column is-one-third-desktop">
-
+            {{template "errors" .}}
             <h1 class="box has-background-info-light has-text-weight-semibold">Change to a new pasword</h1>
             <br>
 
@@ -42,5 +43,5 @@
         </div>
     </div>
     </div>
-
+</turbo-frame>
 {{end}}

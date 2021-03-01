@@ -8,7 +8,7 @@ require (
 	cloud.google.com/go v0.74.0 // indirect
 	entgo.io/ent v0.6.0
 	github.com/PuerkitoBio/goquery v1.6.0 // indirect
-	github.com/adnaan/renderlayout v0.0.2
+	github.com/adnaan/renderlayout v0.0.3
 	github.com/adnaan/users v0.1.7
 	github.com/andybalholm/cascadia v1.2.0 // indirect
 	github.com/go-chi/chi v4.1.2+incompatible

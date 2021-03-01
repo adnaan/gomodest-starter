@@ -4,7 +4,6 @@ export default class extends Controller {
     static targets = [ "name","email","magicEmail","password", "confirmPassword", "formError","magic"]
 
     validateEmail(e) {
-        console.log(e)
         if (!this.emailTarget.validity.valid || this.emailTarget.value === ''){
             this.showFormError("Invalid Email")
             return false;
@@ -13,7 +12,6 @@ export default class extends Controller {
     }
 
     validateMagicEmail(e) {
-        console.log(e)
         if (!this.magicEmailTarget.validity.valid || this.magicEmailTarget.value === ''){
             this.showFormError("Invalid Email")
             return false;

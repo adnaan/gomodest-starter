@@ -1,6 +1,8 @@
 {{define "content"}}
+<turbo-frame id="signup">
     <div class="columns is-mobile is-centered">
         <div class="column is-one-third-desktop">
+            {{template "errors" .}}
             <div class="columns is-mobile is-centered pb-6">
                 <p class="title is-3">Sign up with {{.app_name}}</p>
             </div>
@@ -74,5 +76,5 @@
         </div>
     </div>
     </div>
-
+</turbo-frame>
 {{end}}

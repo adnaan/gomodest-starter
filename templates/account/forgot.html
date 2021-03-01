@@ -1,6 +1,8 @@
 {{define "content"}}
+<turbo-frame id="forgot">
     <div class="columns is-mobile is-centered">
         <div class="column is-one-third-desktop">
+            {{template "errors" .}}
             {{ if .recovery_sent }}
                 <box class="box has-background-warning"> A password recovery link has been sent to your inbox. </box>
            {{else}}
@@ -33,5 +35,5 @@
         </div>
     </div>
     </div>
-
+</turbo-frame>
 {{end}}
