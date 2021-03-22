@@ -16,7 +16,7 @@ import (
 
 func List(t Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID := r.Context().Value(authn.CtxUserIdKey).(string)
+		userID := authn.AccountIDFromContext(r)
 		tasks, err := t.db.Task.Query().Where(task.Owner(userID)).All(t.ctx)
 		if err != nil {
 			render.Render(w, r, ErrInternal(err))
@@ -33,7 +33,7 @@ func Create(t Context) http.HandlerFunc {
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := new(req)
-		userID := r.Context().Value(authn.CtxUserIdKey).(string)
+		userID := authn.AccountIDFromContext(r)
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			render.Render(w, r, ErrInternal(err))
