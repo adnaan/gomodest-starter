@@ -7,13 +7,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/adnaan/authn"
+
 	"github.com/jordan-wright/email"
 
-	"github.com/adnaan/users"
 	"github.com/matcornic/hermes/v2"
 )
 
-func sendEmailFunc(cfg Config) users.SendMailFunc {
+func sendEmailFunc(cfg Config) authn.SendMailFunc {
 	appName := strings.Title(strings.ToLower(cfg.Name))
 	h := hermes.Hermes{
 		Product: hermes.Product{
@@ -24,7 +25,7 @@ func sendEmailFunc(cfg Config) users.SendMailFunc {
 	}
 
 	pool := newEmailPool(cfg)
-	return func(mailType users.MailType, token, sendTo string, metadata map[string]interface{}) error {
+	return func(mailType authn.MailType, token, sendTo string, metadata map[string]interface{}) error {
 		var name string
 		var ok bool
 		if metadata["name"] != nil {
@@ -38,16 +39,16 @@ func sendEmailFunc(cfg Config) users.SendMailFunc {
 		var subject string
 
 		switch mailType {
-		case users.Confirmation:
+		case authn.Confirmation:
 			subject = fmt.Sprintf("Welcome to %s!", appName)
 			emailTmpl = confirmation(appName, name, fmt.Sprintf("%s/confirm/%s", cfg.Domain, token))
-		case users.Recovery:
+		case authn.Recovery:
 			subject = fmt.Sprintf("Reset password on %s", appName)
 			emailTmpl = recovery(appName, name, fmt.Sprintf("%s/reset/%s", cfg.Domain, token))
-		case users.ChangeEmail:
+		case authn.ChangeEmail:
 			subject = fmt.Sprintf("Change email on %s", appName)
 			emailTmpl = changeEmail(appName, name, fmt.Sprintf("%s/change/%s", cfg.Domain, token))
-		case users.OTP:
+		case authn.Passwordless:
 			subject = fmt.Sprintf("Magic link to log into %s", appName)
 			emailTmpl = magic(appName, name, fmt.Sprintf("%s/magic-login/%s", cfg.Domain, token))
 		}
