@@ -14,6 +14,11 @@ import (
 
 // modified from https://github.com/stripe-samples/checkout-single-subscription/blob/master/server/go/server.go
 
+const (
+	billingIDKey      = "billing_id"
+	currentPriceIDKey = "current_price_id"
+)
+
 type errResponse struct {
 	Error string `json:"error"`
 }
@@ -25,9 +30,9 @@ func handleCreateCheckoutSession(appCtx Context) http.HandlerFunc {
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := new(req)
-		user, err := appCtx.users.LoggedInUser(r)
+		account, err := appCtx.authn.CurrentAccount(r)
 		if err != nil {
-			log.Printf("users.LoggednIuser: %v", err)
+			log.Printf("authn.CurrentAccount: %v", err)
 			render.Status(r, http.StatusUnauthorized)
 			render.JSON(w, r, &errResponse{"unauthorized"})
 			return
@@ -41,7 +46,7 @@ func handleCreateCheckoutSession(appCtx Context) http.HandlerFunc {
 		}
 
 		params := &stripe.CheckoutSessionParams{
-			CustomerEmail: stripe.String(user.Email),
+			CustomerEmail: stripe.String(account.Email()),
 			SuccessURL:    stripe.String(appCtx.cfg.Domain + "/account/checkout/success?session_id={CHECKOUT_SESSION_ID}"),
 			CancelURL:     stripe.String(appCtx.cfg.Domain + "/account/checkout/cancel"),
 			PaymentMethodTypes: stripe.StringSlice([]string{
@@ -80,15 +85,23 @@ func handleCheckoutSuccess(appCtx Context) http.HandlerFunc {
 		}
 		s, err := session.Get(sessionID, nil)
 		if err != nil {
-			log.Printf("session.Get: %v", err)
+			log.Printf("session.Get: %v\n", err)
 			render.Status(r, http.StatusBadRequest)
 			render.JSON(w, r, &errResponse{err.Error()})
 			return
 		}
 
-		err = appCtx.users.UpdateBillingID(r, s.Customer.ID)
+		account, err := appCtx.authn.CurrentAccount(r)
 		if err != nil {
-			log.Printf("UpdateBillingID %v", err)
+			log.Printf("authn.CurrentAccount: %v\n", err)
+			render.Status(r, http.StatusUnauthorized)
+			render.JSON(w, r, &errResponse{"unauthorized"})
+			return
+		}
+
+		err = account.Attributes().Set(billingIDKey, s.Customer.ID)
+		if err != nil {
+			log.Printf("UpdateBillingID %v\n", err)
 			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, &errResponse{err.Error()})
 			return
@@ -106,21 +119,27 @@ func handleCheckoutCancel(appCtx Context) http.HandlerFunc {
 
 func handleManageSubscription(appCtx Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user, err := appCtx.users.LoggedInUser(r)
+		account, err := appCtx.authn.CurrentAccount(r)
 		if err != nil {
-			log.Printf("users.LoggednIuser: %v", err)
-			http.Redirect(w, r, "/account", http.StatusSeeOther)
+			log.Printf("authn.CurrentAccount: %v", err)
+			render.Status(r, http.StatusUnauthorized)
+			render.JSON(w, r, &errResponse{"unauthorized"})
 			return
 		}
 
 		// expect plan to be change
-		err = appCtx.users.DelSessionVal(r, w, "current_price_id")
+		err = account.Attributes().Session().Del(w, currentPriceIDKey)
 		if err != nil {
-			log.Println("DelSessionVal, current_price_id failed", err)
+			log.Printf("account.Attributes().Session().Del(), %s failed  err %v\n", currentPriceIDKey, err)
 		}
-
+		billingID, ok := account.Attributes().Map().String(billingIDKey)
+		if !ok {
+			log.Printf(" %s not found \n", billingIDKey)
+			http.Redirect(w, r, "/account", http.StatusSeeOther)
+			return
+		}
 		params := &stripe.BillingPortalSessionParams{
-			Customer:  stripe.String(user.BillingID),
+			Customer:  stripe.String(billingID),
 			ReturnURL: stripe.String(appCtx.cfg.Domain + "/account"),
 		}
 

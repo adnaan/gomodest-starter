@@ -6,10 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/adnaan/gomodest/app/gen/models/task"
 	"github.com/lithammer/shortuuid/v3"
-
-	"github.com/adnaan/users"
 
 	rl "github.com/adnaan/renderlayout"
 
@@ -30,24 +27,26 @@ func defaultPageHandler(appCtx Context) rl.Data {
 		pageData["app_name"] = strings.Title(strings.ToLower(appCtx.cfg.Name))
 		pageData["feature_groups"] = appCtx.cfg.FeatureGroups
 
-		user, err := appCtx.users.LoggedInUser(r)
+		account, err := appCtx.authn.CurrentAccount(r)
 		if err != nil {
 			return pageData, nil
 		}
 
-		pageData["is_logged_in"] = true
-		pageData["email"] = user.Email
-		pageData["metadata"] = user.Metadata
-		pageData["workspaces"] = user.Workspaces
-		if user.IsAPITokenSet {
+		accAttributes := account.Attributes().Map()
+		if _, ok := accAttributes["api_key"]; ok {
 			pageData["is_api_token_set"] = true
 		}
 
-		currentPriceID := appCtx.users.GetSessionStringVal(r, "current_price_id")
+		pageData["is_logged_in"] = true
+		pageData["email"] = account.Email()
+		pageData["metadata"] = accAttributes
+
+		currentPriceID, _ := account.Attributes().Session().Get(currentPriceIDKey)
 		// get currentPriceID using stripe customer ID
-		if user.BillingID != "" && currentPriceID == nil {
+		billingId, billingIDExists := accAttributes.String(billingIDKey)
+		if billingIDExists && currentPriceID == nil {
 			params := &stripe.SubscriptionListParams{
-				Customer: user.BillingID,
+				Customer: billingId,
 				Status:   string(stripe.SubscriptionStatusActive),
 			}
 			params.AddExpand("data.items.data.price")
@@ -58,7 +57,7 @@ func defaultPageHandler(appCtx Context) rl.Data {
 				s := i.Subscription()
 				if s.Status == stripe.SubscriptionStatusActive {
 					for _, pr := range s.Items.Data {
-						currentPriceID = &pr.Price.ID
+						currentPriceID = pr.Price.ID
 					}
 				}
 
@@ -66,13 +65,13 @@ func defaultPageHandler(appCtx Context) rl.Data {
 		}
 
 		if currentPriceID != nil {
-			err = appCtx.users.SetSessionVal(r, w, "current_price_id", *currentPriceID)
+			err = account.Attributes().Session().Set(w, currentPriceIDKey, currentPriceID)
 			if err != nil {
 				log.Println("SetSessionVal", err)
 			}
 
 			for _, plan := range appCtx.cfg.Plans {
-				if plan.PriceID == *currentPriceID {
+				if plan.PriceID == currentPriceID.(string) {
 					pageData["current_plan"] = Plan{
 						Current:   true,
 						PriceID:   plan.PriceID,
@@ -128,7 +127,7 @@ func signupPageSubmit(appCtx Context) rl.Data {
 			}
 		}
 
-		err := appCtx.users.Signup(email, password, "owner", metadata)
+		err := appCtx.authn.Signup(r.Context(), email, password, metadata)
 		if err != nil {
 			return rl.D{}, err
 		}
@@ -176,13 +175,13 @@ func loginPageSubmit(appCtx Context) rl.Data {
 		}
 
 		if loginForm.Magic == "magic" {
-			err := appCtx.users.OTP(loginForm.Email)
+			err := appCtx.authn.SendPasswordlessToken(r.Context(), loginForm.Email)
 			if err != nil {
 				return nil, err
 			}
 			http.Redirect(w, r, "/magic-link-sent", http.StatusSeeOther)
 		} else {
-			err := appCtx.users.Login(w, r, loginForm.Email, loginForm.Password)
+			err := appCtx.authn.Login(w, r, loginForm.Email, loginForm.Password)
 			if err != nil {
 				return nil, err
 			}
@@ -203,7 +202,7 @@ func loginPageSubmit(appCtx Context) rl.Data {
 func magicLinkLoginConfirm(appCtx Context) rl.Data {
 	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		otp := chi.URLParam(r, "otp")
-		err := appCtx.users.LoginWithOTP(w, r, otp)
+		err := appCtx.authn.LoginWithPasswordlessToken(w, r, otp)
 		if err != nil {
 			return nil, err
 		}
@@ -247,29 +246,17 @@ func loginPage(appCtx Context) rl.Data {
 			}, nil
 		}
 
-		from := r.URL.Query().Get("from")
-		if from != "" {
-			// store from in session to be used by external login(goth)
-			appCtx.users.SetSessionVal(r, w, "from", from)
-		}
-
 		return rl.D{}, nil
 	}
 }
 
 func gothAuthCallbackPage(appCtx Context) rl.Data {
 	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
-		err := appCtx.users.HandleGothCallback(w, r, "owner", nil)
+		err := appCtx.authn.LoginProviderCallback(w, r, nil)
 		if err != nil {
 			return rl.D{}, err
 		}
 		redirectTo := "/app"
-
-		fromVal, err := appCtx.users.GetSessionVal(r, "from")
-		if err == nil && fromVal != nil {
-			redirectTo = fromVal.(string)
-			appCtx.users.DelSessionVal(r, w, "from")
-		}
 
 		http.Redirect(w, r, redirectTo, http.StatusSeeOther)
 		return rl.D{}, nil
@@ -278,7 +265,7 @@ func gothAuthCallbackPage(appCtx Context) rl.Data {
 
 func gothAuthPage(appCtx Context) rl.Data {
 	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
-		err := appCtx.users.HandleGothLogin(w, r)
+		err := appCtx.authn.LoginWithProvider(w, r)
 		if err != nil {
 			return rl.D{}, err
 		}
@@ -296,12 +283,15 @@ func gothAuthPage(appCtx Context) rl.Data {
 func confirmEmailChangePage(appCtx Context) rl.Data {
 	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		token := chi.URLParam(r, "token")
-		err := appCtx.users.ConfirmEmailChange(token)
+		acc, err := appCtx.authn.CurrentAccount(r)
+		if err != nil {
+			return nil, err
+		}
+		err = acc.ConfirmEmailChange(token)
 		if err != nil {
 			return nil, err
 		}
 		http.Redirect(w, r, "/account?email_changed=true", http.StatusSeeOther)
-
 		return rl.D{}, nil
 	}
 }
@@ -309,7 +299,7 @@ func confirmEmailChangePage(appCtx Context) rl.Data {
 func confirmEmailPage(appCtx Context) rl.Data {
 	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		token := chi.URLParam(r, "token")
-		err := appCtx.users.ConfirmEmail(token)
+		err := appCtx.authn.ConfirmSignupEmail(r.Context(), token)
 		if err != nil {
 			return nil, err
 		}
@@ -373,7 +363,7 @@ func accountPageSubmit(appCtx Context) rl.Data {
 
 		pageData := make(map[string]interface{})
 
-		user, err := appCtx.users.LoggedInUser(r)
+		account, err := appCtx.authn.CurrentAccount(r)
 		if err != nil {
 			return nil, err
 		}
@@ -381,7 +371,7 @@ func accountPageSubmit(appCtx Context) rl.Data {
 		if accountForm.ResetAPIToken {
 			// check if the form has been previously submitted
 			if accountForm.FormToken != "" {
-				formTokenVal, err := appCtx.users.GetSessionVal(r, "form_token")
+				formTokenVal, err := account.Attributes().Session().Get("form_token")
 				if err == nil && formTokenVal != nil {
 					formToken := formTokenVal.(string)
 					if formToken == accountForm.FormToken {
@@ -389,53 +379,45 @@ func accountPageSubmit(appCtx Context) rl.Data {
 					}
 				}
 			}
-			apiToken, err := appCtx.users.ResetAPIToken(r)
+
+			apiKey := shortuuid.New()
+			token, err := appCtx.branca.EncodeToString(apiKey)
 			if err != nil {
-				return rl.D{}, err
+				return nil, fmt.Errorf("%v %w", err, ErrInternal)
 			}
 
-			appCtx.users.SetSessionVal(r, w, "form_token", accountForm.FormToken)
+			err = account.Attributes().Set("api_key", apiKey)
+			if err != nil {
+				return nil, fmt.Errorf("%v %w", err, ErrInternal)
+			}
+
+			account.Attributes().Session().Set(w, "form_token", accountForm.FormToken)
 			return rl.D{
 				"is_api_token_set": true,
-				"api_token":        apiToken,
+				"api_token":        token,
 			}, nil
 		}
 
-		if accountForm.Email != "" && accountForm.Email != user.Email {
-			err = appCtx.users.ChangeEmail(user.ID, accountForm.Email)
+		if accountForm.Email != "" && accountForm.Email != account.Email() {
+			err = account.ChangeEmail(accountForm.Email)
 			if err != nil {
 				return nil, err
 			}
 			pageData["change_email"] = "requested"
 		}
 
-		var name string
-		var ok bool
-		if user.Metadata["name"] == nil {
-			name = ""
-		} else {
-			name, ok = user.Metadata["name"].(string)
-			if !ok {
-				return nil, err
-			}
-		}
-
+		name, _ := account.Attributes().Map().String("name")
 		if name != accountForm.Name {
-			err = appCtx.users.UpdateMetaData(r, map[string]interface{}{
-				"name": accountForm.Name,
-			})
-
+			err = account.Attributes().Set("name", accountForm.Name)
 			if err != nil {
 				return nil, err
 			}
 		}
 
-		appCtx.users.SetSessionVal(r, w, "form_token", accountForm.FormToken)
+		account.Attributes().Session().Set(w, "form_token", accountForm.FormToken)
 
-		pageData["email"] = user.Email
-
-		user.Metadata["name"] = accountForm.Name
-		pageData["metadata"] = user.Metadata
+		pageData["email"] = account.Email()
+		pageData["metadata"] = account.Attributes().Map()
 		return pageData, nil
 	}
 }
@@ -449,7 +431,7 @@ func forgotPageSubmit(appCtx Context) rl.Data {
 
 		pageData := make(map[string]interface{})
 
-		err := appCtx.users.Recovery(accountForm.Email)
+		err := appCtx.authn.Recovery(r.Context(), accountForm.Email)
 		if err != nil {
 			return pageData, err
 		}
@@ -479,7 +461,7 @@ func resetPageSubmit(appCtx Context) rl.Data {
 			return nil, fmt.Errorf("%v, %w", errs, fmt.Errorf("missing password"))
 		}
 
-		err := appCtx.users.ConfirmRecovery(token, resetForm.Password)
+		err := appCtx.authn.ConfirmRecovery(r.Context(), token, resetForm.Password)
 		if err != nil {
 			return rl.D{}, err
 		}
@@ -492,110 +474,15 @@ func resetPageSubmit(appCtx Context) rl.Data {
 
 func deleteAccount(appCtx Context) rl.Data {
 	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
-		err := appCtx.users.DeleteUser(r)
+		account, err := appCtx.authn.CurrentAccount(r)
 		if err != nil {
-			return rl.D{}, err
+			return nil, err
+		}
+		err = account.Delete()
+		if err != nil {
+			return nil, err
 		}
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return rl.D{}, nil
-	}
-}
-
-func listTasks(appCtx Context) rl.Data {
-	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
-		userID := r.Context().Value(users.CtxUserIdKey).(string)
-		tasks, err := appCtx.db.Task.Query().Where(task.Owner(userID)).All(appCtx.ctx)
-		if err != nil {
-			return nil, fmt.Errorf("%w", err)
-		}
-
-		return rl.D{
-			"tasks": tasks,
-		}, nil
-	}
-}
-
-func createNewTask(appCtx Context) rl.Data {
-	type req struct {
-		Text string `json:"text"`
-	}
-
-	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
-		req := new(req)
-		err := r.ParseForm()
-		if err != nil {
-			return nil, fmt.Errorf("%w", err)
-		}
-
-		err = appCtx.formDecoder.Decode(req, r.Form)
-		if err != nil {
-			return nil, fmt.Errorf("%w", err)
-		}
-
-		if req.Text == "" {
-			return nil, fmt.Errorf("%w", fmt.Errorf("empty task"))
-		}
-
-		userID := r.Context().Value(users.CtxUserIdKey).(string)
-		_, err = appCtx.db.Task.Create().
-			SetID(shortuuid.New()).
-			SetStatus(task.StatusInprogress).
-			SetOwner(userID).
-			SetText(req.Text).
-			Save(appCtx.ctx)
-		if err != nil {
-			return nil, fmt.Errorf("%w", err)
-		}
-
-		return nil, nil
-	}
-}
-
-func deleteTask(appCtx Context) rl.Data {
-	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
-		id := chi.URLParam(r, "id")
-		userID := r.Context().Value(users.CtxUserIdKey).(string)
-
-		_, err := appCtx.db.Task.Delete().Where(task.And(
-			task.Owner(userID), task.ID(id),
-		)).Exec(appCtx.ctx)
-		if err != nil {
-			return nil, fmt.Errorf("%w", err)
-		}
-
-		return nil, nil
-	}
-}
-
-func editTask(appCtx Context) rl.Data {
-	type req struct {
-		Text string `json:"text"`
-	}
-	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
-		req := new(req)
-		err := r.ParseForm()
-		if err != nil {
-			return nil, fmt.Errorf("%w", err)
-		}
-
-		err = appCtx.formDecoder.Decode(req, r.Form)
-		if err != nil {
-			return nil, fmt.Errorf("%w", err)
-		}
-
-		if req.Text == "" {
-			return nil, fmt.Errorf("%w", fmt.Errorf("empty task"))
-		}
-
-		id := chi.URLParam(r, "id")
-		userID := r.Context().Value(users.CtxUserIdKey).(string)
-		err = appCtx.db.Task.Update().Where(task.And(
-			task.Owner(userID), task.ID(id),
-		)).SetText(req.Text).Exec(appCtx.ctx)
-		if err != nil {
-			return nil, fmt.Errorf("%w", err)
-		}
-
-		return nil, nil
 	}
 }

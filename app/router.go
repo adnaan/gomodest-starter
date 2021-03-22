@@ -5,20 +5,19 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
+
+	"github.com/hako/branca"
+
+	"github.com/adnaan/authn"
 
 	"github.com/adnaan/gomodest/app/gen/models"
 
 	"github.com/go-playground/form"
 
-	"github.com/go-chi/render"
-
 	"github.com/stripe/stripe-go/v72"
 
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/google"
-
-	"github.com/adnaan/users"
 
 	"github.com/go-chi/httplog"
 
@@ -28,11 +27,12 @@ import (
 )
 
 type Context struct {
-	users       *users.API
+	authn       *authn.API
 	cfg         Config
 	formDecoder *form.Decoder
 	db          *models.Client
 	ctx         context.Context
+	branca      *branca.Branca
 }
 
 type APIRoute struct {
@@ -59,27 +59,25 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 		ctx:         ctx,
 		cfg:         cfg,
 		formDecoder: form.NewDecoder(),
+		branca:      branca.NewBranca(cfg.APIMasterSecret),
 	}
 
-	defaultUsersConfig := users.Config{
-		Driver:          cfg.Driver,
-		Datasource:      cfg.DataSource,
-		SessionSecret:   cfg.SessionSecret,
-		APIMasterSecret: cfg.APIMasterSecret,
-		SendMail:        sendEmailFunc(cfg),
+	defaultUsersConfig := authn.Config{
+		Driver:        cfg.Driver,
+		Datasource:    cfg.DataSource,
+		SessionSecret: cfg.SessionSecret,
+		SendMail:      sendEmailFunc(cfg),
 		GothProviders: []goth.Provider{
-			google.New(cfg.GoogleClientID, cfg.GoogleSecret, fmt.Sprintf("%s/auth/callback?provider=google", cfg.Domain), "email", "profile"),
+			google.New(
+				cfg.GoogleClientID,
+				cfg.GoogleSecret,
+				fmt.Sprintf("%s/auth/callback?provider=google", cfg.Domain),
+				"email", "profile",
+			),
 		},
-		Roles: map[string][]users.Permission{
-			"owner": ownerRole(appCtx),
-		},
-	}
-	usersAPI, err := users.NewDefaultAPI(ctx, defaultUsersConfig)
-	if err != nil {
-		log.Fatal(err)
 	}
 
-	appCtx.users = usersAPI
+	appCtx.authn = authn.New(ctx, defaultUsersConfig)
 
 	// logger
 	logger := httplog.NewLogger(cfg.Name,
@@ -91,7 +89,7 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 	index, err := rl.New(
 		rl.Layout("index"),
 		rl.DisableCache(true),
-		rl.Debug(true),
+		rl.Debug(false),
 		rl.DefaultData(defaultPageHandler(appCtx)),
 	)
 
@@ -105,17 +103,13 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 	r.Use(middleware.Heartbeat(cfg.HealthPath))
 	r.Use(middleware.Recoverer)
 	r.Use(httplog.RequestLogger(logger))
-
 	r.NotFound(index("404"))
 	// public
 	r.Route("/", func(r chi.Router) {
-		//r.Use(setDefaultPageData(appCtx))
-
 		r.Post("/webhook/{source}", handleWebhook(appCtx))
 		r.Get("/", index("home"))
 		r.Get("/signup", index("account/signup"))
 		r.Post("/signup", index("account/signup", signupPageSubmit(appCtx)))
-
 		r.Get("/confirm/{token}", index("account/confirmed", confirmEmailPage(appCtx)))
 
 		r.Get("/login", index("account/login", loginPage(appCtx)))
@@ -124,12 +118,12 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 		r.Get("/auth", index("account/login", gothAuthPage(appCtx)))
 
 		r.Get("/logout", func(w http.ResponseWriter, r *http.Request) {
-			provider := r.URL.Query().Get("provider")
-			if provider != "" {
-				usersAPI.HandleGothLogout(w, r)
-				return
+			acc, err := appCtx.authn.CurrentAccount(r)
+			if err != nil {
+				log.Println("err logging out ", err)
+				http.Redirect(w, r, "/", http.StatusSeeOther)
 			}
-			usersAPI.Logout(w, r)
+			acc.Logout(w, r)
 		})
 		r.Get("/magic-link-sent", index("account/magic"))
 		r.Get("/magic-login/{otp}", index("account/login", magicLinkLoginConfirm(appCtx)))
@@ -143,7 +137,7 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 
 	// authenticated
 	r.Route("/account", func(r chi.Router) {
-		r.Use(usersAPI.IsAuthenticated)
+		r.Use(appCtx.authn.IsAuthenticated)
 		r.Get("/", index("account/main", accountPage(appCtx)))
 		r.Post("/", index("account/main", accountPageSubmit(appCtx)))
 		r.Post("/delete", index("account/main", deleteAccount(appCtx)))
@@ -155,52 +149,26 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 	})
 
 	r.Route("/app", func(r chi.Router) {
-		r.Use(usersAPI.IsAuthenticated)
+		r.Use(appCtx.authn.IsAuthenticated)
 		r.Get("/", index("app", appPage(appCtx), listTasks(appCtx)))
 		r.Post("/tasks/new", index("app", createNewTask(appCtx), listTasks(appCtx)))
 		r.Post("/tasks/{id}/edit", index("app", editTask(appCtx), listTasks(appCtx)))
 		r.Post("/tasks/{id}/delete", index("app", deleteTask(appCtx), listTasks(appCtx)))
 	})
 
-	authz := func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// GET /api/tasks/ => get:api:tasks
-			action := buildRestAction(r.Method, r.URL.Path)
-			target := chi.URLParam(r, "id")
-			if target == "" {
-				target = "*"
-			}
-			allow, err := usersAPI.Can(r, action, target)
-			if !allow || err != nil {
-				log.Printf("Can err: %v\n", err)
-				render.Render(w, r, ErrUnauthorized(err))
-				return
-			}
-			next.ServeHTTP(w, r)
-		})
-	}
-
 	r.Route("/api", func(r chi.Router) {
-		r.Use(usersAPI.IsAuthenticated)
+		r.Use(appCtx.authn.IsAuthenticated)
 		r.Use(middleware.AllowContentType("application/json"))
-		r.With(authz).Route("/tasks", func(r chi.Router) {
+		r.Route("/tasks", func(r chi.Router) {
 			r.Get("/", List(appCtx))
 			r.Post("/", Create(appCtx))
 		})
-		r.With(authz).Route("/tasks/{id}", func(r chi.Router) {
+		r.Route("/tasks/{id}", func(r chi.Router) {
 			r.Put("/status", UpdateStatus(appCtx))
 			r.Put("/text", UpdateText(appCtx))
 			r.Delete("/", Delete(appCtx))
 		})
-
 	})
 
 	return r
-}
-
-func buildRestAction(method, path string) string {
-	return fmt.Sprintf("%s%s", strings.ToLower(method),
-		strings.ToLower(
-			strings.TrimRight(
-				strings.Replace(path, "/", ":", -1), ":")))
 }
