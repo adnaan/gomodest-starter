@@ -25,6 +25,7 @@ require (
 	github.com/lithammer/shortuuid/v3 v3.0.5
 	github.com/markbates/goth v1.67.1
 	github.com/matcornic/hermes/v2 v2.1.0
+	github.com/mattn/go-sqlite3 v1.14.6
 	github.com/mholt/binding v0.3.0
 	github.com/rs/zerolog v1.20.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect

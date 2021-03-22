@@ -24,6 +24,7 @@ import (
 	rl "github.com/adnaan/renderlayout"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type Context struct {
