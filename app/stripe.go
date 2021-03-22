@@ -130,7 +130,7 @@ func handleManageSubscription(appCtx Context) http.HandlerFunc {
 		// expect plan to be change
 		err = account.Attributes().Session().Del(w, currentPriceIDKey)
 		if err != nil {
-			log.Printf("account.Attributes().Session(), %s failed  err %v\n", currentPriceIDKey, err)
+			log.Printf("account.Attributes().Session().Del(), %s failed  err %v\n", currentPriceIDKey, err)
 		}
 		billingID, ok := account.Attributes().Map().String(billingIDKey)
 		if !ok {

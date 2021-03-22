@@ -57,7 +57,7 @@ func defaultPageHandler(appCtx Context) rl.Data {
 				s := i.Subscription()
 				if s.Status == stripe.SubscriptionStatusActive {
 					for _, pr := range s.Items.Data {
-						currentPriceID = &pr.Price.ID
+						currentPriceID = pr.Price.ID
 					}
 				}
 
