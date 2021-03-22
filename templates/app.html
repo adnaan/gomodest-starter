@@ -1,8 +1,9 @@
 {{define "content"}}
 <div class="columns is-mobile is-centered">
     <div class="column is-half-desktop">
+        <turbo-frame id="app">
             {{template "errors" .}}
-            <form  method="POST" action="/app/tasks/new">
+            <form  method="POST" action="/app/tasks/new" >
                 <div class="field columns">
                     <div class="control column is-10-desktop is-10-mobile">
                         <input class="input"
@@ -110,6 +111,7 @@
                     </div>
                 {{ end }}
             </div>
+        </turbo-frame>
     </div>
 </div>
 {{end}}

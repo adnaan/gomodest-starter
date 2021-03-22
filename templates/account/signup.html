@@ -1,13 +1,14 @@
 {{define "content"}}
-    <div class="columns is-mobile is-centered">
-        <div class="column is-one-third-desktop">
+<div class="columns is-mobile is-centered">
+    <div class="column is-one-third-desktop">
+        <turbo-frame id="account">
             {{template "errors" .}}
             <div class="columns is-mobile is-centered pb-6">
                 <p class="title is-3">Sign up with {{.app_name}}</p>
             </div>
             <form
-                  data-action="submit->account#submitSignupForm"
-                  method="POST">
+                    data-action="submit->account#submitSignupForm"
+                    method="POST">
                 <div class="field">
                     <label class="label">Name</label>
                     <input data-account-target="name"
@@ -44,7 +45,7 @@
                 </div>
                 <div class="field is-grouped">
                     <div class="control is-expanded">
-                        <button class="button is-primary is-fullwidth"
+                        <button class="button is-primary is-fullwidth" data-turbo-frame="_top"
                                 type="submit">
                             Sign up
                         </button>
@@ -72,6 +73,7 @@
                     </button>
                 </div>
             </form>
-        </div>
+        </turbo-frame>
     </div>
+</div>
 {{end}}

@@ -1,14 +1,15 @@
 {{define "content"}}
-    <div class="columns is-mobile is-centered">
-        <div class="column is-one-third-desktop">
+<div class="columns is-mobile is-centered">
+    <div class="column is-one-third-desktop">
+        <turbo-frame id="account">
             {{template "errors" .}}
             {{ if .recovery_sent }}
-                <box class="box has-background-warning"> A password recovery link has been sent to your inbox. </box>
-           {{else}}
+            <box class="box has-background-warning"> A password recovery link has been sent to your inbox.</box>
+            {{else}}
 
             <form
-                  data-action="submit->account#submitForgetForm"
-                  method="POST">
+                    data-action="submit->account#submitForgetForm"
+                    method="POST">
                 <div class="field">
                     <label class="label">Email</label>
                     <input data-account-target="email"
@@ -31,6 +32,7 @@
                 </div>
             </form>
             {{end}}
-        </div>
+        </turbo-frame>
     </div>
+</div>
 {{end}}

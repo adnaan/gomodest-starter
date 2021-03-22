@@ -1,24 +1,25 @@
 {{define "content"}}
-    <div class="columns is-mobile is-centered">
-        <div class="column is-one-third-desktop">
+<div class="columns is-mobile is-centered">
+    <div class="column is-one-third-desktop">
+        <turbo-frame id="account">
             {{template "errors" .}}
             {{ if .confirmed }}
-                <box class="box has-background-success">
-                    Thank you for confirming your email. Sign in to get started !
-                </box>
+            <box class="box has-background-success">
+                Thank you for confirming your email. Sign in to get started !
+            </box>
             {{end}}
 
             {{ if .not_confirmed }}
-                <box class="box has-background-warning">
-                    Email not confirmed yet ! An email was sent to your inbox for confirmation.
-                    Please confirm to login.
-                </box>
+            <box class="box has-background-warning">
+                Email not confirmed yet ! An email was sent to your inbox for confirmation.
+                Please confirm to login.
+            </box>
             {{end}}
 
             {{ if .confirmation_sent }}
-                <box class="box has-background-warning">
-                    An email has been sent to your inbox for confirmation. Please confirm to login.
-                </box>
+            <box class="box has-background-warning">
+                An email has been sent to your inbox for confirmation. Please confirm to login.
+            </box>
             {{end}}
 
             <div class="columns is-mobile is-centered pb-5">
@@ -27,103 +28,106 @@
 
             <div data-controller="toggle"
                  data-toggle-toggle-class-value="is-hidden">
-            <div id="magic-login" class="is-hidden" data-toggle-target="toggled">
-                <div class="columns is-mobile is-centered py-5">
-                    <button id="btn-magic-login"
-                            class="button is-primary is-rounded"
-                            type="button"
-                            data-action="click->toggle#it">
-                        Use Password instead
-                    </button>
-                </div>
-                <form
-                        data-action="submit->account#submitMagicLoginForm"
-                        method="POST">
-                    <div class="field">
-                        <label class="label">Email</label>
-                        <input data-account-target="magicEmail"
-                               name="email"
-                               pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
-                               class="input"
-                               type="email"
-                               placeholder="your@email.com"
-                               aria-label="Email">
-
+                <div id="magic-login" class="is-hidden" data-toggle-target="toggled">
+                    <div class="columns is-mobile is-centered py-5">
+                        <button id="btn-magic-login"
+                                class="button is-primary is-rounded"
+                                type="button"
+                                data-action="click->toggle#it">
+                            Use Password instead
+                        </button>
                     </div>
+                    <form
+                            data-action="submit->account#submitMagicLoginForm"
+                            data-turbo-frame="_top"
+                            method="POST">
+                        <div class="field">
+                            <label class="label">Email</label>
+                            <input data-account-target="magicEmail"
+                                   name="email"
+                                   pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
+                                   class="input"
+                                   type="email"
+                                   placeholder="your@email.com"
+                                   aria-label="Email">
 
-                    <input data-account-target="magic"
-                           name="magic"
-                           class="input"
-                           value="magic"
-                           type="hidden">
-
-                    <div class="field is-grouped">
-                        <div class="control is-expanded">
-                            <button class="button is-primary is-fullwidth"
-                                    type="submit">
-                                Sign in with Magic Link
-                            </button>
                         </div>
-                    </div>
-                </form>
-            </div>
 
-            <div id="password-login" data-toggle-target="toggled">
-                <div class="columns is-mobile is-centered py-5">
-                    <button  id="btn-password-login" type="button"
-                             class="button is-primary is-rounded"
-                             data-action="click->toggle#it"> Use Magic Link instead </button>
-                </div>
-            <form
-                  data-action="submit->account#submitLoginForm"
-                  method="POST">
-                <p class="has-text-success"> {{.userErrs}} </p>
-                <div class="field">
-                    <label class="label">Email</label>
-                    <input data-account-target="email"
-                           name="email"
-                           pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
-                           class="input"
-                           type="email"
-                           placeholder="your@email.com"
-                           aria-label="Email">
+                        <input data-account-target="magic"
+                               name="magic"
+                               class="input"
+                               value="magic"
+                               type="hidden">
 
+                        <div class="field is-grouped">
+                            <div class="control is-expanded">
+                                <button class="button is-primary is-fullwidth"
+                                        type="submit">
+                                    Sign in with Magic Link
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
 
-                <div class="field">
-                    <label class="label">Password</label>
-                    <input data-account-target="password"
-                           name="password"
-                           class="input"
-                           type="password"
-                           aria-label="Password">
-                </div>
-
-
-                <div class="field is-grouped">
-                    <div class="control is-expanded">
-                        <button class="button is-primary is-fullwidth"
-                                type="submit">
-                            Sign in
+                <div id="password-login" data-toggle-target="toggled">
+                    <div class="columns is-mobile is-centered py-5">
+                        <button id="btn-password-login" type="button"
+                                class="button is-primary is-rounded"
+                                data-action="click->toggle#it"> Use Magic Link instead
                         </button>
                     </div>
-                    <div class="control is-expanded">
-                        <button class="button is-primary is-outlined is-fullwidth"
-                                data-action="click->navigate#goto"
-                                data-goto="/signup"
-                                type="button">
-                            Sign up
-                        </button>
-                    </div>
+                    <form
+                            data-action="submit->account#submitLoginForm"
+                            data-turbo-frame="_top"
+                            method="POST">
+                        <p class="has-text-success"> {{.userErrs}} </p>
+                        <div class="field">
+                            <label class="label">Email</label>
+                            <input data-account-target="email"
+                                   name="email"
+                                   pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
+                                   class="input"
+                                   type="email"
+                                   placeholder="your@email.com"
+                                   aria-label="Email">
+
+                        </div>
+
+                        <div class="field">
+                            <label class="label">Password</label>
+                            <input data-account-target="password"
+                                   name="password"
+                                   class="input"
+                                   type="password"
+                                   aria-label="Password">
+                        </div>
+
+
+                        <div class="field is-grouped">
+                            <div class="control is-expanded">
+                                <button class="button is-primary is-fullwidth"
+                                        type="submit">
+                                    Sign in
+                                </button>
+                            </div>
+                            <div class="control is-expanded">
+                                <button class="button is-primary is-outlined is-fullwidth"
+                                        data-action="click->navigate#goto"
+                                        data-goto="/signup"
+                                        type="button">
+                                    Sign up
+                                </button>
+                            </div>
+                        </div>
+                        <a class="is-primary is-outlined is-fullwidth"
+                           data-action="click->navigate#goto"
+                           data-goto="/forgot"
+                           type="button">
+                            Forgot Password ?
+                        </a>
+                    </form>
                 </div>
-                <a class="is-primary is-outlined is-fullwidth"
-                        data-action="click->navigate#goto"
-                        data-goto="/forgot"
-                        type="button">
-                    Forgot Password ?
-                </a>
-            </form>
-            </div>
             </div>
             <hr>
             <div class="control is-expanded">
@@ -137,6 +141,7 @@
                     <span>Sign in with Google</span>
                 </button>
             </div>
-        </div>
+        </turbo-frame>
     </div>
+</div>
 {{end}}

@@ -1,13 +1,14 @@
 {{define "content"}}
-    <div class="columns is-mobile is-centered">
-        <div class="column is-one-third-desktop">
+<div class="columns is-mobile is-centered">
+    <div class="column is-one-third-desktop">
+        <turbo-frame id="account">
             {{template "errors" .}}
             <h1 class="box has-background-info-light has-text-weight-semibold">Change to a new pasword</h1>
             <br>
 
             <form
-                  data-action="submit->account#submitResetForm"
-                  method="POST">
+                    data-action="submit->account#submitResetForm"
+                    method="POST">
                 <div class="field">
                     <label class="label">Password</label>
                     <input data-account-target="password"
@@ -39,6 +40,7 @@
                     </div>
                 </div>
             </form>
-        </div>
+        </turbo-frame>
     </div>
+</div>
 {{end}}
