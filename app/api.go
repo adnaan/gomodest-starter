@@ -4,20 +4,19 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/adnaan/users"
-
 	"github.com/go-chi/chi"
 
 	"github.com/lithammer/shortuuid/v3"
 
 	"github.com/go-chi/render"
 
+	"github.com/adnaan/authn"
 	"github.com/adnaan/gomodest/app/gen/models/task"
 )
 
 func List(t Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userID := r.Context().Value(users.CtxUserIdKey).(string)
+		userID := r.Context().Value(authn.CtxUserIdKey).(string)
 		tasks, err := t.db.Task.Query().Where(task.Owner(userID)).All(t.ctx)
 		if err != nil {
 			render.Render(w, r, ErrInternal(err))
@@ -34,7 +33,7 @@ func Create(t Context) http.HandlerFunc {
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := new(req)
-		userID := r.Context().Value(users.CtxUserIdKey).(string)
+		userID := r.Context().Value(authn.CtxUserIdKey).(string)
 		err := render.DecodeJSON(r.Body, &req)
 		if err != nil {
 			render.Render(w, r, ErrInternal(err))

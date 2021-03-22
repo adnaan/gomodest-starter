@@ -7,14 +7,13 @@ import (
 	"github.com/adnaan/authn"
 	"github.com/adnaan/gomodest/app/gen/models/task"
 	rl "github.com/adnaan/renderlayout"
-	"github.com/adnaan/users"
 	"github.com/go-chi/chi"
 	"github.com/lithammer/shortuuid/v3"
 )
 
 func listTasks(appCtx Context) rl.Data {
 	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
-		userID := r.Context().Value(authn.CtxUserIdKey).(string)
+		userID := authn.AccountIDFromContext(r)
 		tasks, err := appCtx.db.Task.Query().Where(task.Owner(userID)).All(appCtx.ctx)
 		if err != nil {
 			return nil, fmt.Errorf("%w", err)
@@ -47,7 +46,7 @@ func createNewTask(appCtx Context) rl.Data {
 			return nil, fmt.Errorf("%w", fmt.Errorf("empty task"))
 		}
 
-		userID := r.Context().Value(users.CtxUserIdKey).(string)
+		userID := authn.AccountIDFromContext(r)
 		_, err = appCtx.db.Task.Create().
 			SetID(shortuuid.New()).
 			SetStatus(task.StatusInprogress).
@@ -65,7 +64,7 @@ func createNewTask(appCtx Context) rl.Data {
 func deleteTask(appCtx Context) rl.Data {
 	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		id := chi.URLParam(r, "id")
-		userID := r.Context().Value(users.CtxUserIdKey).(string)
+		userID := authn.AccountIDFromContext(r)
 
 		_, err := appCtx.db.Task.Delete().Where(task.And(
 			task.Owner(userID), task.ID(id),
@@ -99,7 +98,7 @@ func editTask(appCtx Context) rl.Data {
 		}
 
 		id := chi.URLParam(r, "id")
-		userID := r.Context().Value(users.CtxUserIdKey).(string)
+		userID := authn.AccountIDFromContext(r)
 		err = appCtx.db.Task.Update().Where(task.And(
 			task.Owner(userID), task.ID(id),
 		)).SetText(req.Text).Exec(appCtx.ctx)

@@ -2,7 +2,6 @@ module github.com/adnaan/gomodest
 
 go 1.16
 
-//replace github.com/adnaan/users => ../users
 replace github.com/adnaan/authn => ../authn
 
 require (
@@ -11,7 +10,6 @@ require (
 	github.com/PuerkitoBio/goquery v1.6.0 // indirect
 	github.com/adnaan/authn v0.0.0-00010101000000-000000000000
 	github.com/adnaan/renderlayout v0.0.3
-	github.com/adnaan/users v0.1.7
 	github.com/andybalholm/cascadia v1.2.0 // indirect
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-chi/httplog v0.1.8
