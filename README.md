@@ -14,10 +14,10 @@ interactivity in server rendered html & mounting Svelte components into divs.
 
 A few things which were used:
 
-1. Go, html/template, goview
-2. Authentication: [github.com/adnaan/users](https://github.com/adnaan/users)
+1. Go, html/template, goview, 
+2. Authentication: [github.com/adnaan/authn](https://github.com/adnaan/authn)
 3. SvelteJS
-4. StimulusJS
+4. [Hotwire](https://hotwire.dev/) 
 5. Bulma CSS
 
 Many more things in `go.mod` & `web/package.json`
