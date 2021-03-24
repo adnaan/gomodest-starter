@@ -10,7 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/adnaan/gomodest/app/gen/models/task"
+	"github.com/adnaan/gomodest-starter/app/gen/models/task"
 )
 
 // TaskCreate is the builder for creating a Task entity.

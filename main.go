@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/adnaan/gomodest/app"
+	"github.com/adnaan/gomodest-starter/app"
 
 	"github.com/go-chi/chi"
 

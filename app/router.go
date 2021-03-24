@@ -10,7 +10,7 @@ import (
 
 	"github.com/adnaan/authn"
 
-	"github.com/adnaan/gomodest/app/gen/models"
+	"github.com/adnaan/gomodest-starter/app/gen/models"
 
 	"github.com/go-playground/form"
 
@@ -44,7 +44,7 @@ type APIRoute struct {
 
 func Router(ctx context.Context, cfg Config) chi.Router {
 	//driver := "postgres"
-	//dataSource := "host=0.0.0.0 port=5432 user=gomodest dbname=gomodest sslmode=disable"
+	//dataSource := "host=0.0.0.0 port=5432 user=gomodest-starter dbname=gomodest-starter sslmode=disable"
 	stripe.Key = cfg.StripeSecretKey
 
 	db, err := models.Open(cfg.Driver, cfg.DataSource)

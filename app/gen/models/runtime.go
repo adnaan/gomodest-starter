@@ -5,8 +5,8 @@ package models
 import (
 	"time"
 
-	"github.com/adnaan/gomodest/app/gen/models/task"
-	"github.com/adnaan/gomodest/app/schema"
+	"github.com/adnaan/gomodest-starter/app/gen/models/task"
+	"github.com/adnaan/gomodest-starter/app/schema"
 )
 
 // The init function reads all schema descriptors with runtime code

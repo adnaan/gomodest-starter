@@ -5,9 +5,9 @@ package enttest
 import (
 	"context"
 
-	"github.com/adnaan/gomodest/app/gen/models"
+	"github.com/adnaan/gomodest-starter/app/gen/models"
 	// required by schema hooks.
-	_ "github.com/adnaan/gomodest/app/gen/models/runtime"
+	_ "github.com/adnaan/gomodest-starter/app/gen/models/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
 )

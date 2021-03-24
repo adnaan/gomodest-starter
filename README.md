@@ -107,7 +107,7 @@ This snippet is the most interesting part of this project:
 {{end}}
 ```
 
-[source](https://github.com/adnaan/gomodest/blob/main/web/html/app.html)
+[source](https://github.com/adnaan/gomodest-starter/blob/main/web/html/app.html)
 
 In the above snippet, we use StimulusJS to mount a Svelte component by using the following code:
 
@@ -135,15 +135,15 @@ In the above snippet, we use StimulusJS to mount a Svelte component by using the
          }
      }
 ```
-[source](https://github.com/adnaan/gomodest/blob/main/web/src/controllers/svelte_controller.js)
+[source](https://github.com/adnaan/gomodest-starter/blob/main/web/src/controllers/svelte_controller.js)
 
 This strategy allows us to mix server rendered HTML pages with client side dynamism.
 
-Other possibly interesting aspects could be the layout of [web/html](https://github.com/adnaan/gomodest/tree/main/web/html) and the usage of the super nice [goview](https://github.com/foolin/goview) library to render html in these files: 
+Other possibly interesting aspects could be the layout of [web/html](https://github.com/adnaan/gomodest-starter/tree/main/web/html) and the usage of the super nice [goview](https://github.com/foolin/goview) library to render html in these files: 
 
- 1. [router.go](https://github.com/adnaan/gomodest/blob/main/routes/router.go)
- 2. [view.go](https://github.com/adnaan/gomodest/blob/main/routes/view.go)
- 3. [pages.go](https://github.com/adnaan/gomodest/blob/main/routes/pages.go)
+ 1. [router.go](https://github.com/adnaan/gomodest-starter/blob/main/routes/router.go)
+ 2. [view.go](https://github.com/adnaan/gomodest-starter/blob/main/routes/view.go)
+ 3. [pages.go](https://github.com/adnaan/gomodest-starter/blob/main/routes/pages.go)
  
  That is all.
  

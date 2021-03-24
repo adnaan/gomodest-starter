@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/adnaan/gomodest/app/gen/models/predicate"
-	"github.com/adnaan/gomodest/app/gen/models/task"
+	"github.com/adnaan/gomodest-starter/app/gen/models/predicate"
+	"github.com/adnaan/gomodest-starter/app/gen/models/task"
 )
 
 // TaskDelete is the builder for deleting a Task entity.

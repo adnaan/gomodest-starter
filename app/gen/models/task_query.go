@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/adnaan/gomodest/app/gen/models/predicate"
-	"github.com/adnaan/gomodest/app/gen/models/task"
+	"github.com/adnaan/gomodest-starter/app/gen/models/predicate"
+	"github.com/adnaan/gomodest-starter/app/gen/models/task"
 )
 
 // TaskQuery is the builder for querying Task entities.
@@ -334,7 +334,7 @@ func (tq *TaskQuery) sqlCount(ctx context.Context) (int, error) {
 func (tq *TaskQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := tq.sqlCount(ctx)
 	if err != nil {
-		return false, fmt.Errorf("models: check existence: %v", err)
+		return false, fmt.Errorf("models: check existence: %w", err)
 	}
 	return n > 0, nil
 }

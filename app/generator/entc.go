@@ -17,7 +17,7 @@ func main() {
 		`,
 		IDType:  &field.TypeInfo{Type: field.TypeInt},
 		Target:  "../gen/models",
-		Package: "github.com/adnaan/gomodest/app/gen/models",
+		Package: "github.com/adnaan/gomodest-starter/app/gen/models",
 	})
 	if err != nil {
 		log.Fatal("running ent codegen:", err)

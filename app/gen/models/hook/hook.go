@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/adnaan/gomodest/app/gen/models"
+	"github.com/adnaan/gomodest-starter/app/gen/models"
 )
 
 // The TaskFunc type is an adapter to allow the use of ordinary

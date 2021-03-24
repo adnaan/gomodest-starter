@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/adnaan/authn"
-	"github.com/adnaan/gomodest/app/gen/models/task"
+	"github.com/adnaan/gomodest-starter/app/gen/models/task"
 	rl "github.com/adnaan/renderlayout"
 	"github.com/go-chi/chi"
 	"github.com/lithammer/shortuuid/v3"

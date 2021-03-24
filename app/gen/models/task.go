@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/adnaan/gomodest/app/gen/models/task"
+	"github.com/adnaan/gomodest-starter/app/gen/models/task"
 )
 
 // Task is the model entity for the Task schema.

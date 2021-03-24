@@ -1,4 +1,4 @@
-module github.com/adnaan/gomodest
+module github.com/adnaan/gomodest-starter
 
 go 1.16
 

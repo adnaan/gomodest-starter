@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/adnaan/gomodest/app/gen/models/predicate"
-	"github.com/adnaan/gomodest/app/gen/models/task"
+	"github.com/adnaan/gomodest-starter/app/gen/models/predicate"
+	"github.com/adnaan/gomodest-starter/app/gen/models/task"
 
 	"entgo.io/ent"
 )

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/adnaan/gomodest/app/gen/models/predicate"
+	"github.com/adnaan/gomodest-starter/app/gen/models/predicate"
 )
 
 // ID filters vertices based on their ID field.

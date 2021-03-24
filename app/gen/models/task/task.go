@@ -22,7 +22,6 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
-
 	// Table holds the table name of the task in the database.
 	Table = "tasks"
 )

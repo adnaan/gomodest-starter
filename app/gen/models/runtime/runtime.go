@@ -2,7 +2,7 @@
 
 package runtime
 
-// The schema-stitching logic is generated in github.com/adnaan/gomodest/app/gen/models/runtime.go
+// The schema-stitching logic is generated in github.com/adnaan/gomodest-starter/app/gen/models/runtime.go
 
 const (
 	Version = "(devel)" // Version of ent codegen.
