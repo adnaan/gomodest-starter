@@ -14,10 +14,10 @@ import (
 	"github.com/adnaan/gomodest-starter/app/gen/models/task"
 )
 
-func List(t Context) http.HandlerFunc {
+func list(t Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := authn.AccountIDFromContext(r)
-		tasks, err := t.db.Task.Query().Where(task.Owner(userID)).All(t.ctx)
+		tasks, err := t.db.Task.Query().Where(task.Owner(userID)).All(r.Context())
 		if err != nil {
 			render.Render(w, r, ErrInternal(err))
 			return
@@ -27,7 +27,7 @@ func List(t Context) http.HandlerFunc {
 	}
 }
 
-func Create(t Context) http.HandlerFunc {
+func create(t Context) http.HandlerFunc {
 	type req struct {
 		Text string `json:"text"`
 	}
@@ -45,7 +45,7 @@ func Create(t Context) http.HandlerFunc {
 			SetStatus(task.StatusInprogress).
 			SetOwner(userID).
 			SetText(req.Text).
-			Save(t.ctx)
+			Save(r.Context())
 		if err != nil {
 			render.Render(w, r, ErrInternal(err))
 			return
@@ -54,7 +54,7 @@ func Create(t Context) http.HandlerFunc {
 	}
 }
 
-func UpdateStatus(t Context) http.HandlerFunc {
+func updateStatus(t Context) http.HandlerFunc {
 	type req struct {
 		Status string `json:"status"`
 	}
@@ -72,7 +72,7 @@ func UpdateStatus(t Context) http.HandlerFunc {
 			UpdateOneID(id).
 			SetUpdatedAt(time.Now()).
 			SetStatus(task.Status(req.Status)).
-			Save(t.ctx)
+			Save(r.Context())
 		if err != nil {
 			render.Render(w, r, ErrInternal(err))
 			return
@@ -81,7 +81,7 @@ func UpdateStatus(t Context) http.HandlerFunc {
 	}
 }
 
-func UpdateText(t Context) http.HandlerFunc {
+func updateText(t Context) http.HandlerFunc {
 	type req struct {
 		Text string `json:"text"`
 	}
@@ -99,7 +99,7 @@ func UpdateText(t Context) http.HandlerFunc {
 			UpdateOneID(id).
 			SetUpdatedAt(time.Now()).
 			SetText(req.Text).
-			Save(t.ctx)
+			Save(r.Context())
 		if err != nil {
 			render.Render(w, r, ErrInternal(err))
 			return
@@ -108,10 +108,10 @@ func UpdateText(t Context) http.HandlerFunc {
 	}
 }
 
-func Delete(t Context) http.HandlerFunc {
+func delete(t Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
-		err := t.db.Task.DeleteOneID(id).Exec(t.ctx)
+		err := t.db.Task.DeleteOneID(id).Exec(r.Context())
 		if err != nil {
 			render.Render(w, r, ErrInternal(err))
 			return

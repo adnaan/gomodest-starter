@@ -32,7 +32,6 @@ type Context struct {
 	cfg         Config
 	formDecoder *form.Decoder
 	db          *models.Client
-	ctx         context.Context
 	branca      *branca.Branca
 }
 
@@ -57,13 +56,12 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 
 	appCtx := Context{
 		db:          db,
-		ctx:         ctx,
 		cfg:         cfg,
 		formDecoder: form.NewDecoder(),
 		branca:      branca.NewBranca(cfg.APIMasterSecret),
 	}
 
-	defaultUsersConfig := authn.Config{
+	authnConfig := authn.Config{
 		Driver:        cfg.Driver,
 		Datasource:    cfg.DataSource,
 		SessionSecret: cfg.SessionSecret,
@@ -78,7 +76,7 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 		},
 	}
 
-	appCtx.authn = authn.New(ctx, defaultUsersConfig)
+	appCtx.authn = authn.New(ctx, authnConfig)
 
 	// logger
 	logger := httplog.NewLogger(cfg.Name,
@@ -161,13 +159,13 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 		r.Use(appCtx.authn.IsAuthenticated)
 		r.Use(middleware.AllowContentType("application/json"))
 		r.Route("/tasks", func(r chi.Router) {
-			r.Get("/", List(appCtx))
-			r.Post("/", Create(appCtx))
+			r.Get("/", list(appCtx))
+			r.Post("/", create(appCtx))
 		})
 		r.Route("/tasks/{id}", func(r chi.Router) {
-			r.Put("/status", UpdateStatus(appCtx))
-			r.Put("/text", UpdateText(appCtx))
-			r.Delete("/", Delete(appCtx))
+			r.Put("/status", updateStatus(appCtx))
+			r.Put("/text", updateText(appCtx))
+			r.Delete("/", delete(appCtx))
 		})
 	})
 

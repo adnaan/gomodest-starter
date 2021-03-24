@@ -14,7 +14,7 @@ import (
 func listTasks(appCtx Context) rl.Data {
 	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		userID := authn.AccountIDFromContext(r)
-		tasks, err := appCtx.db.Task.Query().Where(task.Owner(userID)).All(appCtx.ctx)
+		tasks, err := appCtx.db.Task.Query().Where(task.Owner(userID)).All(r.Context())
 		if err != nil {
 			return nil, fmt.Errorf("%w", err)
 		}
@@ -52,7 +52,7 @@ func createNewTask(appCtx Context) rl.Data {
 			SetStatus(task.StatusInprogress).
 			SetOwner(userID).
 			SetText(req.Text).
-			Save(appCtx.ctx)
+			Save(r.Context())
 		if err != nil {
 			return nil, fmt.Errorf("%w", err)
 		}
@@ -68,7 +68,7 @@ func deleteTask(appCtx Context) rl.Data {
 
 		_, err := appCtx.db.Task.Delete().Where(task.And(
 			task.Owner(userID), task.ID(id),
-		)).Exec(appCtx.ctx)
+		)).Exec(r.Context())
 		if err != nil {
 			return nil, fmt.Errorf("%w", err)
 		}
@@ -101,7 +101,7 @@ func editTask(appCtx Context) rl.Data {
 		userID := authn.AccountIDFromContext(r)
 		err = appCtx.db.Task.Update().Where(task.And(
 			task.Owner(userID), task.ID(id),
-		)).SetText(req.Text).Exec(appCtx.ctx)
+		)).SetText(req.Text).Exec(r.Context())
 		if err != nil {
 			return nil, fmt.Errorf("%w", err)
 		}
