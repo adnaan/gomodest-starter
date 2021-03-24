@@ -16,8 +16,6 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/go-chi/chi"
-
-	"github.com/mholt/binding"
 )
 
 func defaultPageHandler(appCtx Context) rl.Data {
@@ -89,7 +87,7 @@ func defaultPageHandler(appCtx Context) rl.Data {
 	}
 }
 
-func signupPageSubmit(appCtx Context) rl.Data {
+func signupPage(appCtx Context) rl.Data {
 	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		var email, password string
 		metadata := make(map[string]interface{})
@@ -138,83 +136,6 @@ func signupPageSubmit(appCtx Context) rl.Data {
 	}
 }
 
-type LoginForm struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Magic    string `json:"magic"`
-}
-
-func (l *LoginForm) Bind(_ *http.Request) error {
-	return nil
-}
-
-// Fieldmap for the LoginData
-func (l *LoginForm) FieldMap(_ *http.Request) binding.FieldMap {
-	return binding.FieldMap{
-		&l.Email: binding.Field{
-			Form:     "email",
-			Required: true,
-		},
-		&l.Password: binding.Field{
-			Form:     "password",
-			Required: false,
-		},
-		&l.Magic: binding.Field{
-			Form:     "magic",
-			Required: false,
-		},
-	}
-}
-
-func loginPageSubmit(appCtx Context) rl.Data {
-	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
-		loginForm := new(LoginForm)
-		if errs := binding.Bind(r, loginForm); errs != nil {
-			return nil, fmt.Errorf("%v, %w",
-				errs, fmt.Errorf("missing email"))
-		}
-
-		if loginForm.Magic == "magic" {
-			err := appCtx.authn.SendPasswordlessToken(r.Context(), loginForm.Email)
-			if err != nil {
-				return nil, err
-			}
-			http.Redirect(w, r, "/magic-link-sent", http.StatusSeeOther)
-		} else {
-			err := appCtx.authn.Login(w, r, loginForm.Email, loginForm.Password)
-			if err != nil {
-				return nil, err
-			}
-
-			redirectTo := "/app"
-			from := r.URL.Query().Get("from")
-			if from != "" {
-				redirectTo = from
-			}
-
-			http.Redirect(w, r, redirectTo, http.StatusSeeOther)
-		}
-
-		return rl.D{}, nil
-	}
-}
-
-func magicLinkLoginConfirm(appCtx Context) rl.Data {
-	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
-		otp := chi.URLParam(r, "otp")
-		err := appCtx.authn.LoginWithPasswordlessToken(w, r, otp)
-		if err != nil {
-			return nil, err
-		}
-
-		redirectTo := "/app"
-
-		http.Redirect(w, r, redirectTo, http.StatusSeeOther)
-
-		return rl.D{}, nil
-	}
-}
-
 func loginPage(appCtx Context) rl.Data {
 	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 
@@ -250,7 +171,74 @@ func loginPage(appCtx Context) rl.Data {
 	}
 }
 
-func gothAuthCallbackPage(appCtx Context) rl.Data {
+func loginPageSubmit(appCtx Context) rl.Data {
+	type req struct {
+		Email    *string
+		Password *string
+		Magic    *string
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
+		form := new(req)
+		err := r.ParseForm()
+		if err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
+
+		err = appCtx.formDecoder.Decode(form, r.Form)
+		if err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
+
+		if form.Email == nil {
+			return nil, fmt.Errorf("%w", fmt.Errorf("email is empty"))
+		}
+
+		if form.Magic != nil && *form.Magic == "magic" {
+			err := appCtx.authn.SendPasswordlessToken(r.Context(), *form.Email)
+			if err != nil {
+				return nil, err
+			}
+			http.Redirect(w, r, "/magic-link-sent", http.StatusSeeOther)
+		} else {
+			if form.Password == nil {
+				return nil, fmt.Errorf("%w", fmt.Errorf("password is empty"))
+			}
+			err := appCtx.authn.Login(w, r, *form.Email, *form.Password)
+			if err != nil {
+				return nil, err
+			}
+
+			redirectTo := "/app"
+			from := r.URL.Query().Get("from")
+			if from != "" {
+				redirectTo = from
+			}
+
+			http.Redirect(w, r, redirectTo, http.StatusSeeOther)
+		}
+
+		return rl.D{}, nil
+	}
+}
+
+func magicLinkLoginConfirm(appCtx Context) rl.Data {
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
+		otp := chi.URLParam(r, "otp")
+		err := appCtx.authn.LoginWithPasswordlessToken(w, r, otp)
+		if err != nil {
+			return nil, err
+		}
+
+		redirectTo := "/app"
+
+		http.Redirect(w, r, redirectTo, http.StatusSeeOther)
+
+		return rl.D{}, nil
+	}
+}
+
+func loginProviderCallbackPage(appCtx Context) rl.Data {
 	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		err := appCtx.authn.LoginProviderCallback(w, r, nil)
 		if err != nil {
@@ -263,7 +251,7 @@ func gothAuthCallbackPage(appCtx Context) rl.Data {
 	}
 }
 
-func gothAuthPage(appCtx Context) rl.Data {
+func loginProviderPage(appCtx Context) rl.Data {
 	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
 		err := appCtx.authn.LoginWithProvider(w, r)
 		if err != nil {
@@ -308,8 +296,68 @@ func confirmEmailPage(appCtx Context) rl.Data {
 		return rl.D{}, nil
 	}
 }
-func appPage(appCtx Context) rl.Data {
+
+func forgotPage(appCtx Context) rl.Data {
+	type req struct {
+		Email *string
+	}
 	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
+		form := new(req)
+		err := r.ParseForm()
+		if err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
+
+		err = appCtx.formDecoder.Decode(form, r.Form)
+		if err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
+
+		if form.Email == nil {
+			return nil, fmt.Errorf("%w", fmt.Errorf("email is empty"))
+		}
+
+		pageData := make(map[string]interface{})
+
+		err = appCtx.authn.Recovery(r.Context(), *form.Email)
+		if err != nil {
+			return pageData, err
+		}
+
+		pageData["recovery_sent"] = true
+
+		return pageData, nil
+	}
+}
+
+func resetPage(appCtx Context) rl.Data {
+	type req struct {
+		Password *string
+	}
+	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
+		token := chi.URLParam(r, "token")
+		form := new(req)
+		err := r.ParseForm()
+		if err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
+
+		err = appCtx.formDecoder.Decode(form, r.Form)
+		if err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
+
+		if form.Password == nil {
+			return nil, fmt.Errorf("%w", fmt.Errorf("password is empty"))
+		}
+
+		err = appCtx.authn.ConfirmRecovery(r.Context(), token, *form.Password)
+		if err != nil {
+			return rl.D{}, err
+		}
+
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+
 		return rl.D{}, nil
 	}
 }
@@ -339,27 +387,24 @@ func accountPage(appCtx Context) rl.Data {
 	}
 }
 
-type AccountForm struct {
-	Name          string
-	Email         string
-	ResetAPIToken bool
-	FormToken     string
-}
-
-// Fieldmap for the accountform. extend it for more fields
-func (af *AccountForm) FieldMap(_ *http.Request) binding.FieldMap {
-	return binding.FieldMap{
-		&af.Name:          "name",
-		&af.Email:         "email",
-		&af.ResetAPIToken: "reset_api_token",
-		&af.FormToken:     "form_token",
-	}
-}
-
 func accountPageSubmit(appCtx Context) rl.Data {
+	type req struct {
+		Name          *string
+		Email         *string
+		ResetAPIToken bool
+		FormToken     *string
+	}
 	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
-		accountForm := new(AccountForm)
-		binding.Bind(r, accountForm)
+		form := new(req)
+		err := r.ParseForm()
+		if err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
+
+		err = appCtx.formDecoder.Decode(form, r.Form)
+		if err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
 
 		pageData := make(map[string]interface{})
 
@@ -368,13 +413,13 @@ func accountPageSubmit(appCtx Context) rl.Data {
 			return nil, err
 		}
 
-		if accountForm.ResetAPIToken {
+		if form.ResetAPIToken {
 			// check if the form has been previously submitted
-			if accountForm.FormToken != "" {
+			if form.FormToken != nil {
 				formTokenVal, err := account.Attributes().Session().Get("form_token")
 				if err == nil && formTokenVal != nil {
 					formToken := formTokenVal.(string)
-					if formToken == accountForm.FormToken {
+					if formToken == *form.FormToken {
 						return rl.D{}, nil
 					}
 				}
@@ -391,15 +436,15 @@ func accountPageSubmit(appCtx Context) rl.Data {
 				return nil, fmt.Errorf("%v %w", err, ErrInternal)
 			}
 
-			account.Attributes().Session().Set(w, "form_token", accountForm.FormToken)
+			account.Attributes().Session().Set(w, "form_token", form.FormToken)
 			return rl.D{
 				"is_api_token_set": true,
 				"api_token":        token,
 			}, nil
 		}
 
-		if accountForm.Email != "" && accountForm.Email != account.Email() {
-			err = account.ChangeEmail(accountForm.Email)
+		if form.Email != nil && *form.Email != account.Email() {
+			err = account.ChangeEmail(*form.Email)
 			if err != nil {
 				return nil, err
 			}
@@ -407,68 +452,18 @@ func accountPageSubmit(appCtx Context) rl.Data {
 		}
 
 		name, _ := account.Attributes().Map().String("name")
-		if name != accountForm.Name {
-			err = account.Attributes().Set("name", accountForm.Name)
+		if name != *form.Name {
+			err = account.Attributes().Set("name", form.Name)
 			if err != nil {
 				return nil, err
 			}
 		}
 
-		account.Attributes().Session().Set(w, "form_token", accountForm.FormToken)
+		account.Attributes().Session().Set(w, "form_token", form.FormToken)
 
 		pageData["email"] = account.Email()
 		pageData["metadata"] = account.Attributes().Map()
 		return pageData, nil
-	}
-}
-
-func forgotPageSubmit(appCtx Context) rl.Data {
-	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
-		accountForm := new(AccountForm)
-		if errs := binding.Bind(r, accountForm); errs != nil {
-			return nil, fmt.Errorf("%v, %w", errs, "email or password missing")
-		}
-
-		pageData := make(map[string]interface{})
-
-		err := appCtx.authn.Recovery(r.Context(), accountForm.Email)
-		if err != nil {
-			return pageData, err
-		}
-
-		pageData["recovery_sent"] = true
-
-		return pageData, nil
-	}
-}
-
-type ResetForm struct {
-	Password string
-}
-
-// Fieldmap for the ResetForm. extend it for more fields
-func (rf *ResetForm) FieldMap(_ *http.Request) binding.FieldMap {
-	return binding.FieldMap{
-		&rf.Password: "password",
-	}
-}
-
-func resetPageSubmit(appCtx Context) rl.Data {
-	return func(w http.ResponseWriter, r *http.Request) (rl.D, error) {
-		token := chi.URLParam(r, "token")
-		resetForm := new(ResetForm)
-		if errs := binding.Bind(r, resetForm); errs != nil {
-			return nil, fmt.Errorf("%v, %w", errs, fmt.Errorf("missing password"))
-		}
-
-		err := appCtx.authn.ConfirmRecovery(r.Context(), token, resetForm.Password)
-		if err != nil {
-			return rl.D{}, err
-		}
-
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-
-		return rl.D{}, nil
 	}
 }
 

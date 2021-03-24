@@ -5,7 +5,7 @@
         <form
                 data-action="submit->account#submitAccountForm"
                 method="POST">
-            <input type="hidden" name="form_token" value="{{.form_token}}">
+            <input type="hidden" name="FormToken" value="{{.form_token}}">
             {{if .Error}}
             <div class="field has-background-danger has-text-white px-6 py-5">
                 {{.Error}}
@@ -19,7 +19,7 @@
                             data-action="blur->account#validateName"
                             maxlength="30"
                             class="input"
-                            name="name"
+                            name="Name"
                             type="text"
                             placeholder="e.g Alex Smith"
                             value="{{.metadata.name}}">
@@ -33,7 +33,7 @@
                     <input class="input"
                            data-account-target="email"
                            data-action="blur->account#validateEmail"
-                           name="email"
+                           name="Email"
                            type="email"
                            aria-label="Email"
                            pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
@@ -68,7 +68,7 @@
             <div class="modal-background"></div>
             <div class="modal-card">
                 <form action="/account/delete" method="POST">
-                    <input type="hidden" name="form_token" value="{{.form_token}}">
+                    <input type="hidden" name="FormToken" value="{{.form_token}}">
                     <header class="modal-card-head">
                         <p class="modal-card-title">Are you sure ?</p>
                         <button class="delete"

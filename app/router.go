@@ -108,14 +108,18 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 		r.Post("/webhook/{source}", handleWebhook(appCtx))
 		r.Get("/", index("home"))
 		r.Get("/signup", index("account/signup"))
-		r.Post("/signup", index("account/signup", signupPageSubmit(appCtx)))
+		r.Post("/signup", index("account/signup", signupPage(appCtx)))
 		r.Get("/confirm/{token}", index("account/confirmed", confirmEmailPage(appCtx)))
-
 		r.Get("/login", index("account/login", loginPage(appCtx)))
 		r.Post("/login", index("account/login", loginPageSubmit(appCtx)))
-		r.Get("/auth/callback", index("account/login", gothAuthCallbackPage(appCtx)))
-		r.Get("/auth", index("account/login", gothAuthPage(appCtx)))
-
+		r.Get("/auth/callback", index("account/login", loginProviderCallbackPage(appCtx)))
+		r.Get("/auth", index("account/login", loginProviderPage(appCtx)))
+		r.Get("/magic-link-sent", index("account/magic"))
+		r.Get("/magic-login/{otp}", index("account/login", magicLinkLoginConfirm(appCtx)))
+		r.Get("/forgot", index("account/forgot"))
+		r.Post("/forgot", index("account/forgot", forgotPage(appCtx)))
+		r.Get("/reset/{token}", index("account/reset"))
+		r.Post("/reset/{token}", index("account/reset", resetPage(appCtx)))
 		r.Get("/logout", func(w http.ResponseWriter, r *http.Request) {
 			acc, err := appCtx.authn.CurrentAccount(r)
 			if err != nil {
@@ -124,13 +128,6 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 			}
 			acc.Logout(w, r)
 		})
-		r.Get("/magic-link-sent", index("account/magic"))
-		r.Get("/magic-login/{otp}", index("account/login", magicLinkLoginConfirm(appCtx)))
-
-		r.Get("/forgot", index("account/forgot"))
-		r.Post("/forgot", index("account/forgot", forgotPageSubmit(appCtx)))
-		r.Get("/reset/{token}", index("account/reset"))
-		r.Post("/reset/{token}", index("account/reset", resetPageSubmit(appCtx)))
 		r.Get("/change/{token}", index("account/changed", confirmEmailChangePage(appCtx)))
 	})
 
@@ -149,7 +146,7 @@ func Router(ctx context.Context, cfg Config) chi.Router {
 
 	r.Route("/app", func(r chi.Router) {
 		r.Use(appCtx.authn.IsAuthenticated)
-		r.Get("/", index("app", appPage(appCtx), listTasks(appCtx)))
+		r.Get("/", index("app", listTasks(appCtx)))
 		r.Post("/tasks/new", index("app", createNewTask(appCtx), listTasks(appCtx)))
 		r.Post("/tasks/{id}/edit", index("app", editTask(appCtx), listTasks(appCtx)))
 		r.Post("/tasks/{id}/delete", index("app", deleteTask(appCtx), listTasks(appCtx)))
